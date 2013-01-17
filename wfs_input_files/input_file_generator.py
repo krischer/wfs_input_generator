@@ -21,6 +21,19 @@ class Input_File_Generator(object):
         self._stations = []
 
     def add_events(self, events):
+        """
+        Add one or more events to the input file generator. Most inversions
+        should specify only one event but some codes can deal with multiple
+        events.
+
+        :type events: list or obspy.core.event.Catalog object
+        :param events: A list of filenames, a list of obspy.core.event.Event
+            objects, or an obspy.core.event.Catalog object.
+        """
+        # Thin wrapper to be able to also treat single events or filenames.
+        if isinstance(events, Event) or not hasattr(events, "__iter__"):
+            events = list(events)
+
         for event in events:
             if isinstance(event, Event):
                 self._parse_event(event)
