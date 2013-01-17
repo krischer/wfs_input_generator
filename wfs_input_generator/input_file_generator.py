@@ -180,13 +180,15 @@ class InputFileGenerator(object):
         if not os.path.isdir(output_dir):
             msg = "output_dir %s is not a directory" % output_dir
             raise ValueError(msg)
+        output_dir = os.path.abspath(output_dir)
         # Make sure only unique stations and events are passed on.
         self._stations = unique_list(self._stations)
         self._events = unique_list(self._events)
         # Call the write function. The write function is supposed to raise the
         # appropriate error in case anything is amiss.
-        self.__write_functions[format](self.config, self._stations,
-            self._events, output_dir)
+        self.__write_functions[format](config=self.config,
+            events=self._events, stations=self._stations,
+            output_directory=output_dir)
 
     def __find_write_scripts(self):
         """
