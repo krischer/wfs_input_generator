@@ -9,6 +9,7 @@ DESCRIPTION
     GNU Lesser General Public License, Version 3
     (http://www.gnu.org/copyleft/lesser.html)
 """
+from copy import deepcopy
 from obspy import readEvents
 from obspy.core import AttribDict
 from obspy.core.event import Event
@@ -63,6 +64,11 @@ class Input_File_Generator(object):
              "local_depth_in_m": 123.4,
              "id": "network_code.station_code"}
 
+        `local_depth_in_m` is optional and will be assumed to be zero if not
+        present. It denotes the burrial of the sensor beneath the surface.
+
+        If it is a SEED/XML-SEED files, all stations in it will be added.
+
         :type stations: List of filenames, list of dictionaries or a single
             filename, single dictionary.
         :param stations: The stations for which output files should be
@@ -71,7 +77,28 @@ class Input_File_Generator(object):
         # Thin wrapper to enable single element treatment.
         if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
             stations = list(stations)
-        pass
+        for station in stations:
+            if isinstance(station, dict):
+                if "latitude" not in station or \
+                    "longitude" not in station or \
+                    "elevation_in_m" not in station or \
+                    "id" not in station:
+                    msg = ("Each station dictionary needs to at least have "
+                        "'latitude', 'longitude', 'elevation_in_m', and 'id' "
+                        "keys.")
+                    raise ValueError(msg)
+                # Create new dict to not carry around any additional keys.
+                stat = {
+                    "latitude": float(station["latitude"]),
+                    "longitude": float(station["longitude"]),
+                    "elevation_in_m": float(station["elevation_in_m"]),
+                    "id": str(station["id"])}
+                if "local_depth_in_m" in station:
+                    stat["local_depth_in_m"] = \
+                        float(station["local_depth_in_m"])
+                else:
+                    stat["local_depth_in_m"] = 0.0
+                self._stations.append(stat)
 
 
     def write(self, events):
