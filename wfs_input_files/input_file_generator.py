@@ -9,7 +9,6 @@ DESCRIPTION
     GNU Lesser General Public License, Version 3
     (http://www.gnu.org/copyleft/lesser.html)
 """
-from copy import deepcopy
 from obspy import readEvents
 from obspy.core import AttribDict
 from obspy.core.event import Event
@@ -50,6 +49,8 @@ class Input_File_Generator(object):
                 raise TypeError(msg)
             for event in cat:
                 self._parse_event(event)
+        # Make sure each event is unique.
+        self._events = list(set(self._events))
 
     def add_stations(self, stations):
         """
@@ -99,7 +100,31 @@ class Input_File_Generator(object):
                 else:
                     stat["local_depth_in_m"] = 0.0
                 self._stations.append(stat)
-
+                continue
+            # Otherwise it is assumed to be a file readable by
+            # obspy.xseed.Parser.
+            try:
+                p = Parser(station)
+            except:
+                msg = "Could not read %s." % station
+                raise TypeError(msg)
+            # Just loop over all channels, collect stations and later make sure
+            # that each station is unique.
+            channels = p.getInventory()["channels"]
+            stations_in_file = []
+            for channel in channels:
+                stat = {}
+                stat["id"] = ".".join(channel["channel_id"].split(".")[:2])
+                coord = p.getCoordinates(channel["channel_id"])
+                stat["latitude"] = coord["latitude"]
+                stat["longitude"] = coord["longitude"]
+                stat["elevation_in_m"] = coord["elevation"]
+                stat["local_depth_in_m"] = coord["local_depth"]
+                stations_in_file.append(stat)
+            stations_in_file = list(set(stations_in_file))
+            self._stations.extend(stations_in_file)
+        # Make sure each station is unique.
+        self._stations = list(set(self._stations))
 
     def write(self, events):
         pass
@@ -142,7 +167,7 @@ class Input_File_Generator(object):
             raise ValueError(msg)
 
         # Now the event should be valid.
-        self.events.append({
+        self._events.append({
             "latitude": origin.latitude,
             "longitude": origin.longitude,
             "depth_in_km": origin.depth,
