@@ -6,8 +6,8 @@ DESCRIPTION
 :copyright:
     Lion Krischer (krischer@geophysik.uni-muenchen.de), 2013
 :license:
-    GNU Lesser General Public License, Version 3
-    (http://www.gnu.org/copyleft/lesser.html)
+    GNU General Public License, Version 3
+    (http://www.gnu.org/copyleft/gpl.html)
 """
 from obspy import readEvents
 from obspy.core import AttribDict
