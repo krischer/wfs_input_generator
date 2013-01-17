@@ -15,6 +15,18 @@ from obspy.core.event import Event
 from obspy.xseed import Parser
 
 
+def unique_list(items):
+    """
+    Helper function taking a list of items and returning a list with duplicate
+    items removed.
+    """
+    output = []
+    for item in items:
+        if item not in output:
+            output.append(item)
+    return output
+
+
 class InputFileGenerator(object):
     def __init__(self):
         self.config = AttribDict()
@@ -50,7 +62,7 @@ class InputFileGenerator(object):
             for event in cat:
                 self._parse_event(event)
         # Make sure each event is unique.
-        self._events = list(set(self._events))
+        self._events = unique_list(self._events)
 
     def add_stations(self, stations):
         """
@@ -121,10 +133,10 @@ class InputFileGenerator(object):
                 stat["elevation_in_m"] = coord["elevation"]
                 stat["local_depth_in_m"] = coord["local_depth"]
                 stations_in_file.append(stat)
-            stations_in_file = list(set(stations_in_file))
+            stations_in_file = unique_list(stations_in_file)
             self._stations.extend(stations_in_file)
         # Make sure each station is unique.
-        self._stations = list(set(self._stations))
+        self._stations = unique_list(self._stations)
 
     def write(self, events):
         pass
