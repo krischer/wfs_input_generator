@@ -12,6 +12,7 @@ DESCRIPTION
 from obspy import readEvents
 from obspy.core import AttribDict
 from obspy.core.event import Event
+from obspy.xseed import Parser
 
 
 class Input_File_Generator(object):
@@ -25,6 +26,9 @@ class Input_File_Generator(object):
         Add one or more events to the input file generator. Most inversions
         should specify only one event but some codes can deal with multiple
         events.
+
+        Can currently deal with QuakeML files and obspy.core.event.Event
+        objects.
 
         :type events: list or obspy.core.event.Catalog object
         :param events: A list of filenames, a list of obspy.core.event.Event
@@ -47,7 +51,28 @@ class Input_File_Generator(object):
                 self._parse_event(event)
 
     def add_stations(self, stations):
+        """
+        Add the desired output stations to the input file generator.
+
+        Can currently deal with SEED/XML-SEED files and dictionaries of the
+        following form:
+
+            {"latitude": 123.4,
+             "longitude": 123.4,
+             "elevation_in_m": 123.4,
+             "local_depth_in_m": 123.4,
+             "id": "network_code.station_code"}
+
+        :type stations: List of filenames, list of dictionaries or a single
+            filename, single dictionary.
+        :param stations: The stations for which output files should be
+            generated.
+        """
+        # Thin wrapper to enable single element treatment.
+        if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
+            stations = list(stations)
         pass
+
 
     def write(self, events):
         pass
