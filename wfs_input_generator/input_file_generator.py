@@ -15,7 +15,7 @@ from obspy.core.event import Event
 from obspy.xseed import Parser
 
 
-class Input_File_Generator(object):
+class InputFileGenerator(object):
     def __init__(self):
         self.config = AttribDict()
         self._events = []
