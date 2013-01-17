@@ -90,25 +90,25 @@ class InputFileGenerator(object):
         # Thin wrapper to enable single element treatment.
         if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
             stations = list(stations)
-        for station in stations:
-            if isinstance(station, dict):
-                if "latitude" not in station or \
-                    "longitude" not in station or \
-                    "elevation_in_m" not in station or \
-                    "id" not in station:
+        for station_item in stations:
+            if isinstance(station_item, dict):
+                if "latitude" not in station_item or \
+                    "longitude" not in station_item or \
+                    "elevation_in_m" not in station_item or \
+                    "id" not in station_item:
                     msg = ("Each station dictionary needs to at least have "
                         "'latitude', 'longitude', 'elevation_in_m', and 'id' "
                         "keys.")
                     raise ValueError(msg)
                 # Create new dict to not carry around any additional keys.
                 stat = {
-                    "latitude": float(station["latitude"]),
-                    "longitude": float(station["longitude"]),
-                    "elevation_in_m": float(station["elevation_in_m"]),
-                    "id": str(station["id"])}
-                if "local_depth_in_m" in station:
+                    "latitude": float(station_item["latitude"]),
+                    "longitude": float(station_item["longitude"]),
+                    "elevation_in_m": float(station_item["elevation_in_m"]),
+                    "id": str(station_item["id"])}
+                if "local_depth_in_m" in station_item:
                     stat["local_depth_in_m"] = \
-                        float(station["local_depth_in_m"])
+                        float(station_item["local_depth_in_m"])
                 else:
                     stat["local_depth_in_m"] = 0.0
                 self._stations.append(stat)
@@ -116,26 +116,40 @@ class InputFileGenerator(object):
             # Otherwise it is assumed to be a file readable by
             # obspy.xseed.Parser.
             try:
-                p = Parser(station)
+                parser = Parser(station_item)
             except:
                 msg = "Could not read %s." % station
                 raise TypeError(msg)
-            # Just loop over all channels, collect stations and later make sure
-            # that each station is unique.
-            channels = p.getInventory()["channels"]
-            stations_in_file = []
-            for channel in channels:
-                stat = {}
-                stat["id"] = ".".join(channel["channel_id"].split(".")[:2])
-                coord = p.getCoordinates(channel["channel_id"])
-                stat["latitude"] = coord["latitude"]
-                stat["longitude"] = coord["longitude"]
-                stat["elevation_in_m"] = coord["elevation"]
-                stat["local_depth_in_m"] = coord["local_depth"]
-                stations_in_file.append(stat)
-            stations_in_file = unique_list(stations_in_file)
-            self._stations.extend(stations_in_file)
-        # Make sure each station is unique.
+            for station in parser.stations:
+                network_code = None
+                station_code = None
+                latitude = None
+                longitude = None
+                elevation = None
+                local_depth = None
+                for blockette in station:
+                    if blockette.id not in [50, 52]:
+                        continue
+                    elif blockette.id == 50:
+                        network_code = str(blockette.network_code)
+                        station_code = str(blockette.station_call_letters)
+                        continue
+                    elif blockette.id == 52:
+                        latitude = blockette.latitude
+                        longitude = blockette.longitude
+                        elevation = blockette.elevation
+                        local_depth = blockette.local_depth
+                        break
+                if None in [network_code, station_code, latitude, longitude,
+                    elevation, local_depth]:
+                    msg = "Could not parse %s" % station_item
+                    raise ValueError(msg)
+                self._stations.append({
+                    "id": "%s.%s" % (network_code, station_code),
+                    "latitude": latitude,
+                    "longitude": longitude,
+                    "elevation_in_m": elevation,
+                    "local_depth_in_m": local_depth})
         self._stations = unique_list(self._stations)
 
     def write(self, events):
