@@ -29,3 +29,21 @@ pip install -v -e .
 ```
 
 Both work fine.
+
+## Usage
+
+```python
+>>> from wfs_input_generator import InputFileGenerator
+>>> gen = InputFileGenerator()
+
+# Add an event
+>>> gen.add_events("quake.xml")
+
+# Add some stations
+>>> gen.add_stations(["station1.seed", "station2.seed"])
+
+```
+
+## How to add support for a new solver.
+Adding support for a new solver is simply a matter of adding one file per
+solver.
