@@ -9,10 +9,13 @@ DESCRIPTION
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)
 """
+import glob
+import inspect
 from obspy import readEvents
 from obspy.core import AttribDict
 from obspy.core.event import Event
 from obspy.xseed import Parser
+import os
 
 
 def unique_list(items):
@@ -152,8 +155,44 @@ class InputFileGenerator(object):
                     "local_depth_in_m": local_depth})
         self._stations = unique_list(self._stations)
 
-    def write(self, events):
+    def write(self, program):
         pass
+
+    def __find_write_scripts(self):
+        """
+        Helper method to find all available writer script. A write script is
+        defined as being in the folder "writer" and having a name of the form
+        "write_XXX.py". It furthermore needs to have a write() method.
+        """
+        # Most generic way to get the 'writers' subdirectory.
+        write_dir = os.path.join(os.path.dirname(inspect.getfile(
+            inspect.currentframe())), "writers")
+        files = glob.glob(os.path.join(write_dir, "write_*.py"))
+        import_names = [os.path.splitext(os.path.basename(_i))[0] for _i in
+            files]
+        write_functions = {}
+        for name in import_names:
+            module_name = "writers.%s" % name
+            try:
+                module = __import__(module_name, globals(), locals(),
+                    ["write"], -1)
+                function = module.write
+            except Exception as e:
+                print("Warning: Could not import %s." % (module_name))
+                print("\t%s: %s" % (e.__class__.__name__, str(e)))
+            if not hasattr(function, "__call__"):
+                msg = "Warning: write in %s is not a function." % module_name
+                print(msg)
+                continue
+            write_functions[name[6:]] = function
+        self.__write_functions = write_functions
+
+    def get_available_formats(self):
+        """
+        Get a list of all available formats.
+        """
+        self.__find_write_scripts()
+        return list(self.__write_functions.keys())
 
     def _parse_event(self, event):
         """
