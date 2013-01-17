@@ -35,6 +35,18 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         gen = InputFileGenerator()
         gen.add_stations([seed_file_1, seed_file_2])
 
+        self.assertEqual([
+            {"id": "BW.FURT",
+             "latitude": 48.162899,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0,
+             "local_depth_in_m": 0.0},
+            {"id": "BW.RJOB",
+             "latitude": 47.737167,
+             "longitude": 12.795714,
+             "elevation_in_m": 860.0,
+             "local_depth_in_m": 0.0}], gen._stations)
+
 
 def suite():
     return unittest.makeSuite(InputFileGeneratorTestCase, "test")
