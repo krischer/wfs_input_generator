@@ -75,3 +75,16 @@ class Input_File_Generator(object):
             or not mt.m_rp or not mt.m_tp:
             msg = "Every event needs all six moment tensor components."
             raise ValueError(msg)
+
+        # Now the event should be valid.
+        self.events.append({
+            "latitude": origin.latitude,
+            "longitude": origin.longitude,
+            "depth_in_km": origin.depth,
+            "origin_time": origin.time,
+            "m_rr": mt.m_rr,
+            "m_tt": mt.m_tt,
+            "m_pp": mt.m_pp,
+            "m_rt": mt.m_rt,
+            "m_rp": mt.m_rp,
+            "m_tp": mt.m_tp})
