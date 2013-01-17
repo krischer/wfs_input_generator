@@ -155,8 +155,38 @@ class InputFileGenerator(object):
                     "local_depth_in_m": local_depth})
         self._stations = unique_list(self._stations)
 
-    def write(self, program):
-        pass
+    def write(self, format, output_dir):
+        """
+        Write an input file with the specified format.
+
+        :type format: string
+        :param format: The requested format of the generated input files. Get a
+            list of available format with a call to
+            self.get_available_formats().
+        :type output_dir: string
+        :param output_dir: The folder where all files will be written to. If
+            it does not exists, it will be created. Any files already in
+            existence WILL be overwritten. So be careful.
+        """
+        # Check if the corresponding write function exists.
+        self.__find_write_scripts()
+        if format not in list(self.__write_functions.keys()):
+            msg = "Format %s not found. Available formats: %s." % (format,
+                list(self.__write_functions.keys()))
+            raise ValueError(msg)
+        # Create the folder if it does not exist.
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        if not os.path.isdir(output_dir):
+            msg = "output_dir %s is not a directory" % output_dir
+            raise ValueError(msg)
+        # Make sure only unique stations and events are passed on.
+        self._stations = unique_list(self._stations)
+        self._events = unique_list(self._events)
+        # Call the write function. The write function is supposed to raise the
+        # appropriate error in case anything is amiss.
+        self.__write_functions[format](self.config, self._stations,
+            self._events, output_dir)
 
     def __find_write_scripts(self):
         """
