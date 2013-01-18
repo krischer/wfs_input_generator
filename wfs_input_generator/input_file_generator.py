@@ -36,7 +36,7 @@ class InputFileGenerator(object):
     """
     def __init__(self):
         self.config = AttribDict()
-        self.config.time_config = AttribDict()
+        self.time_config = AttribDict()
         self.config.mesh = None
         self.config.model = None
         self._events = []
@@ -59,7 +59,6 @@ class InputFileGenerator(object):
             events = [events, ]
 
         for event in events:
-            print event
             if isinstance(event, Event):
                 self._parse_event(event)
                 continue
