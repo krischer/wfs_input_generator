@@ -6,18 +6,17 @@
       <preferredMagnitudeID>smi:local/Magnitude/2013-01-05T20:19:58.728336</preferredMagnitudeID>
       <preferredFocalMechanismID>smi:local/FocalMechanism/2013-01-05T20:19:58.728497</preferredFocalMechanismID>
       <description>
-        <text>BAJA CALIFORNIA, MEXICO</text>
-        <type>region name</type>
+        <text>FICTIONAL EVENT IN BAVARIA</text>
       </description>
       <origin publicID="smi:local/Origin/2013-01-05T20:19:58.728068">
         <time>
           <value>2012-04-12T07:15:48.500000Z</value>
         </time>
         <latitude>
-          <value>28.7</value>
+          <value>45.0</value>
         </latitude>
         <longitude>
-          <value>-113.1</value>
+          <value>12.1</value>
         </longitude>
         <depth>
           <value>13.0</value>
