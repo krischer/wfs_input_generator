@@ -55,11 +55,11 @@ class InputFileGenerator(object):
         :param events: A list of filenames, a list of obspy.core.event.Event
             objects, or an obspy.core.event.Catalog object.
         """
-        # Thin wrapper to be able to also treat single events or filenames.
         if isinstance(events, Event) or not hasattr(events, "__iter__"):
-            events = list(events)
+            events = [events, ]
 
         for event in events:
+            print event
             if isinstance(event, Event):
                 self._parse_event(event)
                 continue
@@ -98,7 +98,7 @@ class InputFileGenerator(object):
         """
         # Thin wrapper to enable single element treatment.
         if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
-            stations = list(stations)
+            stations = [stations, ]
         for station_item in stations:
             if isinstance(station_item, dict):
                 if "latitude" not in station_item or \
