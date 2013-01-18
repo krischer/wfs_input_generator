@@ -36,7 +36,7 @@ class InputFileGenerator(object):
     """
     def __init__(self):
         self.config = AttribDict()
-        self.time_config = AttribDict()
+        self.config.time_config = AttribDict()
         self.config.mesh = None
         self.config.model = None
         self._events = []
