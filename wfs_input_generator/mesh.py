@@ -42,6 +42,7 @@ class SphericalSectionMesh(Mesh):
         self._max_longitude = None
         self._min_depth = None
         self._max_depth = None
+        super(SphericalSectionMesh, self).__init__()
 
     @property
     def n_north_south(self):
