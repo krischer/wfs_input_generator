@@ -63,8 +63,8 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         # Sort to be able to compare.
         events = sorted(gen._events)
         self.assertEqual([{
-            "latitude": 28.7,
-            "longitude": -113.1,
+            "latitude": 45.0,
+            "longitude": 12.1,
             "depth_in_km": 13.0,
             "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
             "m_rr": -2.11e+18,
