@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Example of how to create an input file for a certain SES3D version.
+Example of how to create an input file for SES3D version 4.0.
 
 :copyright:
     Lion Krischer (krischer@geophysik.uni-muenchen.de), 2013
@@ -10,7 +10,6 @@ Example of how to create an input file for a certain SES3D version.
     (http://www.gnu.org/copyleft/lesser.html)
 """
 from wfs_input_generator import InputFileGenerator
-from wfs_input_generator.mesh import SphericalSectionMesh
 
 import os
 
@@ -30,7 +29,7 @@ gen.config.time_config.time_delta = 0.75
 gen.config.output_directory = "../DATA/OUTPUT/1.8s"
 gen.config.forward_wavefield_output_folder = "tmp/DATABASES_MPI/fichtner/"
 gen.config.simulation_type = "normal simulation"
-
+# Discretization
 gen.config.nx_global = 66
 gen.config.ny_global = 108
 gen.config.nz_global = 28
@@ -38,7 +37,7 @@ gen.config.px = 3
 gen.config.py = 4
 gen.config.pz = 4
 
-# Configure the mesh. Make it have ten elements in each direction.
+# Configure the mesh.
 gen.config.mesh.min_latitude = -10.0
 gen.config.mesh.max_latitude = 10.0
 gen.config.mesh.min_longitude = 0.0
