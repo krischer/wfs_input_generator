@@ -10,7 +10,6 @@ Example of how to create an input file for a certain SES3D version.
     (http://www.gnu.org/copyleft/lesser.html)
 """
 from wfs_input_generator import InputFileGenerator
-from wfs_input_generator.mesh import SphericalSectionMesh
 
 import os
 
@@ -27,7 +26,6 @@ gen.config.time_config.time_steps = 700
 gen.config.time_config.time_delta = 0.75
 
 # Configure the mesh. Make it have ten elements in each direction.
-gen.config.mesh = SphericalSectionMesh()
 gen.config.mesh.n_north_south = 10
 gen.config.mesh.n_west_east = 10
 gen.config.mesh.n_down_up = 10
