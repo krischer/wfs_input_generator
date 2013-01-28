@@ -36,10 +36,10 @@ Both work fine.
 >>> from wfs_input_generator import InputFileGenerator
 >>> gen = InputFileGenerator()
 
-# Add an event
+# Add an event. Only QuakeML with a given moment tensor right now.
 >>> gen.add_events("quake.xml")
 
-# Add some stations
+# Add some stations. SEED/XSEED/SAC
 >>> gen.add_stations(["station1.seed", "station2.seed"])
 
 # Add some solver specific documentation.
@@ -47,7 +47,7 @@ Both work fine.
 
 # Get a list of available output format
 >>> gen.get_available_formats()
-['ses3d_svnr276']
+['ses3d_4_0', 'ses3d_muc_svnr276']
 
 # Write the input files to a specified folder.
 >>> gen.write(format="ses3d_svnr276", output_dir="solver_input_files")

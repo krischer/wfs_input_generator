@@ -39,4 +39,4 @@ gen.config.mesh.max_depth = 200.0
 gen.config.mesh.config.lagrange_polynomial_degree = 4
 gen.config.mesh.config.width_of_relaxing_boundaries = 2
 
-gen.write(format="ses3d_svnr276", output_dir="output")
+gen.write(format="ses3d_muc_svnr276", output_dir="output")
