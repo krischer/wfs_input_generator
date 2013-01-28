@@ -39,10 +39,6 @@ gen.config.py = 4
 gen.config.pz = 4
 
 # Configure the mesh. Make it have ten elements in each direction.
-gen.config.mesh = {}
-#gen.config.mesh.n_north_south = 10
-#gen.config.mesh.n_west_east = 10
-#gen.config.mesh.n_down_up = 10
 gen.config.mesh.min_latitude = -10.0
 gen.config.mesh.max_latitude = 10.0
 gen.config.mesh.min_longitude = 0.0

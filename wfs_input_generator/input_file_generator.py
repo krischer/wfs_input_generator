@@ -37,7 +37,7 @@ class InputFileGenerator(object):
     def __init__(self):
         self.config = AttribDict()
         self.config.time_config = AttribDict()
-        self.config.mesh = None
+        self.config.mesh = AttribDict()
         self.config.model = None
         self._events = []
         self._stations = []
@@ -95,6 +95,7 @@ class InputFileGenerator(object):
         :param stations: The stations for which output files should be
             generated.
         """
+        all_stations = {}
         # Thin wrapper to enable single element treatment.
         if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
             stations = [stations, ]
@@ -119,7 +120,10 @@ class InputFileGenerator(object):
                         float(station_item["local_depth_in_m"])
                 else:
                     stat["local_depth_in_m"] = 0.0
-                self._stations.append(stat)
+                if stat["id"] in all_stations:
+                    all_stations[stat["id"]].update(stat)
+                else:
+                    all_stations[stat["id"]] = stat
                 continue
             # Otherwise it is assumed to be a file readable by
             # obspy.xseed.Parser.
@@ -152,12 +156,18 @@ class InputFileGenerator(object):
                     elevation, local_depth]:
                     msg = "Could not parse %s" % station_item
                     raise ValueError(msg)
-                self._stations.append({
+                stat = {
                     "id": "%s.%s" % (network_code, station_code),
                     "latitude": latitude,
                     "longitude": longitude,
                     "elevation_in_m": elevation,
-                    "local_depth_in_m": local_depth})
+                    "local_depth_in_m": local_depth}
+                if stat["id"] in all_stations:
+                    all_stations[stat["id"]].update(stat)
+                else:
+                    all_stations[stat["id"]] = stat
+
+        self._stations = list(all_stations.values())
         self._stations = unique_list(self._stations)
 
     def write(self, format, output_dir):
