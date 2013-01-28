@@ -13,8 +13,9 @@ solvers.
 import glob
 import inspect
 from obspy import readEvents
-from obspy.core import AttribDict
+from obspy.core import AttribDict, read
 from obspy.core.event import Event
+from obspy.sac.core import isSAC
 from obspy.xseed import Parser
 import os
 
@@ -125,50 +126,79 @@ class InputFileGenerator(object):
                 else:
                     all_stations[stat["id"]] = stat
                 continue
-            # Otherwise it is assumed to be a file readable by
-            # obspy.xseed.Parser.
+            # Check if the file is a sac file.
+            if isSAC(station_item):
+                st = read(station_item)
+                for tr in st:
+                    stat = {}
+                    stat["id"] = "%s.%s" % (tr.stats.network,
+                        tr.stats.station)
+                    stat["latitude"] = float(tr.stats.sac.stla)
+                    stat["longitude"] = float(tr.stats.sac.stlo)
+                    stat["elevation_in_m"] = float(tr.stats.sac.stel)
+                    stat["local_depth_in_m"] = float(tr.stats.sac.stdp)
+                    if stat["id"] in all_stations:
+                        all_stations[stat["id"]].update(stat)
+                    else:
+                        all_stations[stat["id"]] = stat
+                    continue
+                continue
+
+            # Check if the file is readable by the parser.
             try:
-                parser = Parser(station_item)
+                Parser(station_item)
+                is_seed = True
             except:
-                msg = "Could not read %s." % station
-                raise TypeError(msg)
-            for station in parser.stations:
-                network_code = None
-                station_code = None
-                latitude = None
-                longitude = None
-                elevation = None
-                local_depth = None
-                for blockette in station:
-                    if blockette.id not in [50, 52]:
-                        continue
-                    elif blockette.id == 50:
-                        network_code = str(blockette.network_code)
-                        station_code = str(blockette.station_call_letters)
-                        continue
-                    elif blockette.id == 52:
-                        latitude = blockette.latitude
-                        longitude = blockette.longitude
-                        elevation = blockette.elevation
-                        local_depth = blockette.local_depth
-                        break
-                if None in [network_code, station_code, latitude, longitude,
-                    elevation, local_depth]:
-                    msg = "Could not parse %s" % station_item
-                    raise ValueError(msg)
-                stat = {
-                    "id": "%s.%s" % (network_code, station_code),
-                    "latitude": latitude,
-                    "longitude": longitude,
-                    "elevation_in_m": elevation,
-                    "local_depth_in_m": local_depth}
-                if stat["id"] in all_stations:
-                    all_stations[stat["id"]].update(stat)
-                else:
-                    all_stations[stat["id"]] = stat
+                is_seed = False
+            if is_seed is True:
+                self._parse_seed(station_item, all_stations)
+                continue
+
+            msg = "Warning: Could not read %s." % station_item
+            print msg
 
         self._stations = list(all_stations.values())
         self._stations = unique_list(self._stations)
+
+    def _parse_seed(self, station_item, all_stations):
+        """
+        Helper function to parse SEED and XSEED files.
+        """
+        parser = Parser(station_item)
+        for station in parser.stations:
+            network_code = None
+            station_code = None
+            latitude = None
+            longitude = None
+            elevation = None
+            local_depth = None
+            for blockette in station:
+                if blockette.id not in [50, 52]:
+                    continue
+                elif blockette.id == 50:
+                    network_code = str(blockette.network_code)
+                    station_code = str(blockette.station_call_letters)
+                    continue
+                elif blockette.id == 52:
+                    latitude = blockette.latitude
+                    longitude = blockette.longitude
+                    elevation = blockette.elevation
+                    local_depth = blockette.local_depth
+                    break
+            if None in [network_code, station_code, latitude, longitude,
+                elevation, local_depth]:
+                msg = "Could not parse %s" % station_item
+                raise ValueError(msg)
+            stat = {
+                "id": "%s.%s" % (network_code, station_code),
+                "latitude": latitude,
+                "longitude": longitude,
+                "elevation_in_m": elevation,
+                "local_depth_in_m": local_depth}
+            if stat["id"] in all_stations:
+                all_stations[stat["id"]].update(stat)
+            else:
+                all_stations[stat["id"]] = stat
 
     def write(self, format, output_dir):
         """
