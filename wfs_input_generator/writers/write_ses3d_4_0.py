@@ -11,6 +11,8 @@ Input file write for SES3D 4.0
 """
 EARTH_RADIUS = 6371 * 1000
 
+from wfs_input_generator import rotations
+
 import os
 
 
@@ -35,6 +37,16 @@ def write(config, events, stations, output_directory):
     # Set the sampling rate of the forward field for the adjoint simulation.
     config.setdefault("adj_forward_sampling_rate", 15)
 
+    # Define the rotation axis. The rotation is the rotation of the mesh. The
+    # data will be rotated in the inverse direction!
+    config.mesh.setdefault("rotation_axis", [0, 0, 1])
+    config.mesh.setdefault("rotation_angle", 0.0)
+
+    rotation_angle = config.mesh.rotation_angle
+    if rotation_angle:
+        rotation_angle *= -1
+    rotation_axis = config.mesh.rotation_axis
+
     # Parse the simulation type.
     sim_map = {
         "normal simulation": 0,
@@ -56,6 +68,19 @@ def write(config, events, stations, output_directory):
         msg = "Exactly one event is needed"
         raise ValueError(msg)
     event = events[0]
+
+    # Rotate coordinates and moment tensor if requested.
+    if rotation_angle:
+        lat, lng = rotations.rotate_lat_lon(event["latitude"],
+                event["longitude"], rotation_axis, rotation_angle)
+        m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = rotations.rotate_moment_tensor(
+            event["m_rr"], event["m_tt"], event["m_pp"], event["m_rt"],
+            event["m_rp"], event["m_tp"], event["latitude"],
+            event["longitude"], rotation_axis, rotation_angle)
+    else:
+        lat, lng = (event["latitude"], event["longitude"])
+        m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (event["m_rr"], event["m_tt"],
+            event["m_pp"], event["m_rt"], event["m_rp"], event["m_tp"])
 
     event_template = (
     "SIMULATION PARAMETERS =================================================="
@@ -87,16 +112,16 @@ def write(config, events, stations, output_directory):
         nt=config.time_config.time_steps,
         dt=config.time_config.time_delta,
         # Colatitude!
-        xxs=90.0 - event["latitude"],
-        yys=event["longitude"],
+        xxs=90.0 - lat,
+        yys=lng,
         zzs=event["depth_in_km"] * 1000.0,
         srctype=10,
-        m_tt=event["m_tt"],
-        m_pp=event["m_pp"],
-        m_rr=event["m_rr"],
-        m_tp=event["m_tp"],
-        m_tr=event["m_rt"],
-        m_pr=event["m_rp"],
+        m_tt=m_tt,
+        m_pp=m_pp,
+        m_rr=m_rr,
+        m_tp=m_tp,
+        m_tr=m_rt,
+        m_pr=m_rp,
         output_directory=config.output_directory,
         ssamp=int(config.snapshot_sampling),
         output_displacement=1 if config.output_displacement else 0)
@@ -111,6 +136,13 @@ def write(config, events, stations, output_directory):
 
     recfile_parts = [str(len(stations))]
     for station in stations:
+        # Also rotate each station if desired.
+        if rotation_angle:
+            lat, lng = rotations.rotate_lat_lon(station["latitude"],
+                station["longitude"], rotation_axis, rotation_angle)
+        else:
+            lat, lng = (station["latitude"], station["longitude"])
+
         depth = -1.0 * (station["elevation_in_m"] - \
             station["local_depth_in_m"])
         if depth < 0:
@@ -119,9 +151,7 @@ def write(config, events, stations, output_directory):
             network=station["id"].split(".")[0],
             station=station["id"].split(".")[1]))
         recfile_parts.append("{colatitude:.6f} {longitude:.6f} {depth:.1f}"\
-            .format(colatitude=90.0 - station["latitude"],
-                longitude=station["longitude"],
-                depth=depth))
+            .format(colatitude=90.0 - lat, longitude=lng, depth=depth))
 
     # Write the receiver file.
     with open(os.path.join(input_folder, "recfile"), "wt") as open_file:
