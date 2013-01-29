@@ -216,9 +216,9 @@ def write(config, events, stations, output_directory):
         "{wavefield_folder}")
 
     setup_file = setup_file_template.format(
-        # Colatitude!
-        theta_min=90.0 - config.mesh.min_latitude,
-        theta_max=90.0 - config.mesh.max_latitude,
+        # Colatitude! Swaps min and max.
+        theta_min=90.0 - config.mesh.max_latitude,
+        theta_max=90.0 - config.mesh.min_latitude,
         phi_min=config.mesh.min_longitude,
         phi_max=config.mesh.max_longitude,
         ## Min/max radius and depth are inverse to each other.
