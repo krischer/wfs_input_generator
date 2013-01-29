@@ -139,7 +139,7 @@ def write(config, events, stations, output_directory):
     with open(os.path.join(input_folder, "event_list"), "wt") as open_file:
         open_file.write("{0:<56d}! n_events = number_of_events\n{0}".format(1))
 
-    recfile_parts = [str(len(stations))]
+    recfile_parts = []
     for station in stations:
         # Also rotate each station if desired.
         if rotation_angle:
@@ -164,6 +164,7 @@ def write(config, events, stations, output_directory):
             station=station["id"].split(".")[1]))
         recfile_parts.append("{colatitude:.6f} {longitude:.6f} {depth:.1f}"\
             .format(colatitude=90.0 - lat, longitude=lng, depth=depth))
+    recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
     # Write the receiver file.
     with open(os.path.join(input_folder, "recfile"), "wt") as open_file:
