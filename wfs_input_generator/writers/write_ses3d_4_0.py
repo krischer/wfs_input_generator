@@ -82,6 +82,11 @@ def write(config, events, stations, output_directory):
         m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (event["m_rr"], event["m_tt"],
             event["m_pp"], event["m_rt"], event["m_rp"], event["m_tp"])
 
+    # Check if the event still lies within bounds.
+    if not _is_in_bounds(lat, lng, config.mesh):
+        msg = "Event is not in the domain!"
+        raise ValueError(msg)
+
     event_template = (
     "SIMULATION PARAMETERS =================================================="
         "================================\n"
@@ -142,6 +147,13 @@ def write(config, events, stations, output_directory):
                 station["longitude"], rotation_axis, rotation_angle)
         else:
             lat, lng = (station["latitude"], station["longitude"])
+
+        # Check if the stations still lies within bounds of the mesh.
+        if not _is_in_bounds(lat, lng, config.mesh):
+            msg = "Stations %s is not in the domain. Will be skipped." % \
+                station["id"]
+            print msg
+            continue
 
         depth = -1.0 * (station["elevation_in_m"] - \
             station["local_depth_in_m"])
@@ -230,3 +242,10 @@ def write(config, events, stations, output_directory):
         open_file.write(setup_file)
 
     return
+
+
+def _is_in_bounds(lat, lng, mesh):
+    if (mesh.min_latitude <= lat <= mesh.max_latitude) and \
+       (mesh.min_longitude <= lng <= mesh.max_longitude):
+        return True
+    return False
