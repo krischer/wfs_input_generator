@@ -312,7 +312,7 @@ class InputFileGenerator(object):
         self._events.append({
             "latitude": origin.latitude,
             "longitude": origin.longitude,
-            "depth_in_km": origin.depth,
+            "depth_in_km": origin.depth / 1000.0,
             "origin_time": origin.time,
             "m_rr": mt.m_rr,
             "m_tt": mt.m_tt,
