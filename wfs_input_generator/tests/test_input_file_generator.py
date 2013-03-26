@@ -50,6 +50,78 @@ class InputFileGeneratorTestCase(unittest.TestCase):
              "elevation_in_m": 860.0,
              "local_depth_in_m": 0.0}], stations)
 
+    def test_passingStationDictionaries(self):
+        """
+        Checks that stations can also be passed as dictionaries.
+        """
+        stations = [{"id": "BW.FURT",
+             "latitude": 48.162899,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0,
+             "local_depth_in_m": 10.0},
+            {"id": "BW.RJOB",
+             "latitude": 47.737167,
+             "longitude": 12.795714,
+             "elevation_in_m": 860.0,
+             "local_depth_in_m": 2.0}]
+        gen = InputFileGenerator()
+        gen.add_stations(stations)
+        self.assertEqual(sorted(stations), sorted(gen._stations))
+
+    def test_local_depth_will_be_set_to_zero(self):
+        """
+        Tests that the local depth will be set to zero if not given.
+        """
+        stations = [{"id": "BW.FURT",
+             "latitude": 48.162899,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0},
+            {"id": "BW.RJOB",
+             "latitude": 47.737167,
+             "longitude": 12.795714,
+             "elevation_in_m": 860.0}]
+        gen = InputFileGenerator()
+        gen.add_stations(stations)
+        # Now add the local depth again.
+        stations[0]["local_depth_in_m"] = 0.0
+        stations[1]["local_depth_in_m"] = 0.0
+        self.assertEqual(sorted(stations), sorted(gen._stations))
+
+    def test_id_lat_lon_ele_are_necessary(self):
+        """
+        Tests that some station fields need to be set.
+        """
+        # Station with missing id.
+        station_1 = {"latitude": 47.737167,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0}
+        # Station with missing latitude.
+        station_2 = {"id": "BW.FURT",
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0}
+        # Station with missing longitude.
+        station_3 = {"id": "BW.FURT",
+             "latitude": 47.737167,
+             "elevation_in_m": 565.0}
+        # Station with missing elevation.
+        station_4 = {"id": "BW.FURT",
+             "latitude": 47.737167,
+             "longitude": 11.2752}
+        # Station with everything necessary
+        station_5 = {"id": "BW.FURT",
+             "latitude": 47.737167,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0}
+
+        gen = InputFileGenerator()
+        # The first 4 should raise a ValueError
+        self.assertRaises(ValueError, gen.add_stations, station_1)
+        self.assertRaises(ValueError, gen.add_stations, station_2)
+        self.assertRaises(ValueError, gen.add_stations, station_3)
+        self.assertRaises(ValueError, gen.add_stations, station_4)
+        # The last one not.
+        gen.add_stations(station_5)
+
     def test_readingQuakeMLFiles(self):
         """
         Tests the reading of QuakeML Files.
@@ -83,8 +155,8 @@ class InputFileGeneratorTestCase(unittest.TestCase):
             "m_pp": -2.19e+19,
             "m_rt": 6.94e+19,
             "m_rp": -4.08e+19,
-            "m_tp": 4.09e+19
-            }], events)
+            "m_tp": 4.09e+19}],
+            events)
 
 
 def suite():

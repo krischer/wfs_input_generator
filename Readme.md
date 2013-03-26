@@ -1,7 +1,7 @@
-## Installation
+o# Installation
 
 ### Requirements:
-    * ObsPy >= 0.8
+    * ObsPy >= 0.8.3
 
 ### Installation
 

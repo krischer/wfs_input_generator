@@ -22,8 +22,8 @@
           <uncertainty>0.01</uncertainty>
         </longitude>
         <depth>
-          <value>28.7</value>
-          <uncertainty>0.3</uncertainty>
+          <value>28700.0</value>
+          <uncertainty>300</uncertainty>
         </depth>
         <depthType>from moment tensor inversion</depthType>
       </origin>
