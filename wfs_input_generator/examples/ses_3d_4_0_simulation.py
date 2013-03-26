@@ -12,6 +12,7 @@ writer.
     GNU Lesser General Public License, Version 3
     (http://www.gnu.org/copyleft/lesser.html)
 """
+import numpy as np
 from wfs_input_generator import InputFileGenerator
 
 gen = InputFileGenerator()
@@ -21,16 +22,18 @@ gen.add_events("../tests/data/event1.xml")
 gen.add_stations(["../tests/data/dataless.seed.BW_FURT",
     "../tests/data/dataless.seed.BW_RJOB"])
 
-# Time configuration. Should be self-explanatory.
-gen.config.time_config.time_steps = 700
-gen.config.time_config.time_delta = 0.75
+# Just perform a standard forward simulation.
+gen.config.simulation_type = "normal simulation"
+
+gen.config.output_folder = "../OUTPUT"
+
+# Time configuration.
+gen.config.number_of_time_steps = 700
+gen.config.time_increment_in_s = 0.75
 
 # SES3D specific configuration
 gen.config.output_directory = "../DATA/OUTPUT/1.8s"
-gen.config.forward_wavefield_output_folder = "tmp/DATABASES_MPI/fichtner/"
-gen.config.simulation_type = "normal simulation"
-
-# Discretization
+# SES3D specific discretization
 gen.config.nx_global = 66
 gen.config.ny_global = 108
 gen.config.nz_global = 28
@@ -38,20 +41,31 @@ gen.config.px = 3
 gen.config.py = 4
 gen.config.pz = 4
 
+# Specify some source time function.
+gen.config.source_time_function = np.sin(np.linspace(0, 10, 700))
+
 # Configure the mesh.
-gen.config.mesh.min_latitude = -10.0
-gen.config.mesh.max_latitude = 10.0
-gen.config.mesh.min_longitude = 0.0
-gen.config.mesh.max_longitude = 20.0
-gen.config.mesh.min_depth = 0.0
-gen.config.mesh.max_depth = 200.0
+gen.config.mesh_min_latitude = -50.0
+gen.config.mesh_max_latitude = 50.0
+gen.config.mesh_min_longitude = -50.0
+gen.config.mesh_max_longitude = 50.0
+gen.config.mesh_min_depth_in_km = 0.0
+gen.config.mesh_max_depth_in_km = 200.0
 
 # Define the rotation. Take care this is defined as the rotation of the mesh.
 # The data will be rotated in the opposite direction! The following example
 # will rotate the mesh 5 degrees southwards around the x-axis. For a definition
 # of the coordinate system refer to the rotations.py file. The rotation is
 # entirely optional.
-gen.config.mesh.rotation_angle = [1.0, 0.0, 0.0]
-gen.config.mesh.rotation_axis = 5.0
+gen.config.rotation_angle_in_degree = 5.0
+gen.config.rotation_axis = [1.0, 0.0, 0.0]
 
+# Define Q
+gen.config.is_dissipative = True
+gen.config.Q_model_relaxation_times = [1.7308, 14.3961, 22.9973]
+gen.config.Q_model_weights_of_relaxation_mechanisms = [2.5100, 2.4354, 0.0879]
+
+# Finally write the file to a folder. If not output directory is given, a
+# dictionary containing all the files will be returned.
 gen.write(format="ses3d_4_0", output_dir="output")
+print "Written files to 'output' folder."

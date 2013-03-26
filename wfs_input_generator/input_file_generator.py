@@ -221,14 +221,6 @@ class InputFileGenerator(object):
             msg = "Format %s not found. Available formats: %s." % (format,
                 list(self.__write_functions.keys()))
             raise ValueError(msg)
-        # Create the folder if it does not exist.
-        if output_dir:
-            if not os.path.exists(output_dir):
-                os.makedirs(output_dir)
-            if not os.path.isdir(output_dir):
-                msg = "output_dir %s is not a directory" % output_dir
-                raise ValueError(msg)
-            output_dir = os.path.abspath(output_dir)
         # Make sure only unique stations and events are passed on. Sort
         # stations by id.
         self._stations = sorted(unique_list(self._stations),
@@ -269,6 +261,22 @@ class InputFileGenerator(object):
         # appropriate error in case anything is amiss.
         input_files = writer["function"](config=config,
             events=self._events, stations=self._stations)
+
+        # If an output directory is given, it will be used.
+        if output_dir:
+            # Create the folder if it does not exist.
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            if not os.path.isdir(output_dir):
+                msg = "output_dir %s is not a directory" % output_dir
+                raise ValueError(msg)
+            output_dir = os.path.abspath(output_dir)
+
+            # Now loop over all files stored in the dictionary and write them.
+            for filename, content in input_files.iteritems():
+                with open(os.path.join(output_dir, filename), "wt") \
+                        as open_file:
+                    open_file.write(content)
 
         return input_files
 
