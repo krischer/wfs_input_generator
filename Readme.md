@@ -2,6 +2,7 @@ o# Installation
 
 ### Requirements:
     * ObsPy >= 0.8.3
+    * flake8 >= 2.0 (only for running the tests)
 
 ### Installation
 
