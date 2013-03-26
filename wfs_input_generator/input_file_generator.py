@@ -56,12 +56,16 @@ class InputFileGenerator(object):
         :param events: A list of filenames, a list of obspy.core.event.Event
             objects, or an obspy.core.event.Catalog object.
         """
-        if isinstance(events, Event) or not hasattr(events, "__iter__"):
+        if isinstance(events, Event) or isinstance(events, dict) or \
+                not hasattr(events, "__iter__"):
             events = [events, ]
 
         for event in events:
             if isinstance(event, Event):
                 self._parse_event(event)
+                continue
+            elif isinstance(event, dict):
+                self._events.append(event)
                 continue
             try:
                 cat = readEvents(event)
@@ -157,7 +161,7 @@ class InputFileGenerator(object):
             msg = "Warning: Could not read %s." % station_item
             print msg
 
-        self._stations = list(all_stations.values())
+        self._stations.extend(list(all_stations.values()))
         self._stations = unique_list(self._stations)
 
     def _parse_seed(self, station_item, all_stations):

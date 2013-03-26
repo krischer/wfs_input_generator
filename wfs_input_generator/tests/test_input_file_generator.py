@@ -26,7 +26,7 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(
             inspect.getfile(inspect.currentframe()))), "data")
 
-    def test_readingSEEDFiles(self):
+    def test_reading_SEED_files(self):
         """
         Tests the reading of SEED files.
         """
@@ -50,7 +50,33 @@ class InputFileGeneratorTestCase(unittest.TestCase):
              "elevation_in_m": 860.0,
              "local_depth_in_m": 0.0}], stations)
 
-    def test_passingStationDictionaries(self):
+    def test_adding_single_and_multiple_items(self):
+        """
+        Reading all files at once or seperate should make not difference.
+        """
+        seed_file_1 = os.path.join(self.data_dir, "dataless.seed.BW_FURT")
+        seed_file_2 = os.path.join(self.data_dir, "dataless.seed.BW_RJOB")
+        station_1 = {"id": "BW.FURT",
+             "latitude": 48.162899,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0,
+             "local_depth_in_m": 0.0}
+        station_2 = {"id": "BW.RJOB",
+             "latitude": 47.737167,
+             "longitude": 12.795714,
+             "elevation_in_m": 860.0,
+             "local_depth_in_m": 0.0}
+
+        # Try with SEED files first.
+        gen1 = InputFileGenerator()
+        gen2 = InputFileGenerator()
+        gen1.add_stations([seed_file_1, seed_file_2])
+        gen2.add_stations(seed_file_1)
+        gen2.add_stations(seed_file_2)
+        self.assertEqual(sorted(gen1._stations), sorted(gen2._stations))
+
+
+    def test_passing_station_dictionaries(self):
         """
         Checks that stations can also be passed as dictionaries.
         """
@@ -122,7 +148,29 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         # The last one not.
         gen.add_stations(station_5)
 
-    def test_readingQuakeMLFiles(self):
+    def test_other_fields_in_station_dict_are_eliminated(self):
+        """
+        Any additional items in a station dict should be eliminated.
+        """
+        # Station with everything necessary
+        station = {"id": "BW.FURT",
+             "latitude": 47.737167,
+             "longitude": 11.2752,
+             "some_random_key": "also_has_a_field",
+             "elevation_in_m": 565.0,
+             "local_depth_in_m": 324.0,
+             "yes!": "no"}
+
+        gen = InputFileGenerator()
+        gen.add_stations(station)
+        self.assertEqual(sorted(gen._stations),
+            sorted([{"id": "BW.FURT",
+             "latitude": 47.737167,
+             "longitude": 11.2752,
+             "elevation_in_m": 565.0,
+             "local_depth_in_m": 324.0}]))
+
+    def test_reading_QuakeML_files(self):
         """
         Tests the reading of QuakeML Files.
         """
@@ -157,6 +205,36 @@ class InputFileGeneratorTestCase(unittest.TestCase):
             "m_rp": -4.08e+19,
             "m_tp": 4.09e+19}],
             events)
+
+    def test_reading_events_from_dictionary(self):
+        """
+        Tests that events can also be passed as dictionaries.
+        """
+        events = [{
+            "latitude": 45.0,
+            "longitude": 12.1,
+            "depth_in_km": 13.0,
+            "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+            "m_rr": -2.11e+18,
+            "m_tt": -4.22e+19,
+            "m_pp": 4.43e+19,
+            "m_rt": -9.35e+18,
+            "m_rp": -8.38e+18,
+            "m_tp": -6.44e+18
+        }, {
+            "latitude": 13.93,
+            "longitude": -92.47,
+            "depth_in_km": 28.7,
+            "origin_time": UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+            "m_rr": 1.02e+20,
+            "m_tt": -7.96e+19,
+            "m_pp": -2.19e+19,
+            "m_rt": 6.94e+19,
+            "m_rp": -4.08e+19,
+            "m_tp": 4.09e+19}]
+        gen = InputFileGenerator()
+        gen.add_events(events)
+        self.assertEqual(sorted(gen._events), sorted(events))
 
 
 def suite():
