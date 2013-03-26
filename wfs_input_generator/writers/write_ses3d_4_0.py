@@ -83,7 +83,7 @@ def write(config, events, stations, output_directory):
             event["m_pp"], event["m_rt"], event["m_rp"], event["m_tp"])
 
     # Check if the event still lies within bounds.
-    if not _is_in_bounds(lat, lng, config.mesh):
+    if _is_in_bounds(lat, lng, config.mesh) is False:
         msg = "Event is not in the domain!"
         raise ValueError(msg)
 
@@ -114,19 +114,19 @@ def write(config, events, stations, output_directory):
         "field (1=yes,0=no)")
 
     event_file = event_template.format(
-        nt=config.time_config.time_steps,
-        dt=config.time_config.time_delta,
+        nt=int(config.time_config.time_steps),
+        dt=float(config.time_config.time_delta),
         # Colatitude!
-        xxs=90.0 - lat,
-        yys=lng,
-        zzs=event["depth_in_km"] * 1000.0,
+        xxs=90.0 - float(lat),
+        yys=float(lng),
+        zzs=float(event["depth_in_km"] * 1000.0),
         srctype=10,
-        m_tt=m_tt,
-        m_pp=m_pp,
-        m_rr=m_rr,
-        m_tp=m_tp,
-        m_tr=m_rt,
-        m_pr=m_rp,
+        m_tt=float(m_tt),
+        m_pp=float(m_pp),
+        m_rr=float(m_rr),
+        m_tp=float(m_tp),
+        m_tr=float(m_rt),
+        m_pr=float(m_rp),
         output_directory=config.output_directory,
         ssamp=int(config.snapshot_sampling),
         output_displacement=1 if config.output_displacement else 0)
@@ -163,7 +163,8 @@ def write(config, events, stations, output_directory):
             network=station["id"].split(".")[0],
             station=station["id"].split(".")[1]))
         recfile_parts.append("{colatitude:.6f} {longitude:.6f} {depth:.1f}"\
-            .format(colatitude=90.0 - lat, longitude=lng, depth=depth))
+            .format(colatitude=90.0 - float(lat),
+                longitude=float(lng), depth=float(depth)))
     recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
     # Write the receiver file.
@@ -218,25 +219,25 @@ def write(config, events, stations, output_directory):
 
     setup_file = setup_file_template.format(
         # Colatitude! Swaps min and max.
-        theta_min=90.0 - config.mesh.max_latitude,
-        theta_max=90.0 - config.mesh.min_latitude,
-        phi_min=config.mesh.min_longitude,
-        phi_max=config.mesh.max_longitude,
+        theta_min=90.0 - float(config.mesh.max_latitude),
+        theta_max=90.0 - float(config.mesh.min_latitude),
+        phi_min=float(config.mesh.min_longitude),
+        phi_max=float(config.mesh.max_longitude),
         ## Min/max radius and depth are inverse to each other.
-        z_min=EARTH_RADIUS - (config.mesh.max_depth * 1000.0),
-        z_max=EARTH_RADIUS - (config.mesh.min_depth * 1000.0),
+        z_min=EARTH_RADIUS - (float(config.mesh.max_depth) * 1000.0),
+        z_max=EARTH_RADIUS - (float(config.mesh.min_depth) * 1000.0),
         is_diss=1 if config.is_dissipative else 0,
         model_type=1,
-        lpd=config.lagrange_polynomial_degree,
+        lpd=int(config.lagrange_polynomial_degree),
         # Computation setup.
-        nx_global=config.nx_global,
-        ny_global=config.ny_global,
-        nz_global=config.nz_global,
-        px=config.px,
-        py=config.py,
-        pz=config.pz,
+        nx_global=int(config.nx_global),
+        ny_global=int(config.ny_global),
+        nz_global=int(config.nz_global),
+        px=int(config.px),
+        py=int(config.py),
+        pz=int(config.pz),
         adjoint_flag=simulation_type,
-        samp_ad=config.adj_forward_sampling_rate,
+        samp_ad=float(config.adj_forward_sampling_rate),
         wavefield_folder=config.forward_wavefield_output_folder)
 
     with open(os.path.join(input_folder, "setup"), "wt") as open_file:
