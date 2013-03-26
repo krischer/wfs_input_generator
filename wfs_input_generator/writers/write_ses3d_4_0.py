@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Input file write for SES3D 4.0
+Input file writer for SES3D 4.0.
 
 :copyright:
     Lion Krischer (krischer@geophysik.uni-muenchen.de), 2013
@@ -11,43 +11,93 @@ Input file write for SES3D 4.0
 """
 EARTH_RADIUS = 6371 * 1000
 
+import numpy as np
+import obspy
+import os
 from wfs_input_generator import rotations
 
-import os
+
+# Define the required configuration items. The key is always the name of the
+# configuration item and the value is a tuple. The first item in the tuple is
+# the function or type that it will be converted to and the second is the
+# documentation.
+REQUIRED_CONFIGURATION = {
+    "output_folder": (str, "The output directory"),
+    "number_of_time_steps": (int, "The number of time steps"),
+    "time_increment_in_s": (float, "The time increment in seconds"),
+    "mesh_min_latitude": (float, "The minimum latitude of the mesh"),
+    "mesh_max_latitude": (float, "The maximum latitude of the mesh"),
+    "mesh_min_longitude": (float, "The minimum longitude of the mesh"),
+    "mesh_max_longitude": (float, "The maximum longitude of the mesh"),
+    "mesh_min_depth_in_km": (float, "The minimum depth of the mesh in km"),
+    "mesh_max_depth_in_km": (float, "The maximum depth of the mesh in km"),
+    "nx_global": (int, "Number of elements in theta directions. Please refer "
+        "to the SES3D manual for a more extensive description"),
+    "ny_global": (int, "Number of elements in phi directions. Please refer "
+        "to the SES3D manual for a more extensive description"),
+    "nz_global": (int, "Number of elements in r directions. Please refer "
+        "to the SES3D manual for a more extensive description"),
+    "px": (int, "Number of processors in theta direction"),
+    "py": (int, "Number of processors in phi direction"),
+    "pz": (int, "Number of processors in r direction"),
+    "source_time_function": (np.array, "The source time function.")
+}
+
+# The default configuration item. Contains everything that can sensibly be set
+# to some default value. The syntax is very similar to the
+# REQUIRED_CONFIGURATION except that the tuple now has three items, the first
+# one being the actual default value.
+DEFAULT_CONFIGURATION = {
+    "is_dissipative": (True, bool, "Dissipative simulation or not"),
+
+    "output_displacement": (False, bool, "Output the displacement field"),
+
+    "displacement_snapshot_sampling":
+    (10000, int, "Sampling rate of output displacement field"),
+
+    "lagrange_polynomial_degree":
+    (4, int, "Degree of the Lagrange Polynomials"),
+
+    "simulation_type": ("normal simulation", str, "The type of simulation to "
+        "perform. One of 'normal simulation', 'adjoint forward', "
+        "'adjoint backward'"),
+
+    "adjoint_forward_sampling_rate": (15, int, "The sampling rate of the "
+        "adjoint forward field for an ajoint simulation run"),
+    "adjoint_forward_wavefield_output_folder": ("", str,
+        "The output folder of the adjoint forward field if requested. If "
+        "empty, it will be set to a subfolder of the the output directory."),
+    "rotation_angle_in_degree": (0.0, float,
+        "A possible rotation of the mesh. All data will be rotated in the "
+        "opposite way. Useful for simulation close to the equator."),
+    "rotation_axis": ([0.0, 0.0, 1.0], lambda x: map(float, x),
+        "The rotation angle given as [x, y, z] in correspondance with the "
+        "SES3D coordinate system."),
+    "Q_model_relaxation_times": ([1.7308, 14.3961, 22.9973],
+        lambda x: map(float, x),
+        "The relaxations times for the different Q model mechanisms"),
+    "Q_model_weights_of_relaxation_mechanisms": ([2.5100, 2.4354, 0.0879],
+        lambda x: map(float, x),
+        "The weights for relaxations mechanisms for the Q model mechanisms")
+}
 
 
-def write(config, events, stations, output_directory):
+def write(config, events, stations):
     """
     Writes input files for SES3D version 4.0.
 
     Can only simulate one event at a time. If more events are present, an error
     will be raised.
     """
-    # Optional parameters.
-    config.setdefault("snapshot_sampling", 10000)
-    config.setdefault("output_displacement", False)
-    config.setdefault("is_dissipative", False)
-    config.setdefault("model_type", 1)
-    config.setdefault("lagrange_polynomial_degree", 4)
-    # Can be one of
-    #    * "normal simulation"
-    #    * "adjoint forward"
-    #    * "adjoint reverse"
-    config.setdefault("simulation_type", "normal simulation")
-    # Set the sampling rate of the forward field for the adjoint simulation.
-    config.setdefault("adj_forward_sampling_rate", 15)
+    if not config.adjoint_forward_wavefield_output_folder:
+        config.adjoint_forward_wavefield_output_folder = \
+            os.path.join(config.output_folder, "ADJOINT_FORWARD_FIELD")
+    output_files = {}
+    # The data needs to be rotated in the opposite direction.
+    if config.rotation_angle_in_degree:
+        config.rotation_angle_in_degree *= -1.0
 
-    # Define the rotation axis. The rotation is the rotation of the mesh. The
-    # data will be rotated in the inverse direction!
-    config.mesh.setdefault("rotation_axis", [0, 0, 1])
-    config.mesh.setdefault("rotation_angle", 0.0)
-
-    rotation_angle = config.mesh.rotation_angle
-    if rotation_angle:
-        rotation_angle *= -1
-    rotation_axis = config.mesh.rotation_axis
-
-    # Parse the simulation type.
+    # Map and assert the simulation type.
     sim_map = {
         "normal simulation": 0,
         "adjoint forward": 1,
@@ -58,66 +108,73 @@ def write(config, events, stations, output_directory):
         raise ValueError(msg)
     simulation_type = sim_map[config.simulation_type]
 
-    # Create subfolders.
-    input_folder = os.path.join(output_directory, "INPUT")
-    if not os.path.exists(input_folder):
-        os.makedirs(input_folder)
-
-    # One exactly one event is acceptable.
+    # Only exactly one event is acceptable.
     if len(events) != 1:
-        msg = "Exactly one event is needed"
+        msg = "Exactly one event is required for SES3D 4.0."
         raise ValueError(msg)
     event = events[0]
 
+    # Assemble the mesh to have everything in one place
+    mesh = obspy.core.AttribDict()
+    mesh.min_latitude = config.mesh_min_latitude
+    mesh.max_latitude = config.mesh_max_latitude
+    mesh.min_longitude = config.mesh_min_longitude
+    mesh.max_longitude = config.mesh_max_longitude
+    mesh.min_depth_in_km = config.mesh_min_depth_in_km
+    mesh.max_depth_in_km = config.mesh_max_depth_in_km
+
     # Rotate coordinates and moment tensor if requested.
-    if rotation_angle:
+    if config.rotation_angle_in_degree:
         lat, lng = rotations.rotate_lat_lon(event["latitude"],
-                event["longitude"], rotation_axis, rotation_angle)
+            event["longitude"], config.rotation_axis,
+            config.rotation_angle_in_degree)
         m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = rotations.rotate_moment_tensor(
             event["m_rr"], event["m_tt"], event["m_pp"], event["m_rt"],
             event["m_rp"], event["m_tp"], event["latitude"],
-            event["longitude"], rotation_axis, rotation_angle)
+            event["longitude"], config.rotation_axis,
+            config.rotation_angle_in_degree)
     else:
         lat, lng = (event["latitude"], event["longitude"])
         m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (event["m_rr"], event["m_tt"],
             event["m_pp"], event["m_rt"], event["m_rp"], event["m_tp"])
 
-    # Check if the event still lies within bounds.
-    if _is_in_bounds(lat, lng, config.mesh) is False:
+    # Check if the event still lies within bounds. Otherwise the whole
+    # simulation does not make much sense.
+    if _is_in_bounds(lat, lng, mesh) is False:
         msg = "Event is not in the domain!"
         raise ValueError(msg)
 
     event_template = (
-    "SIMULATION PARAMETERS =================================================="
-        "================================\n"
-    "{nt:<56d}! nt, number of time steps\n"
-    "{dt:<56.6f}! dt in sec, time increment\n"
-    "SOURCE ================================================================="
-        "================================\n"
-    "{xxs:<56.6f}! xxs, theta-coord. center of source in degrees\n"
-    "{yys:<56.6f}! yys, phi-coord. center of source in degrees\n"
-    "{zzs:<56.6f}! zzs, source depth in (m)\n"
-    "{srctype:<56d}! srctype, 1:f_x, 2:f_y, 3:f_z, 10:M_ij\n"
-    "{m_tt:<56.6e}! M_theta_theta\n"
-    "{m_pp:<56.6e}! M_phi_phi\n"
-    "{m_rr:<56.6e}! M_r_r\n"
-    "{m_tp:<56.6e}! M_theta_phi\n"
-    "{m_tr:<56.6e}! M_theta_r\n"
-    "{m_pr:<56.6e}! M_phi_r\n"
-    "OUTPUT DIRECTORY ======================================================="
-        "===============================\n"
-    "{output_directory}\n"
-    "OUTPUT FLAGS ==========================================================="
-        "===============================\n"
-    "{ssamp:<56d}! ssamp, snapshot sampling\n"
-    "{output_displacement:<56d}! output_displacement, output displacement "
+        "SIMULATION PARAMETERS ==============================================="
+        "===================================\n"
+        "{nt:<44d}! nt, number of time steps\n"
+        "{dt:<44.6f}! dt in sec, time increment\n"
+        "SOURCE =============================================================="
+        "===================================\n"
+        "{xxs:<44.6f}! xxs, theta-coord. center of source in degrees\n"
+        "{yys:<44.6f}! yys, phi-coord. center of source in degrees\n"
+        "{zzs:<44.6f}! zzs, source depth in (m)\n"
+        "{srctype:<44d}! srctype, 1:f_x, 2:f_y, 3:f_z, 10:M_ij\n"
+        "{m_tt:<44.6e}! M_theta_theta\n"
+        "{m_pp:<44.6e}! M_phi_phi\n"
+        "{m_rr:<44.6e}! M_r_r\n"
+        "{m_tp:<44.6e}! M_theta_phi\n"
+        "{m_tr:<44.6e}! M_theta_r\n"
+        "{m_pr:<44.6e}! M_phi_r\n"
+        "OUTPUT DIRECTORY ===================================================="
+        "==================================\n"
+        "{output_folder}\n"
+        "OUTPUT FLAGS ========================================================"
+        "==================================\n"
+        "{ssamp:<44d}! ssamp, snapshot sampling\n"
+        "{output_displacement:<44d}! output_displacement, output displacement "
         "field (1=yes,0=no)")
 
     event_file = event_template.format(
-        nt=int(config.time_config.time_steps),
-        dt=float(config.time_config.time_delta),
+        nt=int(config.number_of_time_steps),
+        dt=float(config.time_increment_in_s),
         # Colatitude!
-        xxs=90.0 - float(lat),
+        xxs=rotations.lat2colat(float(lat)),
         yys=float(lng),
         zzs=float(event["depth_in_km"] * 1000.0),
         srctype=10,
@@ -127,123 +184,123 @@ def write(config, events, stations, output_directory):
         m_tp=float(m_tp),
         m_tr=float(m_rt),
         m_pr=float(m_rp),
-        output_directory=config.output_directory,
-        ssamp=int(config.snapshot_sampling),
+        output_folder=config.output_folder,
+        ssamp=int(config.displacement_snapshot_sampling),
         output_displacement=1 if config.output_displacement else 0)
 
-    # Write the event file.
-    with open(os.path.join(input_folder, "event_1"), "wt") as open_file:
-        open_file.write(event_file)
-
-    # Write the event_list file
-    with open(os.path.join(input_folder, "event_list"), "wt") as open_file:
-        open_file.write("{0:<56d}! n_events = number_of_events\n{0}".format(1))
+    # Put it in the collected dictionary.
+    output_files["event_1"] = event_file
+    output_files["event_list"] = \
+        "{0:<44d}! n_events = number of events\n{0}".format(1)
 
     recfile_parts = []
     for station in stations:
         # Also rotate each station if desired.
-        if rotation_angle:
+        if config.rotation_angle_in_degree:
             lat, lng = rotations.rotate_lat_lon(station["latitude"],
-                station["longitude"], rotation_axis, rotation_angle)
+                station["longitude"], config.rotation_axis,
+                config.rotation_angle_in_degree)
         else:
             lat, lng = (station["latitude"], station["longitude"])
 
         # Check if the stations still lies within bounds of the mesh.
-        if not _is_in_bounds(lat, lng, config.mesh):
+        if not _is_in_bounds(lat, lng, mesh):
             msg = "Stations %s is not in the domain. Will be skipped." % \
                 station["id"]
             print msg
             continue
 
-        depth = -1.0 * (station["elevation_in_m"] - \
+        depth = -1.0 * (station["elevation_in_m"] -
             station["local_depth_in_m"])
         if depth < 0:
             depth = 0.0
         recfile_parts.append("{network:_<2s}.{station:_<5s}.___".format(
             network=station["id"].split(".")[0],
             station=station["id"].split(".")[1]))
-        recfile_parts.append("{colatitude:.6f} {longitude:.6f} {depth:.1f}"\
-            .format(colatitude=90.0 - float(lat),
+        recfile_parts.append("{colatitude:.6f} {longitude:.6f} {depth:.1f}"
+            .format(colatitude=rotations.lat2colat(float(lat)),
                 longitude=float(lng), depth=float(depth)))
     recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
-    # Write the receiver file.
-    with open(os.path.join(input_folder, "recfile"), "wt") as open_file:
-        open_file.write("\n".join(recfile_parts))
+    output_files["recfile"] = "\n".join(recfile_parts)
 
-    # Write the currently hardcoded relaxation file.
+    # Write the relaxation file.
     relax_file = (
         "RELAXATION TIMES [s] =====================\n"
-        "1.7308\n"
-        "14.3961\n"
-        "22.9973\n"
+        "{relax_times}\n"
         "WEIGHTS OF RELAXATION MECHANISMS =========\n"
-        "2.5100\n"
-        "2.4354\n"
-        "0.0879")
-    with open(os.path.join(input_folder, "relax"), "wt") as open_file:
-        open_file.write(relax_file)
+        "{relax_weights}").format(
+            relax_times="\n".join(["%.6f" % _i for _i in
+                config.Q_model_relaxation_times]),
+            relax_weights="\n".join(["%.6f" % _i for _i in
+                config.Q_model_weights_of_relaxation_mechanisms]))
+
+    output_files["relax"] = relax_file
 
     setup_file_template = (
         "MODEL ==============================================================="
-            "================================================================="
-            "=====\n"
-        "{theta_min:<56.6f}! theta_min (colatitude) in degrees\n"
-        "{theta_max:<56.6f}! theta_max (colatitude) in degrees\n"
-        "{phi_min:<56.6f}! phi_min (longitude) in degrees\n"
-        "{phi_max:<56.6f}! phi_max (longitude) in degrees\n"
-        "{z_min:<56.6f}! z_min (radius) in m\n"
-        "{z_max:<56.6f}! z_max (radius) in m\n"
-        "{is_diss:<56d}! is_diss\n"
-        "{model_type:<56d}! model_type\n"
+        "================================================================="
+        "=====\n"
+        "{theta_min:<44.6f}! theta_min (colatitude) in degrees\n"
+        "{theta_max:<44.6f}! theta_max (colatitude) in degrees\n"
+        "{phi_min:<44.6f}! phi_min (longitude) in degrees\n"
+        "{phi_max:<44.6f}! phi_max (longitude) in degrees\n"
+        "{z_min:<44.6f}! z_min (radius) in m\n"
+        "{z_max:<44.6f}! z_max (radius) in m\n"
+        "{is_diss:<44d}! is_diss\n"
+        "{model_type:<44d}! model_type\n"
         "COMPUTATIONAL SETUP (PARALLELISATION) ==============================="
-            "================================================================="
-            "=====\n"
-        "{nx_global:<56d}! nx_global, "
-            "(nx_global+px = global # elements in theta direction)\n"
-        "{ny_global:<56d}! ny_global, "
-            "(ny_global+py = global # elements in phi direction)\n"
-        "{nz_global:<56d}! nz_global, "
-            "(nz_global+pz = global # of elements in r direction)\n"
-        "{lpd:<56d}! lpd, LAGRANGE polynomial degree\n"
-        "{px:<56d}! px, processors in theta direction\n"
-        "{py:<56d}! py, processors in phi direction\n"
-        "{pz:<56d}! pz, processors in r direction\n"
+        "================================================================="
+        "=====\n"
+        "{nx_global:<44d}! nx_global, "
+        "(nx_global+px = global # elements in theta direction)\n"
+        "{ny_global:<44d}! ny_global, "
+        "(ny_global+py = global # elements in phi direction)\n"
+        "{nz_global:<44d}! nz_global, "
+        "(nz_global+pz = global # of elements in r direction)\n"
+        "{lpd:<44d}! lpd, LAGRANGE polynomial degree\n"
+        "{px:<44d}! px, processors in theta direction\n"
+        "{py:<44d}! py, processors in phi direction\n"
+        "{pz:<44d}! pz, processors in r direction\n"
         "ADJOINT PARAMETERS =================================================="
-            "================================================================="
-            "=====\n"
-        "{adjoint_flag:<56d}! adjoint_flag (0=normal simulation, "
-            "1=adjoint forward, 2=adjoint reverse)\n"
-        "{samp_ad:<56.2f}! samp_ad, sampling rate of forward field\n"
-        "{wavefield_folder}")
+        "================================================================="
+        "=====\n"
+        "{adjoint_flag:<44d}! adjoint_flag (0=normal simulation, "
+        "1=adjoint forward, 2=adjoint reverse)\n"
+        "{samp_ad:<44d}! samp_ad, sampling rate of forward field\n"
+        "{adjoint_wavefield_folder}")
 
     setup_file = setup_file_template.format(
         # Colatitude! Swaps min and max.
-        theta_min=90.0 - float(config.mesh.max_latitude),
-        theta_max=90.0 - float(config.mesh.min_latitude),
-        phi_min=float(config.mesh.min_longitude),
-        phi_max=float(config.mesh.max_longitude),
+        theta_min=rotations.lat2colat(float(mesh.max_latitude)),
+        theta_max=rotations.lat2colat(float(mesh.min_latitude)),
+        phi_min=float(mesh.min_longitude),
+        phi_max=float(mesh.max_longitude),
         ## Min/max radius and depth are inverse to each other.
-        z_min=EARTH_RADIUS - (float(config.mesh.max_depth) * 1000.0),
-        z_max=EARTH_RADIUS - (float(config.mesh.min_depth) * 1000.0),
+        z_min=EARTH_RADIUS - (float(mesh.max_depth_in_km) * 1000.0),
+        z_max=EARTH_RADIUS - (float(mesh.min_depth_in_km) * 1000.0),
         is_diss=1 if config.is_dissipative else 0,
         model_type=1,
         lpd=int(config.lagrange_polynomial_degree),
         # Computation setup.
-        nx_global=int(config.nx_global),
-        ny_global=int(config.ny_global),
-        nz_global=int(config.nz_global),
-        px=int(config.px),
-        py=int(config.py),
-        pz=int(config.pz),
+        nx_global=config.nx_global,
+        ny_global=config.ny_global,
+        nz_global=config.nz_global,
+        px=config.px,
+        py=config.py,
+        pz=config.pz,
         adjoint_flag=simulation_type,
-        samp_ad=float(config.adj_forward_sampling_rate),
-        wavefield_folder=config.forward_wavefield_output_folder)
+        samp_ad=config.adjoint_forward_sampling_rate,
+        adjoint_wavefield_folder=
+        config.adjoint_forward_wavefield_output_folder)
 
-    with open(os.path.join(input_folder, "setup"), "wt") as open_file:
-        open_file.write(setup_file)
+    output_files["setup"] = setup_file
 
-    return
+    # Also write the source time function.
+    output_files["stf"] = "\n".join(
+        ["%e" % _i for _i in config.source_time_function])
+
+    return output_files
 
 
 def _is_in_bounds(lat, lng, mesh):

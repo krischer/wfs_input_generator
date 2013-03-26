@@ -10,6 +10,7 @@ solvers.
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)
 """
+import copy
 import glob
 import inspect
 from obspy import readEvents
@@ -37,9 +38,6 @@ class InputFileGenerator(object):
     """
     def __init__(self):
         self.config = AttribDict()
-        self.config.time_config = AttribDict()
-        self.config.mesh = AttribDict()
-        self.config.model = None
         self._events = []
         self._stations = []
 
@@ -204,7 +202,7 @@ class InputFileGenerator(object):
             else:
                 all_stations[stat["id"]] = stat
 
-    def write(self, format, output_dir):
+    def write(self, format, output_dir=None):
         """
         Write an input file with the specified format.
 
@@ -224,20 +222,55 @@ class InputFileGenerator(object):
                 list(self.__write_functions.keys()))
             raise ValueError(msg)
         # Create the folder if it does not exist.
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-        if not os.path.isdir(output_dir):
-            msg = "output_dir %s is not a directory" % output_dir
-            raise ValueError(msg)
-        output_dir = os.path.abspath(output_dir)
-        # Make sure only unique stations and events are passed on.
-        self._stations = unique_list(self._stations)
+        if output_dir:
+            if not os.path.exists(output_dir):
+                os.makedirs(output_dir)
+            if not os.path.isdir(output_dir):
+                msg = "output_dir %s is not a directory" % output_dir
+                raise ValueError(msg)
+            output_dir = os.path.abspath(output_dir)
+        # Make sure only unique stations and events are passed on. Sort
+        # stations by id.
+        self._stations = sorted(unique_list(self._stations),
+            key=lambda x: x["id"])
         self._events = unique_list(self._events)
+
+        writer = self.__write_functions[format]
+        config = copy.deepcopy(self.config)
+
+        # Check that all required configuration values exist and convert to the
+        # correct type.
+        for config_name, value in writer["required_config"].iteritems():
+            convert_fct, _ = value
+            if config_name not in config:
+                msg = ("The input file generator for '%s' requires the "
+                    "configuration item '%s'.") % (format, config_name)
+                raise ValueError(msg)
+            try:
+                config[config_name] = convert_fct(config[config_name])
+            except:
+                msg = ("The configuration value '%s' could not be converted "
+                    "to '%s'") % (config_name, str(convert_fct))
+                raise ValueError(msg)
+
+        # Now set the optional and defaultparameters.
+        for config_name, value in writer["default_config"].iteritems():
+            default_value, convert_fct, _ = value
+            if config_name in config:
+                default_value = config[config_name]
+            try:
+                config[config_name] = convert_fct(default_value)
+            except:
+                msg = ("The configuration value '%s' could not be converted "
+                    "to '%s'") % (config_name, str(convert_fct))
+                raise ValueError(msg)
+
         # Call the write function. The write function is supposed to raise the
         # appropriate error in case anything is amiss.
-        self.__write_functions[format](config=self.config,
-            events=self._events, stations=self._stations,
-            output_directory=output_dir)
+        input_files = writer["function"](config=config,
+            events=self._events, stations=self._stations)
+
+        return input_files
 
     def __find_write_scripts(self):
         """
@@ -256,16 +289,24 @@ class InputFileGenerator(object):
             module_name = "writers.%s" % name
             try:
                 module = __import__(module_name, globals(), locals(),
-                    ["write"], -1)
+                    ["write", "REQUIRED_CONFIGURATION",
+                    "DEFAULT_CONFIGURATION"], -1)
                 function = module.write
+                required_config = module.REQUIRED_CONFIGURATION
+                default_config = module.DEFAULT_CONFIGURATION
             except Exception as e:
                 print("Warning: Could not import %s." % (module_name))
                 print("\t%s: %s" % (e.__class__.__name__, str(e)))
+                continue
             if not hasattr(function, "__call__"):
                 msg = "Warning: write in %s is not a function." % module_name
                 print(msg)
                 continue
-            write_functions[name[6:]] = function
+            # Append the function and some more parameters.
+            write_functions[name[6:]] = {
+                "function": function,
+                "required_config": required_config,
+                "default_config": default_config}
         self.__write_functions = write_functions
 
     def get_available_formats(self):

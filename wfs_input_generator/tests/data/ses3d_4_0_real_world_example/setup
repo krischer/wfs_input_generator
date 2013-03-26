@@ -1,0 +1,21 @@
+MODEL =====================================================================================================================================
+47.100000                                   ! theta_min (colatitude) in degrees
+55.900000                                   ! theta_max (colatitude) in degrees
+23.100000                                   ! phi_min (longitude) in degrees
+42.900000                                   ! phi_max (longitude) in degrees
+5900000.000000                              ! z_min (radius) in m
+6371000.000000                              ! z_max (radius) in m
+0                                           ! is_diss
+1                                           ! model_type
+COMPUTATIONAL SETUP (PARALLELISATION) =====================================================================================================
+66                                          ! nx_global, (nx_global+px = global # elements in theta direction)
+108                                         ! ny_global, (ny_global+py = global # elements in phi direction)
+28                                          ! nz_global, (nz_global+pz = global # of elements in r direction)
+4                                           ! lpd, LAGRANGE polynomial degree
+3                                           ! px, processors in theta direction
+4                                           ! py, processors in phi direction
+4                                           ! pz, processors in r direction
+ADJOINT PARAMETERS ========================================================================================================================
+0                                           ! adjoint_flag (0=normal simulation, 1=adjoint forward, 2=adjoint reverse)
+15                                          ! samp_ad, sampling rate of forward field
+/tmp/some_folder/

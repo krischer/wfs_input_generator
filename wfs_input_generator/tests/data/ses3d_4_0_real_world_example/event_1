@@ -1,0 +1,19 @@
+SIMULATION PARAMETERS ==================================================================================
+4000                                        ! nt, number of time steps
+0.130000                                    ! dt in sec, time increment
+SOURCE =================================================================================================
+50.740000                                   ! xxs, theta-coord. center of source in degrees
+41.040000                                   ! yys, phi-coord. center of source in degrees
+5000.000000                                 ! zzs, source depth in (m)
+10                                          ! srctype, 1:f_x, 2:f_y, 3:f_z, 10:M_ij
+1.000000e+16                                ! M_theta_theta
+1.000000e+16                                ! M_phi_phi
+1.000000e+16                                ! M_r_r
+0.000000e+00                                ! M_theta_phi
+0.000000e+00                                ! M_theta_r
+0.000000e+00                                ! M_phi_r
+OUTPUT DIRECTORY ======================================================================================
+../DATA/OUTPUT/1.8s/
+OUTPUT FLAGS ==========================================================================================
+15000                                       ! ssamp, snapshot sampling
+0                                           ! output_displacement, output displacement field (1=yes,0=no)
