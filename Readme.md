@@ -1,3 +1,19 @@
+## Waveform Solver Input File Generator
+
+Seismic waveform solvers are generally written in a high-performance language and
+require carefully crafted input files to work.
+These input files are very solver dependent and have their own quirks.
+This module attempts to create a generic input file generator that hides the actual
+input files' syntax and is steered with a nice Python API.
+
+It is most useful for performing simulations of real earthquakes. The module reads
+QuakeML and SEED files and derives the necessary information from them. Instead
+of reading from QuakeML and SEED files, the necessary information can also be given
+as Python dictionaries.
+
+A main focus of the development is to make it as easy as possible to add support for
+further input file formats. This is described later on in more detail.
+
 ## Installation
 
 ### Requirements:
