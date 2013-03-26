@@ -10,6 +10,7 @@ Test module file first running flake8 on all files and then running all tests.
     (http://www.gnu.org/copyleft/gpl.html)
 """
 # -*- coding: utf-8 -*-
+import flake8
 import flake8.main
 import glob
 import inspect
@@ -53,6 +54,9 @@ def suite():
 
 def run_flake8():
     print(">>> Running flake8 on all project files...")
+    if flake8.__version__ <= "2":
+        msg = ("Module was designed to be tested with flake8 >= 2.0. Please "
+            "update.")
     test_dir = os.path.dirname(os.path.abspath(inspect.getfile(
         inspect.currentframe())))
     root_dir = os.path.dirname(os.path.dirname(test_dir))

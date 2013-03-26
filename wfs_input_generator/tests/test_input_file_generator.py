@@ -177,6 +177,23 @@ class InputFileGeneratorTestCase(unittest.TestCase):
              "elevation_in_m": 565.0,
              "local_depth_in_m": 324.0}]))
 
+    def test_automatic_type_converstion_for_station_dict(self):
+        """
+        Fields should undergo automatic type conversion.
+        """
+        # All the coordinate values should be converted to floats.
+        station = {"id": "BW.FURT",
+             "latitude": 1,
+             "longitude": 2,
+             "elevation_in_m": "3",
+             "local_depth_in_m": "4"}
+        gen = InputFileGenerator()
+        gen.add_stations(station)
+        self.assertEqual(type(gen._stations[0]["latitude"]), float)
+        self.assertEqual(type(gen._stations[0]["longitude"]), float)
+        self.assertEqual(type(gen._stations[0]["elevation_in_m"]), float)
+        self.assertEqual(type(gen._stations[0]["local_depth_in_m"]), float)
+
     def test_reading_QuakeML_files(self):
         """
         Tests the reading of QuakeML Files.

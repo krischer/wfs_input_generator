@@ -107,9 +107,9 @@ class InputFileGenerator(object):
         for station_item in stations:
             if isinstance(station_item, dict):
                 if "latitude" not in station_item or \
-                    "longitude" not in station_item or \
-                    "elevation_in_m" not in station_item or \
-                    "id" not in station_item:
+                        "longitude" not in station_item or \
+                        "elevation_in_m" not in station_item or \
+                        "id" not in station_item:
                     msg = ("Each station dictionary needs to at least have "
                         "'latitude', 'longitude', 'elevation_in_m', and 'id' "
                         "keys.")
@@ -190,7 +190,7 @@ class InputFileGenerator(object):
                     local_depth = blockette.local_depth
                     break
             if None in [network_code, station_code, latitude, longitude,
-                elevation, local_depth]:
+                    elevation, local_depth]:
                 msg = "Could not parse %s" % station_item
                 raise ValueError(msg)
             stat = {
@@ -297,7 +297,7 @@ class InputFileGenerator(object):
             event.focal_mechanisms[0]
         # Origin needs to have latitude, longitude, depth and time
         if not origin.latitude or not origin.longitude or not origin.depth \
-            or not origin.time:
+                or not origin.time:
             msg = ("Every event origin needs to have latitude, longitude, "
                 "depth and time")
             raise ValueError(msg)
@@ -308,7 +308,7 @@ class InputFileGenerator(object):
         # Also all six components need to be specified.
         mt = foc_mec.moment_tensor.tensor
         if not mt.m_rr or not mt.m_tt or not mt.m_pp or not mt.m_rt \
-            or not mt.m_rp or not mt.m_tp:
+                or not mt.m_rp or not mt.m_tp:
             msg = "Every event needs all six moment tensor components."
             raise ValueError(msg)
 
