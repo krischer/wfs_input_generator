@@ -75,6 +75,13 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         gen2.add_stations(seed_file_2)
         self.assertEqual(sorted(gen1._stations), sorted(gen2._stations))
 
+        # Now try with the dictionaries.
+        gen1 = InputFileGenerator()
+        gen2 = InputFileGenerator()
+        gen1.add_stations([station_1, station_2])
+        gen2.add_stations(station_1)
+        gen2.add_stations(station_2)
+        self.assertEqual(sorted(gen1._stations), sorted(gen2._stations))
 
     def test_passing_station_dictionaries(self):
         """
