@@ -300,6 +300,10 @@ def write(config, events, stations):
     output_files["stf"] = "\n".join(
         ["%e" % _i for _i in config.source_time_function])
 
+    # Make sure all output files have an empty new line at the end.
+    for key in output_files.iterkeys():
+        output_files[key] += "\n"
+
     return output_files
 
 

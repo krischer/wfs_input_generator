@@ -123,6 +123,54 @@ class SES3D_4_0_WriterTestCase(unittest.TestCase):
                     msg += "Got:      \"%s\"\n" % new_line
                     raise AssertionError(msg)
 
+    def test_test_all_files_have_an_empty_last_line(self):
+        """
+        Tests that all files have an empty last line.
+        """
+        station = {"id": "KO.ADVT",
+            "latitude": 41.0,
+            "longitude": 33.1234,
+            "elevation_in_m": 10}
+        event = {
+            "latitude": 39.260,
+            "longitude": 41.040,
+            "depth_in_km": 5.0,
+            "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+            "m_rr": 1.0e16,
+            "m_tt": 1.0e16,
+            "m_pp": 1.0e16,
+            "m_rt": 0.0,
+            "m_rp": 0.0,
+            "m_tp": 0.0}
+
+        gen = InputFileGenerator()
+        gen.add_stations(station)
+        gen.add_events(event)
+
+        # Configure it.
+        gen.config.number_of_time_steps = 4000
+        gen.config.time_increment_in_s = 0.13
+        gen.config.output_folder = "../DATA/OUTPUT/1.8s/"
+        gen.config.mesh_min_latitude = 34.1
+        gen.config.mesh_max_latitude = 42.9
+        gen.config.mesh_min_longitude = 23.1
+        gen.config.mesh_max_longitude = 42.9
+        gen.config.mesh_min_depth_in_km = 0.0
+        gen.config.mesh_max_depth_in_km = 471.0
+        gen.config.nx_global = 66
+        gen.config.ny_global = 108
+        gen.config.nz_global = 28
+        gen.config.px = 3
+        gen.config.py = 4
+        gen.config.pz = 4
+        gen.config.source_time_function = np.linspace(1.0, 0.0, 4000)
+        gen.config.is_dissipative = False
+
+        # Write the input files to a dictionary.
+        input_files = gen.write(format="ses3d_4_0")
+        for input_file in input_files.itervalues():
+            self.assertTrue(input_file.endswith("\n"))
+
 
 def suite():
     return unittest.makeSuite(SES3D_4_0_WriterTestCase, "test")
