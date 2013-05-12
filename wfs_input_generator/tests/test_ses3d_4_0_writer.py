@@ -100,7 +100,7 @@ class SES3D_4_0_WriterTestCase(unittest.TestCase):
         path = os.path.join(self.data_dir, "ses3d_4_0_real_world_example")
         for filename in glob.glob(os.path.join(path, "*")):
             with open(filename, "rt") as open_file:
-                real_file = open_file.read().strip()
+                real_file = open_file.read()
             filename = os.path.basename(filename)
 
             if filename not in input_files:
@@ -169,7 +169,7 @@ class SES3D_4_0_WriterTestCase(unittest.TestCase):
         # Write the input files to a dictionary.
         input_files = gen.write(format="ses3d_4_0")
         for input_file in input_files.itervalues():
-            self.assertTrue(input_file.endswith("\n"))
+           self.assertTrue(input_file.endswith("\n\n"))
 
 
 def suite():

@@ -17,3 +17,4 @@ OUTPUT DIRECTORY ===============================================================
 OUTPUT FLAGS ==========================================================================================
 15000                                       ! ssamp, snapshot sampling
 0                                           ! output_displacement, output displacement field (1=yes,0=no)
+

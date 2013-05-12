@@ -19,3 +19,4 @@ ADJOINT PARAMETERS =============================================================
 0                                           ! adjoint_flag (0=normal simulation, 1=adjoint forward, 2=adjoint reverse)
 15                                          ! samp_ad, sampling rate of forward field
 /tmp/some_folder/
+

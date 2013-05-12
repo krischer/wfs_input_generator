@@ -302,7 +302,7 @@ def write(config, events, stations):
 
     # Make sure all output files have an empty new line at the end.
     for key in output_files.iterkeys():
-        output_files[key] += "\n"
+        output_files[key] += "\n\n"
 
     return output_files
 
