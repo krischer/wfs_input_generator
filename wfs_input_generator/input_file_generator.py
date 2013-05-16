@@ -118,10 +118,10 @@ class InputFileGenerator(object):
                     "longitude": float(station_item["longitude"]),
                     "elevation_in_m": float(station_item["elevation_in_m"]),
                     "id": str(station_item["id"])}
-                if "local_depth_in_m" in station_item:
+                try:
                     stat["local_depth_in_m"] = \
                         float(station_item["local_depth_in_m"])
-                else:
+                except:
                     stat["local_depth_in_m"] = 0.0
                 if stat["id"] in all_stations:
                     all_stations[stat["id"]].update(stat)
