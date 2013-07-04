@@ -221,17 +221,16 @@ class InputFileGenerator(object):
             msg = "Format %s not found. Available formats: %s." % (format,
                 list(self.__write_functions.keys()))
             raise ValueError(msg)
-        # Make sure only unique stations and events are passed on. Sort
-        # stations by id.
-        self._stations = sorted(unique_list(self._stations),
-            key=lambda x: x["id"])
+
+        # Make sure only unique stations and events are passed on. Sort stations by id.
+        self._stations = sorted(unique_list(self._stations),key=lambda x: x["id"])
         self._events = unique_list(self._events)
 
+        # Set the correct write function.
         writer = self.__write_functions[format]
         config = copy.deepcopy(self.config)
 
-        # Check that all required configuration values exist and convert to the
-        # correct type.
+        # Check that all required configuration values exist and convert to the correct type.
         for config_name, value in writer["required_config"].iteritems():
             convert_fct, _ = value
             if config_name not in config:
@@ -259,8 +258,7 @@ class InputFileGenerator(object):
 
         # Call the write function. The write function is supposed to raise the
         # appropriate error in case anything is amiss.
-        input_files = writer["function"](config=config,
-            events=self._events, stations=self._stations)
+        input_files = writer["function"](config=config,events=self._events, stations=self._stations)
 
         # If an output directory is given, it will be used.
         if output_dir:
@@ -282,16 +280,14 @@ class InputFileGenerator(object):
 
     def __find_write_scripts(self):
         """
-        Helper method to find all available writer script. A write script is
+        Helper method to find all available writer scripts. A write script is
         defined as being in the folder "writer" and having a name of the form
         "write_XXX.py". It furthermore needs to have a write() method.
         """
         # Most generic way to get the 'writers' subdirectory.
-        write_dir = os.path.join(os.path.dirname(inspect.getfile(
-            inspect.currentframe())), "writers")
+        write_dir = os.path.join(os.path.dirname(inspect.getfile(inspect.currentframe())), "writers")
         files = glob.glob(os.path.join(write_dir, "write_*.py"))
-        import_names = [os.path.splitext(os.path.basename(_i))[0] for _i in
-            files]
+        import_names = [os.path.splitext(os.path.basename(_i))[0] for _i in files]
         write_functions = {}
         for name in import_names:
             module_name = "writers.%s" % name
@@ -311,10 +307,8 @@ class InputFileGenerator(object):
                 print(msg)
                 continue
             # Append the function and some more parameters.
-            write_functions[name[6:]] = {
-                "function": function,
-                "required_config": required_config,
-                "default_config": default_config}
+            write_functions[name[6:]] = {"function": function,"required_config": required_config,"default_config": default_config}
+
         self.__write_functions = write_functions
 
     def get_available_formats(self):

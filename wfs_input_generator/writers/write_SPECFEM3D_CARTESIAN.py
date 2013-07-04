@@ -22,7 +22,7 @@ import os
 # documentation.
 REQUIRED_CONFIGURATION = {
     "NPROC":(4,int,"number of MPI processors"),
-    "NSTEP":(1000,int"The number of time steps"),
+    "NSTEP":(1000,int,"The number of time steps"),
     "DT":(0.05,float,"The time increment in seconds"),
     "SIMULATION_TYPE": (1,int,"forward or adjoint simulation, 1 = forward, 2 = adjoint, 3 = both simultaneously")
 }
@@ -38,7 +38,7 @@ DEFAULT_CONFIGURATION = {
     "UTM_PROJECTION_ZONE":(11,int,'set up the utm zone, if SUPPRESS_UTM_PROJECTION is false'),
     "SUPPRESS_UTM_PROJECTION":('.true.',str,"suppress the utm projection"),
     "NPROC":(4,int,"number of MPI processors"),
-    "NSTEP":(1000,int"The number of time steps"),
+    "NSTEP":(1000,int,"The number of time steps"),
     "DT":(0.05,float,"The time increment in seconds"),
     "NGNOD":(8,int,"number of nodes for 2D and 3D shape functions for hexahedral,we use either 8-node mesh elements (bricks) or 27-node elements.If you use our internal mesher, the only option is 8-node bricks (27-node elements are not supported)"),
     "MODEL": ('default',str,"setup the geological models, options are: default (model parameters described by mesh properties), 1d_prem,1d_socal,1d_cascadia,aniso,external,gll,salton_trough,tomo"),
@@ -55,7 +55,7 @@ DEFAULT_CONFIGURATION = {
     "PML_INSTEAD_OF_FREE_SURFACE":('.false.',str,"C-PML boundary conditions instead of free surface on the top"),
     "f0_FOR_PML":(12.7,float,"C-PML dominant frequency,see manual"),
     "STACEY_ABSORBING_CONDITIONS":(".false.",str,"Stacey absorbing boundary conditions for a regional simulation"),
-    "STACEY_INSTEAD_OF_FREE_SURFACE":(".false.",str,"Stacey absorbing top surface (defined in mesh as 'free_surface_file')")  = .false.
+    "STACEY_INSTEAD_OF_FREE_SURFACE":(".false.",str,"Stacey absorbing top surface (defined in mesh as 'free_surface_file')"),
     "CREATE_SHAKEMAP"        :(".false.",str,"save shakemap files"),
     "MOVIE_SURFACE"          :(".false.",str,"save velocity snapshot files only for surfaces"),
     "MOVIE_TYPE"             :(1,int,"")        ,
@@ -200,7 +200,7 @@ def write(config, events, stations):
         "\n",
         "# path to store the local database file on each node\n",
         "LOCAL_PATH                      = {LOCAL_PATH}\n",
-        "
+        
         "# interval at which we output time step info and max of norm of displacement\n",
         "NTSTEP_BETWEEN_OUTPUT_INFO      = {NTSTEP_BETWEEN_OUTPUT_INFO}\n",
         "\n",
@@ -236,7 +236,7 @@ def write(config, events, stations):
     
     try:
         magnitude=float(event['magnitude'])
-    else:
+    except:
         magnitude=0
         
     lat, lng = (event["latitude"], event["longitude"])
