@@ -94,9 +94,9 @@ def write(config, events, stations):
     if not config.adjoint_forward_wavefield_output_folder:
         config.adjoint_forward_wavefield_output_folder = \
             os.path.join(config.output_folder, "ADJOINT_FORWARD_FIELD")
-    
+
     output_files = {}
-    
+
     # The data needs to be rotated in the opposite direction.
     if config.rotation_angle_in_degree:
         config.rotation_angle_in_degree *= -1.0
@@ -104,7 +104,7 @@ def write(config, events, stations):
     # Map and assert the simulation type.
     sim_map = {"normal simulation": 0, "adjoint forward": 1,
         "adjoint reverse": 2}
-    
+
     if config.simulation_type not in sim_map:
         msg = "simulation_type needs to be on of %s." % \
             ", ".join(sim_map.keys())
