@@ -48,6 +48,8 @@ REQUIRED_CONFIGURATION = {
 # REQUIRED_CONFIGURATION except that the tuple now has three items, the first
 # one being the actual default value.
 DEFAULT_CONFIGURATION = {
+    "event_tag": ("1", str, "The name of the event. Should be numeric for "
+        "now."),
     "is_dissipative": (True, bool, "Dissipative simulation or not"),
 
     "output_displacement": (False, bool, "Output the displacement field"),
@@ -89,17 +91,19 @@ def write(config, events, stations):
     #==============================================================================================
 
     if not config.adjoint_forward_wavefield_output_folder:
-        config.adjoint_forward_wavefield_output_folder = os.path.join(config.output_folder, "ADJOINT_FORWARD_FIELD")
-    
+        config.adjoint_forward_wavefield_output_folder = \
+            os.path.join(config.output_folder, "ADJOINT_FORWARD_FIELD")
+
     output_files = {}
-    
+
     # The data needs to be rotated in the opposite direction.
     if config.rotation_angle_in_degree:
         config.rotation_angle_in_degree *= -1.0
 
     # Map and assert the simulation type.
-    sim_map = {"normal simulation": 0, "adjoint forward": 1, "adjoint reverse": 2}
-    
+    sim_map = {"normal simulation": 0, "adjoint forward": 1,
+        "adjoint reverse": 2}
+
     if config.simulation_type not in sim_map:
         msg = "simulation_type needs to be on of %s." % \
             ", ".join(sim_map.keys())
@@ -255,7 +259,7 @@ def write(config, events, stations):
         output_displacement=1 if config.output_displacement else 0)
 
     # Put it in the collected dictionary.
-    fn="event_"+config.event_tag
+    fn = "event_%s" % config.event_tag
     output_files[fn] = event_file
 
     #==============================================================================================
@@ -263,7 +267,8 @@ def write(config, events, stations):
     #==============================================================================================
 
     # Make the event_list. Currently, only one event is used
-    output_files["event_list"] = "{0:<44d}! n_events = number of events\n{1}".format(1,config.event_tag)
+    output_files["event_list"] = "{0:<44d}! n_events = number of events\n{1}"\
+        .format(1, config.event_tag)
 
     #==============================================================================================
     # recfile
