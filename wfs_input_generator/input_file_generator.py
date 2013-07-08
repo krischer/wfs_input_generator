@@ -244,7 +244,7 @@ class InputFileGenerator(object):
                     "to '%s'") % (config_name, str(convert_fct))
                 raise ValueError(msg)
 
-        # Now set the optional and defaultparameters.
+        # Now set the optional and default parameters.
         for config_name, value in writer["default_config"].iteritems():
             default_value, convert_fct, _ = value
             if config_name in config:
