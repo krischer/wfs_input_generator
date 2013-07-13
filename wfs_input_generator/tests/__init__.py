@@ -72,7 +72,7 @@ def run_flake8():
             continue
         for py_file in filenames:
             full_path = os.path.join(dirpath, py_file)
-            if flake8.main.check_file(full_path, ignore=("E128")):
+            if flake8.main.check_file(full_path, ignore=["E128"]):
                 count += 1
     if count == 0:
         print("All files OK")
