@@ -19,7 +19,7 @@ setup_config = dict(
     author_email="krischer@geophysik.uni-muenchen.de",
     url="http: //github.com/krischer/wfs_input_generator",
     packages=["wfs_input_generator"],
-    package_dir={"wfs_input_generator":  "wfs_input_generator"},
+    package_dir={"wfs_input_generator": "wfs_input_generator"},
     license="GNU General Public License, version 3 (GPLv3)",
     platforms="OS Independent",
     install_requires=["obspy >=0.8.0"],

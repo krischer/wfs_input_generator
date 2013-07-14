@@ -54,6 +54,7 @@ def _write_grid_block(config):
         lpd=config.mesh.config.lagrange_polynomial_degree,
         pml=config.mesh.config.width_of_relaxing_boundaries)
 
+
 def _write_model_block(config):
     """
     Helper function to write the model block.
@@ -81,6 +82,7 @@ def _write_model_block(config):
         lon_max=config.mesh.max_longitude,
         rad_min=config.mesh.min_depth,
         rad_max=config.mesh.max_depth)
+
 
 def _time_config(time_config):
     template = (

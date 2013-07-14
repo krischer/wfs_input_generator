@@ -169,7 +169,7 @@ class SES3D_4_0_WriterTestCase(unittest.TestCase):
         # Write the input files to a dictionary.
         input_files = gen.write(format="ses3d_4_0")
         for input_file in input_files.itervalues():
-           self.assertTrue(input_file.endswith("\n\n"))
+            self.assertTrue(input_file.endswith("\n\n"))
 
 
 def suite():
