@@ -74,7 +74,13 @@ DEFAULT_CONFIGURATION = {
         "opposite way. Useful for simulation close to the equator."),
     "rotation_axis": ([0.0, 0.0, 1.0], lambda x: map(float, x),
         "The rotation angle given as [x, y, z] in correspondance with the "
-        "SES3D coordinate system.")
+        "SES3D coordinate system."),
+    "Q_model_relaxation_times": ([1.7308, 14.3961, 22.9973],
+        lambda x: map(float, x),
+        "The relaxations times for the different Q model mechanisms"),
+    "Q_model_weights_of_relaxation_mechanisms": ([2.5100, 2.4354, 0.0879],
+        lambda x: map(float, x),
+        "The weights for relaxations mechanisms for the Q model mechanisms")
 }
 
 
@@ -310,22 +316,22 @@ def write(config, events, stations):
     #==========================================================================
     # relaxation parameters
     #==========================================================================
-
     # Write the relaxation file.
     relax_file = (
         "RELAXATION TIMES [s] =====================\n"
         "{relax_times}\n"
         "WEIGHTS OF RELAXATION MECHANISMS =========\n"
-        "{relax_weights}").format(relax_times="\n".join(["%s" % _i
-            for _i in config.tau]),
-        relax_weights="\n".join(["%s" % _i for _i in config.w]))
+        "{relax_weights}").format(
+            relax_times="\n".join(["%.6f" % _i for _i in
+                config.Q_model_relaxation_times]),
+            relax_weights="\n".join(["%.6f" % _i for _i in
+                config.Q_model_weights_of_relaxation_mechanisms]))
 
     output_files["relax"] = relax_file
 
     #==========================================================================
     # source-time function
     #==========================================================================
-
     # Also write the source time function.
     output_files["stf"] = "\n".join(["%e" % _i for
         _i in config.source_time_function])
@@ -333,7 +339,6 @@ def write(config, events, stations):
     #==========================================================================
     # finalize
     #==========================================================================
-
     # Make sure all output files have an empty new line at the end.
     for key in output_files.iterkeys():
         output_files[key] += "\n\n"
