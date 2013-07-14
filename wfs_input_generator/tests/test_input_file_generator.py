@@ -11,10 +11,13 @@ Test suite for the waveform solver input file generator.
 """
 from wfs_input_generator import InputFileGenerator
 
+import flake8
+import flake8.main
 import inspect
 from obspy.core import UTCDateTime
 import os
 import unittest
+import warnings
 
 
 class InputFileGeneratorTestCase(unittest.TestCase):
@@ -25,6 +28,33 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         # Most generic way to get the actual data directory.
         self.data_dir = os.path.join(os.path.dirname(os.path.abspath(
             inspect.getfile(inspect.currentframe()))), "data")
+
+    def test_code_formatting(self):
+        """
+        Tests the formatting and other things with flake8.
+        """
+        if flake8.__version__ <= "2":
+            msg = ("Module was designed to be tested with flake8 >= 2.0. "
+                "Please update.")
+            warnings.warn(msg)
+        test_dir = os.path.dirname(os.path.abspath(inspect.getfile(
+            inspect.currentframe())))
+        root_dir = os.path.dirname(os.path.dirname(test_dir))
+        # Short sanity check.
+        if not os.path.exists(os.path.join(root_dir, "setup.py")):
+            msg = "Could not find project root."
+            raise Exception(msg)
+        count = 0
+        for dirpath, _, filenames in os.walk(root_dir):
+            filenames = [_i for _i in filenames if
+                os.path.splitext(_i)[-1] == os.path.extsep + "py"]
+            if not filenames:
+                continue
+            for py_file in filenames:
+                full_path = os.path.join(dirpath, py_file)
+                if flake8.main.check_file(full_path, ignore=["E128"]):
+                    count += 1
+        self.assertEqual(count, 0, "Not all files passed the flake8 check.")
 
     def test_reading_SEED_files(self):
         """
