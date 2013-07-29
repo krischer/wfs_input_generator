@@ -51,19 +51,14 @@ DEFAULT_CONFIGURATION = {
     "event_tag": ("1", str, "The name of the event. Should be numeric for "
         "now."),
     "is_dissipative": (True, bool, "Dissipative simulation or not"),
-
     "output_displacement": (False, bool, "Output the displacement field"),
-
     "displacement_snapshot_sampling":
-    (10000, int, "Sampling rate of output displacement field"),
-
+        (10000, int, "Sampling rate of output displacement field"),
     "lagrange_polynomial_degree":
-    (4, int, "Degree of the Lagrange Polynomials"),
-
+        (4, int, "Degree of the Lagrange Polynomials"),
     "simulation_type": ("normal simulation", str, "The type of simulation to "
         "perform. One of 'normal simulation', 'adjoint forward', "
         "'adjoint backward'"),
-
     "adjoint_forward_sampling_rate": (15, int, "The sampling rate of the "
         "adjoint forward field for an ajoint simulation run"),
     "adjoint_forward_wavefield_output_folder": ("", str,
