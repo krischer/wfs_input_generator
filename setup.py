@@ -9,7 +9,7 @@ Setup script for the waveform solver input file generator.
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)
 """
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup_config = dict(
     name="wfs_input_generator",
@@ -18,8 +18,7 @@ setup_config = dict(
     author="Lion Krischer",
     author_email="krischer@geophysik.uni-muenchen.de",
     url="http: //github.com/krischer/wfs_input_generator",
-    packages=["wfs_input_generator"],
-    package_dir={"wfs_input_generator": "wfs_input_generator"},
+    packages=find_packages(),
     license="GNU General Public License, version 3 (GPLv3)",
     platforms="OS Independent",
     install_requires=["obspy >=0.8.0"],
