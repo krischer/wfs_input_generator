@@ -52,7 +52,7 @@ class InputFileGeneratorTestCase(unittest.TestCase):
                 continue
             for py_file in filenames:
                 full_path = os.path.join(dirpath, py_file)
-                if flake8.main.check_file(full_path, ignore=["E128"]):
+                if flake8.main.check_file(full_path):
                     count += 1
         self.assertEqual(count, 0, "Not all files passed the flake8 check.")
 
