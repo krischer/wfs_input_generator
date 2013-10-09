@@ -20,7 +20,7 @@ gen = InputFileGenerator()
 # SES3D 4.0 can only simulate one event at a time.
 gen.add_events("../tests/data/event1.xml")
 gen.add_stations(["../tests/data/dataless.seed.BW_FURT",
-    "../tests/data/dataless.seed.BW_RJOB"])
+                  "../tests/data/dataless.seed.BW_RJOB"])
 
 # Just perform a standard forward simulation.
 gen.config.simulation_type = "normal simulation"

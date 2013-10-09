@@ -18,7 +18,8 @@ REQUIRED_CONFIGURATION = {
     "NPROC": (int, "number of MPI processors"),
     "NSTEP": (int, "The number of time steps"),
     "DT": (float, "The time increment in seconds"),
-    "SIMULATION_TYPE": (int, "forward or adjoint simulation, 1 = forward, "
+    "SIMULATION_TYPE": (
+        int, "forward or adjoint simulation, 1 = forward, "
         "2 = adjoint, 3 = both simultaneously")
 }
 
@@ -27,68 +28,89 @@ REQUIRED_CONFIGURATION = {
 # REQUIRED_CONFIGURATION except that the tuple now has three items, the first
 # one being the actual default value.
 DEFAULT_CONFIGURATION = {
-    "NOISE_TOMOGRAPHY": (0, int, "noise tomography simulation, "
+    "NOISE_TOMOGRAPHY": (
+        0, int, "noise tomography simulation, "
         "0 = earthquake simulation,  1/2/3 = three steps in noise simulation"),
     "SAVE_FORWARD": (".false.", str, "save forward wavefield"),
-    "UTM_PROJECTION_ZONE": (11, int,
+    "UTM_PROJECTION_ZONE": (
+        11, int,
         "set up the utm zone, if SUPPRESS_UTM_PROJECTION is false"),
     "SUPPRESS_UTM_PROJECTION": (".true.", str, "suppress the utm projection"),
-    "NGNOD": (8, int, "number of nodes for 2D and 3D shape functions for "
+    "NGNOD": (
+        8, int, "number of nodes for 2D and 3D shape functions for "
         "hexahedral,we use either 8-node mesh elements (bricks) or 27-node "
         "elements.If you use our internal mesher, the only option is 8-node "
         "bricks (27-node elements are not supported)"),
-    "MODEL": ("default", str, "setup the geological models, options are: "
+    "MODEL": (
+        "default", str, "setup the geological models, options are: "
         "default (model parameters described by mesh properties), 1d_prem,"
         "1d_socal,1d_cascadia,aniso,external,gll,salton_trough,tomo"),
-    "APPROXIMATE_(OCEAN_LOAD": (".false.", str,
-        "see SPECFEM3D_CARTESIAN manual"),
+    "APPROXIMATE_(OCEAN_LOAD": (
+        ".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "TOPOGRAPHY": (".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "ATTENUATION": (".false.", str, "see SPECFEM3D_CARTESIAN manual"),
-    "FULL_ATTENUATION_SOLID": (".false.", str,
-        "see SPECFEM3D_CARTESIAN manual"),
+    "FULL_ATTENUATION_SOLID": (
+        ".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "ANISOTROPY": (".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "GRAVITY": (".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "TOMOGRAPHY_PATH": ("../DATA/tomo_files/", str,
-        "path for external tomographic models files"),
-    "USE_OLSEN_ATTENUATION": (".false.", str,
+                        "path for external tomographic models files"),
+    "USE_OLSEN_ATTENUATION": (
+        ".false.", str,
         "use the Olsen attenuation, Q_mu = constant * v_s attenuation rule"),
-    "OLSEN_ATTENUATION_RATIO": (0.05, float,
+    "OLSEN_ATTENUATION_RATIO": (
+        0.05, float,
         "Olsen's constant for Q_mu = constant * v_s attenuation rule"),
-    "PML_CONDITIONS": (".false.", str,
+    "PML_CONDITIONS": (
+        ".false.", str,
         "C-PML boundary conditions for a regional simulation"),
-    "PML_INSTEAD_OF_FREE_SURFACE": (".false.", str,
+    "PML_INSTEAD_OF_FREE_SURFACE": (
+        ".false.", str,
         "C-PML boundary conditions instead of free surface on the top"),
     "f0_FOR_PML": (12.7, float, "C-PML dominant frequency,see manual"),
-    "STACEY_ABSORBING_CONDITIONS": (".false.", str,
+    "STACEY_ABSORBING_CONDITIONS": (
+        ".false.", str,
         "Stacey absorbing boundary conditions for a regional simulation"),
-    "STACEY_INSTEAD_OF_FREE_SURFACE": (".false.", str, "Stacey absorbing top "
+    "STACEY_INSTEAD_OF_FREE_SURFACE": (
+        ".false.", str, "Stacey absorbing top "
         "surface (defined in mesh as 'free_surface_file')"),
     "CREATE_SHAKEMAP": (".false.", str, "save shakemap files"),
-    "MOVIE_SURFACE": (".false.", str,
+    "MOVIE_SURFACE": (
+        ".false.", str,
         "save velocity snapshot files only for surfaces"),
     "MOVIE_TYPE": (1, int, ""),
-    "MOVIE_VOLUME": (".false.", str,
+    "MOVIE_VOLUME": (
+        ".false.", str,
         "save the entire volumetric velocity snapshot files "),
-    "SAVE_DISPLACEMENT": (".false.", str,
+    "SAVE_DISPLACEMENT": (
+        ".false.", str,
         "save displacement instead velocity in the snapshot files"),
-    "USE_HIGHRES_FOR_MOVIES": (".false.", str,
+    "USE_HIGHRES_FOR_MOVIES": (
+        ".false.", str,
         "save high resolution snapshot files (all GLL points)"),
-    "NTSTEP_BETWEEN_FRAMES": (200, int,
+    "NTSTEP_BETWEEN_FRAMES": (
+        200, int,
         "number of timesteps between 2 consecutive snapshots"),
     "HDUR_MOVIE": (0.0, float,
-        "half duration for snapshot files"),
-    "SAVE_MESH_FILES": (".false.", str,
+                   "half duration for snapshot files"),
+    "SAVE_MESH_FILES": (
+        ".false.", str,
         "save VTK mesh files to check the mesh"),
-    "LOCAL_PATH": ("../OUTPUT_FILES/DATABASES_MPI", str,
+    "LOCAL_PATH": (
+        "../OUTPUT_FILES/DATABASES_MPI", str,
         "path to store the local database file on each node"),
-    "NTSTEP_BETWEEN_OUTPUT_INFO": (500, int, "interval at which we output "
+    "NTSTEP_BETWEEN_OUTPUT_INFO": (
+        500, int, "interval at which we output "
         "time step info and max of norm of displacement"),
-    "NTSTEP_BETWEEN_OUTPUT_SEISMOS": (10000, int, "interval in time steps for "
-        "writing of seismograms"),
-    "NTSTEP_BETWEEN_READ_ADJSRC": (0, int, "interval in time steps for "
+    "NTSTEP_BETWEEN_OUTPUT_SEISMOS": (
+        10000, int,
+        "interval in time steps for writing of seismograms"),
+    "NTSTEP_BETWEEN_READ_ADJSRC": (
+        0, int, "interval in time steps for "
         "reading adjoint traces,0 = read the whole adjoint sources at the "
         "same time"),
-    "USE_FORCE_POINT_SOURCE": (".false.", str, "# use a (tilted) "
+    "USE_FORCE_POINT_SOURCE": (
+        ".false.", str, "# use a (tilted) "
         "FORCESOLUTION force point source (or several) instead of a "
         "CMTSOLUTION moment-tensor source. If this flag is turned on, "
         "the FORCESOLUTION file must be edited by precising:\n- the "
@@ -100,7 +122,8 @@ DEFAULT_CONFIGURATION = {
         "direction matters here;\n its norm is ignored and the norm of the "
         "force used is the factor force source times the source time "
         "function."),
-    "USE_RICKER_TIME_FUNCTION": (".false.", str, "set to true to use a Ricker "
+    "USE_RICKER_TIME_FUNCTION": (
+        ".false.", str, "set to true to use a Ricker "
         "source time function instead of the source time functions set by "
         "default to represent a (tilted) FORCESOLUTION force point source or "
         "a CMTSOLUTION moment-tensor source."),
@@ -287,8 +310,9 @@ def write(config, events, stations):
         magnitude = 0
 
     lat, lng = (event["latitude"], event["longitude"])
-    m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (event["m_rr"], event["m_tt"],
-        event["m_pp"], event["m_rt"], event["m_rp"], event["m_tp"])
+    m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (
+        event["m_rr"], event["m_tt"], event["m_pp"], event["m_rt"],
+        event["m_rp"], event["m_tp"])
 
     CMT_SOLUTION_file = CMT_SOLUTION_template.format(
         time_year=float(event["origin_time"].year),
@@ -316,14 +340,15 @@ def write(config, events, stations):
 
     recfile_parts = []
     for station in stations:
-        recfile_parts.append("{station:_<5s} {network:_<2s} {latitude:.10f}"
+        recfile_parts.append(
+            "{station:_<5s} {network:_<2s} {latitude:.10f}"
             "{longitude:.10f} {elev:.1f} {buried:.1f}".format(
-            network=station["network"],
-            station=station["id"],
-            latitude=float(station["latitude"]),
-            longitude=float(station["longitude"]),
-            elev=float(station["elevation_in_m"]),
-            buried=float(station["local_depth_in_m"])))
+                network=station["network"],
+                station=station["id"],
+                latitude=float(station["latitude"]),
+                longitude=float(station["longitude"]),
+                elev=float(station["elevation_in_m"]),
+                buried=float(station["local_depth_in_m"])))
     recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
     output_files = {}

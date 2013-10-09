@@ -108,7 +108,8 @@ class InputFileGenerator(object):
                         "longitude" not in station_item or \
                         "elevation_in_m" not in station_item or \
                         "id" not in station_item:
-                    msg = ("Each station dictionary needs to at least have "
+                    msg = (
+                        "Each station dictionary needs to at least have "
                         "'latitude', 'longitude', 'elevation_in_m', and 'id' "
                         "keys.")
                     raise ValueError(msg)
@@ -134,7 +135,7 @@ class InputFileGenerator(object):
                 for tr in st:
                     stat = {}
                     stat["id"] = "%s.%s" % (tr.stats.network,
-                        tr.stats.station)
+                                            tr.stats.station)
                     stat["latitude"] = float(tr.stats.sac.stla)
                     stat["longitude"] = float(tr.stats.sac.stlo)
                     stat["elevation_in_m"] = float(tr.stats.sac.stel)
@@ -188,7 +189,7 @@ class InputFileGenerator(object):
                     local_depth = blockette.local_depth
                     break
             if None in [network_code, station_code, latitude, longitude,
-                    elevation, local_depth]:
+                        elevation, local_depth]:
                 msg = "Could not parse %s" % station_item
                 raise ValueError(msg)
             stat = {
@@ -218,14 +219,14 @@ class InputFileGenerator(object):
         # Check if the corresponding write function exists.
         self.__find_write_scripts()
         if format not in list(self.__write_functions.keys()):
-            msg = "Format %s not found. Available formats: %s." % (format,
-                list(self.__write_functions.keys()))
+            msg = "Format %s not found. Available formats: %s." % (
+                format, list(self.__write_functions.keys()))
             raise ValueError(msg)
 
         # Make sure only unique stations and events are passed on. Sort
         # stations by id.
         self._stations = sorted(unique_list(self._stations),
-            key=lambda x: x["id"])
+                                key=lambda x: x["id"])
         self._events = unique_list(self._events)
 
         # Set the correct write function.
@@ -238,13 +239,13 @@ class InputFileGenerator(object):
             convert_fct, _ = value
             if config_name not in config:
                 msg = ("The input file generator for '%s' requires the "
-                    "configuration item '%s'.") % (format, config_name)
+                       "configuration item '%s'.") % (format, config_name)
                 raise ValueError(msg)
             try:
                 config[config_name] = convert_fct(config[config_name])
             except:
                 msg = ("The configuration value '%s' could not be converted "
-                    "to '%s'") % (config_name, str(convert_fct))
+                       "to '%s'") % (config_name, str(convert_fct))
                 raise ValueError(msg)
 
         # Now set the optional and default parameters.
@@ -256,13 +257,13 @@ class InputFileGenerator(object):
                 config[config_name] = convert_fct(default_value)
             except:
                 msg = ("The configuration value '%s' could not be converted "
-                    "to '%s'") % (config_name, str(convert_fct))
+                       "to '%s'") % (config_name, str(convert_fct))
                 raise ValueError(msg)
 
         # Call the write function. The write function is supposed to raise the
         # appropriate error in case anything is amiss.
         input_files = writer["function"](config=config, events=self._events,
-            stations=self._stations)
+                                         stations=self._stations)
 
         # If an output directory is given, it will be used.
         if output_dir:
@@ -293,14 +294,15 @@ class InputFileGenerator(object):
             inspect.currentframe())), "writers")
         files = glob.glob(os.path.join(write_dir, "write_*.py"))
         import_names = [os.path.splitext(os.path.basename(_i))[0]
-            for _i in files]
+                        for _i in files]
         write_functions = {}
         for name in import_names:
             module_name = "writers.%s" % name
             try:
-                module = __import__(module_name, globals(), locals(),
+                module = __import__(
+                    module_name, globals(), locals(),
                     ["write", "REQUIRED_CONFIGURATION",
-                    "DEFAULT_CONFIGURATION"], -1)
+                     "DEFAULT_CONFIGURATION"], -1)
                 function = module.write
                 required_config = module.REQUIRED_CONFIGURATION
                 default_config = module.DEFAULT_CONFIGURATION
@@ -313,7 +315,8 @@ class InputFileGenerator(object):
                 print(msg)
                 continue
             # Append the function and some more parameters.
-            write_functions[name[6:]] = {"function": function,
+            write_functions[name[6:]] = {
+                "function": function,
                 "required_config": required_config,
                 "default_config": default_config}
 
@@ -350,7 +353,7 @@ class InputFileGenerator(object):
         if not origin.latitude or not origin.longitude or not origin.depth \
                 or not origin.time:
             msg = ("Every event origin needs to have latitude, longitude, "
-                "depth and time")
+                   "depth and time")
             raise ValueError(msg)
         # The focal mechanism of course needs to have a moment tensor.
         if not foc_mec.moment_tensor or not foc_mec.moment_tensor.tensor:

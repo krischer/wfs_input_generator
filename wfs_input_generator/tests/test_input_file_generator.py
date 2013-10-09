@@ -35,7 +35,7 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         """
         if flake8.__version__ <= "2":
             msg = ("Module was designed to be tested with flake8 >= 2.0. "
-                "Please update.")
+                   "Please update.")
             warnings.warn(msg)
         test_dir = os.path.dirname(os.path.abspath(inspect.getfile(
             inspect.currentframe())))
@@ -47,7 +47,7 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         count = 0
         for dirpath, _, filenames in os.walk(root_dir):
             filenames = [_i for _i in filenames if
-                os.path.splitext(_i)[-1] == os.path.extsep + "py"]
+                         os.path.splitext(_i)[-1] == os.path.extsep + "py"]
             if not filenames:
                 continue
             for py_file in filenames:
@@ -86,16 +86,18 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         """
         seed_file_1 = os.path.join(self.data_dir, "dataless.seed.BW_FURT")
         seed_file_2 = os.path.join(self.data_dir, "dataless.seed.BW_RJOB")
-        station_1 = {"id": "BW.FURT",
-             "latitude": 48.162899,
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0,
-             "local_depth_in_m": 0.0}
-        station_2 = {"id": "BW.RJOB",
-             "latitude": 47.737167,
-             "longitude": 12.795714,
-             "elevation_in_m": 860.0,
-             "local_depth_in_m": 0.0}
+        station_1 = {
+            "id": "BW.FURT",
+            "latitude": 48.162899,
+            "longitude": 11.2752,
+            "elevation_in_m": 565.0,
+            "local_depth_in_m": 0.0}
+        station_2 = {
+            "id": "BW.RJOB",
+            "latitude": 47.737167,
+            "longitude": 12.795714,
+            "elevation_in_m": 860.0,
+            "local_depth_in_m": 0.0}
 
         # Try with SEED files first.
         gen1 = InputFileGenerator()
@@ -117,11 +119,12 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         """
         Checks that stations can also be passed as dictionaries.
         """
-        stations = [{"id": "BW.FURT",
-             "latitude": 48.162899,
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0,
-             "local_depth_in_m": 10.0},
+        stations = [{
+            "id": "BW.FURT",
+            "latitude": 48.162899,
+            "longitude": 11.2752,
+            "elevation_in_m": 565.0,
+            "local_depth_in_m": 10.0},
             {"id": "BW.RJOB",
              "latitude": 47.737167,
              "longitude": 12.795714,
@@ -135,10 +138,11 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         """
         Tests that the local depth will be set to zero if not given.
         """
-        stations = [{"id": "BW.FURT",
-             "latitude": 48.162899,
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0},
+        stations = [{
+            "id": "BW.FURT",
+            "latitude": 48.162899,
+            "longitude": 11.2752,
+            "elevation_in_m": 565.0},
             {"id": "BW.RJOB",
              "latitude": 47.737167,
              "longitude": 12.795714,
@@ -155,26 +159,31 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         Tests that some station fields need to be set.
         """
         # Station with missing id.
-        station_1 = {"latitude": 47.737167,
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0}
+        station_1 = {
+            "latitude": 47.737167,
+            "longitude": 11.2752,
+            "elevation_in_m": 565.0}
         # Station with missing latitude.
-        station_2 = {"id": "BW.FURT",
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0}
+        station_2 = {
+            "id": "BW.FURT",
+            "longitude": 11.2752,
+            "elevation_in_m": 565.0}
         # Station with missing longitude.
-        station_3 = {"id": "BW.FURT",
-             "latitude": 47.737167,
-             "elevation_in_m": 565.0}
+        station_3 = {
+            "id": "BW.FURT",
+            "latitude": 47.737167,
+            "elevation_in_m": 565.0}
         # Station with missing elevation.
-        station_4 = {"id": "BW.FURT",
-             "latitude": 47.737167,
-             "longitude": 11.2752}
+        station_4 = {
+            "id": "BW.FURT",
+            "latitude": 47.737167,
+            "longitude": 11.2752}
         # Station with everything necessary
-        station_5 = {"id": "BW.FURT",
-             "latitude": 47.737167,
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0}
+        station_5 = {
+            "id": "BW.FURT",
+            "latitude": 47.737167,
+            "longitude": 11.2752,
+            "elevation_in_m": 565.0}
 
         gen = InputFileGenerator()
         # The first 4 should raise a ValueError
@@ -190,22 +199,23 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         Any additional items in a station dict should be eliminated.
         """
         # Station with everything necessary
-        station = {"id": "BW.FURT",
-             "latitude": 47.737167,
-             "longitude": 11.2752,
-             "some_random_key": "also_has_a_field",
-             "elevation_in_m": 565.0,
-             "local_depth_in_m": 324.0,
-             "yes!": "no"}
+        station = {
+            "id": "BW.FURT",
+            "latitude": 47.737167,
+            "longitude": 11.2752,
+            "some_random_key": "also_has_a_field",
+            "elevation_in_m": 565.0,
+            "local_depth_in_m": 324.0,
+            "yes!": "no"}
 
         gen = InputFileGenerator()
         gen.add_stations(station)
         self.assertEqual(sorted(gen._stations),
-            sorted([{"id": "BW.FURT",
-             "latitude": 47.737167,
-             "longitude": 11.2752,
-             "elevation_in_m": 565.0,
-             "local_depth_in_m": 324.0}]))
+                         sorted([{"id": "BW.FURT",
+                                  "latitude": 47.737167,
+                                  "longitude": 11.2752,
+                                  "elevation_in_m": 565.0,
+                                  "local_depth_in_m": 324.0}]))
 
     def test_automatic_type_converstion_for_station_dict(self):
         """
@@ -213,10 +223,10 @@ class InputFileGeneratorTestCase(unittest.TestCase):
         """
         # All the coordinate values should be converted to floats.
         station = {"id": "BW.FURT",
-             "latitude": 1,
-             "longitude": 2,
-             "elevation_in_m": "3",
-             "local_depth_in_m": "4"}
+                   "latitude": 1,
+                   "longitude": 2,
+                   "elevation_in_m": "3",
+                   "local_depth_in_m": "4"}
         gen = InputFileGenerator()
         gen.add_stations(station)
         self.assertEqual(type(gen._stations[0]["latitude"]), float)

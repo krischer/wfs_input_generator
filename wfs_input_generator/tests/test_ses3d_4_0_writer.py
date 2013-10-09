@@ -111,7 +111,8 @@ class SES3D_4_0_WriterTestCase(unittest.TestCase):
             new_lines = input_files[filename].splitlines()
 
             if len(lines) != len(new_lines):
-                msg = ("File '%s' does not have the same number of lines "
+                msg = (
+                    "File '%s' does not have the same number of lines "
                     "for the real (%i lines) and generated (%i lines) "
                     "input file") % (filename, len(lines), len(new_lines))
                 raise AssertionError(msg)
@@ -127,7 +128,8 @@ class SES3D_4_0_WriterTestCase(unittest.TestCase):
         """
         Tests that all files have an empty last line.
         """
-        station = {"id": "KO.ADVT",
+        station = {
+            "id": "KO.ADVT",
             "latitude": 41.0,
             "longitude": 33.1234,
             "elevation_in_m": 10}

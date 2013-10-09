@@ -1,34 +1,39 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Functions to rotate vectors, seismograms and moment tensors on a spherical
-body, e.g. the Earth.
+A collection of functions to rotate vectors, seismograms and moment tensors on
+a spherical body, e.g. the Earth.
 
-.. note::
-    **Notes on the used coordinate system:**
 
-    Latitude/Longitude are the usual ones used on Earth.
+.. note:: **On the used coordinate system**
 
-    It is a right handed coordinate system with the origin at the center of the
-    earth. The z-axis points directly at the North Pole and the x-axis points
-    at Latitude 0.0/Longitude 0.0, e.g. the Greenwich meridian at the equator.
-    The y-axis therefore points at (0.0/90.0).
+    Latitude and longitude are natural geographical coordinates used on Earth.
 
-    Theta is the colatitude, e.g. 90.0 - latitude and is the angle from the
-    z-axis.  Phi is the longitude and the angle from the x-axis towards the
-    y-axis, a.k.a the azimuth angle. These are also the generally used
-    spherical coordinates.
+    The coordinate system is right handed with the origin at the center of the
+    Earth. The z-axis points directly at the North Pole and the x-axis points
+    at (latitude 0.0/longitude 0.0), e.g. the Greenwich meridian at the
+    equator. The y-axis therefore points at (latitude 0.0/longitue 90.0), e.g.
+    somewhere close to Sumatra.
+
+    𝜃 (theta) is the colatitude, e.g. 90.0 - latitude and is the angle from
+    the z-axis.  𝜑 (phi) is the longitude and the angle from the x-axis
+    towards the y-axis, a.k.a the azimuth angle. These are also the generally
+    used spherical coordinates.
 
     All rotation axes have to be given as [x, y, z] in the just described
     coordinate system and all rotation angles have to given as degree. A
     positive rotation will rotate clockwise when looking in the direction of
     the rotation axis.
 
-:copyright:
-Lion Krischer (krischer@geophysik.uni-muenchen.de), 2012 - 2013
-:license:
-GNU Lesser General Public License, Version 3
-(http://www.gnu.org/copyleft/lesser.html)
+    For convenience reasons, most function in this module work with coordinates
+    given in latitude and longitude.
+
+
+:copyright: Lion Krischer (krischer@geophysik.uni-muenchen.de), 2012-2013
+
+
+:license: GNU General Public License, Version 3
+    (http://www.gnu.org/copyleft/gpl.html)
 """
 import numpy as np
 
@@ -83,6 +88,8 @@ def lat2colat(lat):
     45.0
     >>> lat2colat(90)
     0.0
+
+    :param lat: The latitude.
     """
     return 90.0 - lat
 
@@ -102,6 +109,8 @@ def colat2lat(colat):
     45.0
     >>> colat2lat(0.0)
     90.0
+
+    :param colat: The colatitude.
     """
     return -1.0 * (colat - 90.0)
 
@@ -112,14 +121,14 @@ def rotate_vector(vector, rotation_axis, angle):
 
     :param vector: The vector to be rotated given as [x, y, z].
     :param rotation_axis: The axis to be rotating around given as [x, y, z].
-    :angle: The rotation angle in degree.
+    :param angle: The rotation angle in degree.
     """
     # Convert angle to radian.
     angle = np.deg2rad(angle)
 
     # Normalize the rotation_axis
     rotation_axis = map(float, rotation_axis)
-    rotation_axis = rotation_axis / np.linalg.norm(rotation_axis)
+    rotation_axis /= np.linalg.norm(rotation_axis)
 
     # Use c1, c2, and c3 as shortcuts for the rotation axis.
     c1 = rotation_axis[0]
@@ -161,12 +170,12 @@ def get_spherical_unit_vectors(lat, lon):
     colat, lon = map(np.deg2rad, [colat, lon])
 
     e_theta = _get_vector(np.cos(lon) * np.cos(colat),
-                         np.sin(lon) * np.cos(colat),
-                         -np.sin(colat))
+                          np.sin(lon) * np.cos(colat),
+                          -np.sin(colat))
     e_phi = _get_vector(-np.sin(lon), np.cos(lon), 0.0)
     e_r = _get_vector(np.cos(lon) * np.sin(colat),
-                     np.sin(lon) * np.sin(colat),
-                     np.cos(colat))
+                      np.sin(lon) * np.sin(colat),
+                      np.cos(colat))
     return e_theta, e_phi, e_r
 
 
@@ -178,8 +187,8 @@ def rotate_lat_lon(lat, lon, rotation_axis, angle):
 
     :param lat: Latitude of original point
     :param lon: Longitude of original point
-    :rotation_axis: Rotation axis specified as [x, y, z].
-    :angle: Rotation angle in degree.
+    :param rotation_axis: Rotation axis specified as [x, y, z].
+    :param angle: Rotation angle in degree.
     """
     # Convert to xyz. Do the calculation on the unit sphere as the radius does
     # not matter.
@@ -219,6 +228,10 @@ def xyz_to_lat_lon_radius(*args):
 def lat_lon_radius_to_xyz(lat, lon, r):
     """
     Converts latitude, longitude and radius to x, y, and z.
+
+    :param lat: The latitude.
+    :param lon:  The longitude.
+    :param r: The radius.
     """
     colat = lat2colat(lat)
     # To radian
@@ -266,7 +279,7 @@ def _get_rotation_and_base_transfer_matrix(lat, lon, rotation_axis, angle):
     # system.
     e_theta, e_phi, e_r = get_spherical_unit_vectors(lat, lon)
     e_theta_new, e_phi_new, e_r_new = get_spherical_unit_vectors(lat_new,
-        lon_new)
+                                                                 lon_new)
 
     # Rotate the new unit vectors in the opposite direction to simulate a
     # rotation in the wanted direction.
@@ -281,28 +294,32 @@ def _get_rotation_and_base_transfer_matrix(lat, lon, rotation_axis, angle):
             np.dot(e_theta_new, e_r)],
         [np.dot(e_phi_new, e_theta), np.dot(e_phi_new, e_phi),
             np.dot(e_phi_new, e_r)],
-        [np.dot(e_r_new, e_theta), np.dot(e_r_new, e_phi),
-            np.dot(e_r_new, e_r)]))
+        [np.dot(e_r_new, e_theta), np.dot(e_r_new, e_phi), np.dot(e_r_new,
+                                                                  e_r)]))
     return transfer_matrix
 
 
 def rotate_moment_tensor(Mrr, Mtt, Mpp, Mrt, Mrp, Mtp, lat, lon, rotation_axis,
-        angle):
+                         angle):
     """
     Rotates a moment tensor, given in spherical coordinates, located at lat/lon
     around the rotation axis and simultaneously performs a base change from the
     spherical unit vectors at lat/lon to the unit vectors at the new
     coordinates.
 
-    :param Mrr, Mtt, Mpp, Mrt, Mrp, Mtp: The six independent components of a
-        moment tensor.
+    :param Mrr: A moment tensor component.
+    :param Mtt: A moment tensor component.
+    :param Mpp: A moment tensor component.
+    :param Mrt: A moment tensor component.
+    :param Mrp: A moment tensor component.
+    :param Mtp: A moment tensor component.
     :param lat: Latitude of the recording point.
     :param lon: Longitude of the recording point.
     :param rotation_axis: Rotation axis given as [x, y, z].
     :param angle: Rotation angle in degree.
     """
-    transfer_matrix = _get_rotation_and_base_transfer_matrix(lat, lon,
-        rotation_axis, angle)
+    transfer_matrix = _get_rotation_and_base_transfer_matrix(
+        lat, lon, rotation_axis, angle)
     # Assemble the second order tensor.
     mt = np.matrix(([Mtt, Mtp, Mrt],
                     [Mtp, Mpp, Mrp],
@@ -316,7 +333,7 @@ def rotate_moment_tensor(Mrr, Mtt, Mpp, Mrt, Mrp, Mtp, lat, lon, rotation_axis,
 
 
 def rotate_data(north_data, east_data, vertical_data, lat, lon, rotation_axis,
-        angle):
+                angle):
     """
     Rotates three component data recorded at lat/lon a certain amount of
     degrees around a given rotation axis.
@@ -330,14 +347,14 @@ def rotate_data(north_data, east_data, vertical_data, lat, lon, rotation_axis,
     :param rotation_axis: Rotation axis given as [x, y, z].
     :param angle: Rotation angle in degree.
     """
-    transfer_matrix = _get_rotation_and_base_transfer_matrix(lat, lon,
-        rotation_axis, angle)
+    transfer_matrix = _get_rotation_and_base_transfer_matrix(
+        lat, lon, rotation_axis, angle)
 
     # Apply the transfer matrix. Invert north data because they have
     # to point in the other direction to be consistent with the spherical
     # coordinates.
     new_data = np.array(transfer_matrix.dot([-1.0 * north_data,
-        east_data, vertical_data]))
+                                             east_data, vertical_data]))
 
     # Return the transferred data arrays. Again negate north data.
     north_data = -1.0 * new_data[0]
@@ -346,316 +363,90 @@ def rotate_data(north_data, east_data, vertical_data, lat, lon, rotation_axis,
     return north_data, east_data, vertical_data
 
 
-###############################################################################
-## Temporarily place the tests here.
-###############################################################################
+def get_border_latlng_list(
+        min_lat, max_lat, min_lng, max_lng, number_of_points_per_side=25,
+        rotation_axis=(0, 0, 1), rotation_angle_in_degree=0):
+    """
+    Helper function taking a spherical section defined by latitudinal and
+    longitudal extension, rotate it around the given axis and rotation angle
+    and return a list of points outlining the region. Useful for plotting.
 
-import unittest
+    :param min_lat: The minimum latitude.
+    :param max_lat: The maximum latitude.
+    :param min_lng: The minimum longitude.
+    :param max_lng: The maximum longitude.
+    :param number_of_points_per_side:  The number of points per side desired.
+    :param rotation_axis: The rotation axis. Optional.
+    :param rotation_angle_in_degree: The rotation angle in degrees. Optional.
+    """
+    north_border = np.empty((number_of_points_per_side, 2))
+    south_border = np.empty((number_of_points_per_side, 2))
+    east_border = np.empty((number_of_points_per_side, 2))
+    west_border = np.empty((number_of_points_per_side, 2))
+
+    north_border[:, 0] = min_lat
+    north_border[:, 1] = np.linspace(min_lng, max_lng,
+                                     number_of_points_per_side)
+
+    south_border[:, 0] = max_lat
+    south_border[:, 1] = np.linspace(max_lng, min_lng,
+                                     number_of_points_per_side)
+
+    east_border[:, 0] = np.linspace(min_lat, max_lat,
+                                    number_of_points_per_side)
+    east_border[:, 1] = max_lng
+
+    west_border[:, 0] = np.linspace(max_lat, min_lat,
+                                    number_of_points_per_side)
+    west_border[:, 1] = min_lng
+
+    # Rotate everything.
+    for border in [north_border, south_border, east_border, west_border]:
+        for _i in xrange(number_of_points_per_side):
+            border[_i, 0], border[_i, 1] = rotate_lat_lon(
+                border[_i, 0], border[_i, 1], rotation_axis,
+                rotation_angle_in_degree)
+
+    # Take care to only use every corner once.
+    borders = np.concatenate([north_border, east_border[1:], south_border[1:],
+                              west_border[1:]])
+    borders = list(borders)
+    borders = [list(_i) for _i in borders]
+    return borders
 
 
-class RotationsTestCase(unittest.TestCase):
-    def test_rotate_vector(self):
-        """
-        Test the basic vector rotation around an arbitrary axis.
-        """
-        np.testing.assert_array_almost_equal(
-            rotate_vector([0, 0, 1], [0, 1, 0], 90),
-            np.array([1.0, 0.0, 0.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([0, 0, 1], [0, 1, 0], 180),
-            np.array([0.0, 0.0, -1.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([0, 0, 1], [0, 1, 0], 270),
-            np.array([-1.0, 0.0, 0.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([0, 0, 1], [0, 1, 0], 360),
-            np.array([0.0, 0.0, 1.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([0, 0, 1], [0, 1, 0], 45),
-            np.array([np.sqrt(0.5), 0.0, np.sqrt(0.5)]), decimal=10)
-        # Use a different vector and rotation angle.
-        np.testing.assert_array_almost_equal(
-            rotate_vector([1, 1, 1], [1, 0, 0], 90),
-            np.array([1.0, -1.0, 1.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([1, 1, 1], [1, 0, 0], 180),
-            np.array([1.0, -1.0, -1.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([1, 1, 1], [1, 0, 0], 270),
-            np.array([1.0, 1.0, -1.0]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([1, 1, 1], [1, 0, 0], 360),
-            np.array([1.0, 1.0, 1.0]), decimal=10)
-        # Some more arbitrary rotations.
-        np.testing.assert_array_almost_equal(
-            rotate_vector([234.3, -5645.4, 345.45], [1, 0, 0], 360),
-            np.array([234.3, -5645.4, 345.45]), decimal=10)
-        np.testing.assert_array_almost_equal(
-            rotate_vector([234.3, -5645.4, 345.45], [1, 0, 0], 180),
-            np.array([234.3, 5645.4, -345.45]), decimal=10)
+def get_max_extention_of_domain(min_lat, max_lat, min_lng, max_lng,
+                                rotation_axis=(0, 0, 1),
+                                rotation_angle_in_degree=0):
+    """
+    Helper function getting the maximum extends of a rotated domain.
 
-    def test_get_spherical_unit_vectors(self):
-        """
-        Tests the get_spherical_unit_vectors() function.
-        """
-        # At 0, 0
-        e_theta, e_phi, e_r = get_spherical_unit_vectors(0.0, 0.0)
-        np.testing.assert_array_almost_equal(
-            e_theta, np.array([0, 0, -1]))
-        np.testing.assert_array_almost_equal(
-            e_phi, np.array([0, 1, 0]))
-        np.testing.assert_array_almost_equal(
-            e_r, np.array([1, 0, 0]))
-        # At the north pole
-        e_theta, e_phi, e_r = get_spherical_unit_vectors(90.0, 0.0)
-        np.testing.assert_array_almost_equal(
-            e_theta, np.array([1, 0, 0]))
-        np.testing.assert_array_almost_equal(
-            e_phi, np.array([0, 1, 0]))
-        np.testing.assert_array_almost_equal(
-            e_r, np.array([0, 0, 1]))
-        # At the south pole
-        e_theta, e_phi, e_r = get_spherical_unit_vectors(-90.0, 0.0)
-        np.testing.assert_array_almost_equal(
-            e_theta, np.array([-1, 0, 0]))
-        np.testing.assert_array_almost_equal(
-            e_phi, np.array([0, 1, 0]))
-        np.testing.assert_array_almost_equal(
-            e_r, np.array([0, 0, -1]))
-        # At the "east pole"
-        e_theta, e_phi, e_r = get_spherical_unit_vectors(0.0, 90.0)
-        np.testing.assert_array_almost_equal(
-            e_theta, np.array([0, 0, -1]))
-        np.testing.assert_array_almost_equal(
-            e_phi, np.array([-1, 0, 0]))
-        np.testing.assert_array_almost_equal(
-            e_r, np.array([0, 1, 0]))
-        # At the "west pole"
-        e_theta, e_phi, e_r = get_spherical_unit_vectors(0.0, -90.0)
-        np.testing.assert_array_almost_equal(
-            e_theta, np.array([0, 0, -1]))
-        np.testing.assert_array_almost_equal(
-            e_phi, np.array([1, 0, 0]))
-        np.testing.assert_array_almost_equal(
-            e_r, np.array([0, -1, 0]))
+    Returns a dictionary with the following keys:
+        * minimum_latitude
+        * maximum_latitude
+        * minimum_longitude
+        * maximum_longitude
 
-    def test_lat_lon_radius_to_xyz(self):
-        """
-        Test the lat_lon_radius_to_xyz() function.
-        """
-        # For (0/0)
-        np.testing.assert_array_almost_equal(
-            lat_lon_radius_to_xyz(0.0, 0.0, 1.0),
-            np.array([1.0, 0.0, 0.0]))
-        # At the North Pole
-        np.testing.assert_array_almost_equal(
-            lat_lon_radius_to_xyz(90.0, 0.0, 1.0),
-            np.array([0.0, 0.0, 1.0]))
-        # At the South Pole
-        np.testing.assert_array_almost_equal(
-            lat_lon_radius_to_xyz(-90.0, 0.0, 1.0),
-            np.array([0.0, 0.0, -1.0]))
-        # At the "West Pole"
-        np.testing.assert_array_almost_equal(
-            lat_lon_radius_to_xyz(0.0, -90.0, 1.0),
-            np.array([0.0, -1.0, 0.0]))
-        # At the "East Pole"
-        np.testing.assert_array_almost_equal(
-            lat_lon_radius_to_xyz(0.0, 90.0, 1.0),
-            np.array([0.0, 1.0, 0.0]))
-
-    def test_xyz_to_lat_lon_radius(self):
-        """
-        Test the xyz_to_lat_lon_radius() function.
-        """
-        # For (0/0)
-        lat, lon, radius = xyz_to_lat_lon_radius(1.0, 0.0, 0.0)
-        self.assertAlmostEqual(lat, 0.0)
-        self.assertAlmostEqual(lon, 0.0)
-        self.assertAlmostEqual(radius, 1.0)
-        # At the North Pole
-        lat, lon, radius = xyz_to_lat_lon_radius(0.0, 0.0, 1.0)
-        self.assertAlmostEqual(lat, 90.0)
-        self.assertAlmostEqual(lon, 0.0)
-        self.assertAlmostEqual(radius, 1.0)
-        # At the South Pole
-        lat, lon, radius = xyz_to_lat_lon_radius(0.0, 0.0, -1.0)
-        self.assertAlmostEqual(lat, -90.0)
-        self.assertAlmostEqual(lon, 0.0)
-        self.assertAlmostEqual(radius, 1.0)
-        # At the "West Pole"
-        lat, lon, radius = xyz_to_lat_lon_radius(0.0, -1.0, 0.0)
-        self.assertAlmostEqual(lat, 0.0)
-        self.assertAlmostEqual(lon, -90.0)
-        self.assertAlmostEqual(radius, 1.0)
-        # At the "East Pole"
-        lat, lon, radius = xyz_to_lat_lon_radius(0.0, 1.0, 0.0)
-        self.assertAlmostEqual(lat, 0.0)
-        self.assertAlmostEqual(lon, 90.0)
-        self.assertAlmostEqual(radius, 1.0)
-
-    def test_rotate_lat_lon(self):
-        """
-        Test the lat/lon rotation on a sphere.
-        """
-        # Rotate north pole to equator.
-        lat_new, lon_new = rotate_lat_lon(90.0, 0.0, [0, 1, 0], 90)
-        self.assertAlmostEqual(lat_new, 0.0)
-        self.assertAlmostEqual(lon_new, 0.0)
-        # Rotate north pole to the south pole.
-        lat_new, lon_new = rotate_lat_lon(90.0, 0.0, [0, 1, 0], 180)
-        self.assertAlmostEqual(lat_new, -90.0)
-        self.assertAlmostEqual(lon_new, 0.0)
-        # Rotate north pole to equator, the other way round.
-        lat_new, lon_new = rotate_lat_lon(90.0, 0.0, [0, 1, 0], -90)
-        self.assertAlmostEqual(lat_new, 0.0)
-        self.assertAlmostEqual(lon_new, 180.0)
-        # Rotate (0/0) to the east
-        lat_new, lon_new = rotate_lat_lon(0.0, 0.0, [0, 0, 1], 90)
-        self.assertAlmostEqual(lat_new, 0.0)
-        self.assertAlmostEqual(lon_new, 90.0)
-        # Rotate (0/0) to the west
-        lat_new, lon_new = rotate_lat_lon(0.0, 0.0, [0, 0, 1], -90)
-        self.assertAlmostEqual(lat_new, 0.0)
-        self.assertAlmostEqual(lon_new, -90.0)
-        # Rotate the west to the South Pole. The longitude can not be tested
-        # reliably because is varies infinitly fast directly at a pole.
-        lat_new, lon_new = rotate_lat_lon(0.0, -90.0, [1, 0, 0], 90)
-        self.assertAlmostEqual(lat_new, -90.0)
-
-    def test_rotate_data(self):
-        """
-        Test the rotate_data() function.
-        """
-        north_data = np.linspace(0, 10, 20)
-        east_data = np.linspace(33, 44, 20)
-        vertical_data = np.linspace(-12, -34, 20)
-        # A rotation around the rotation axis of the earth with a source at the
-        # equator should not change anything.
-        new_north_data, new_east_data, new_vertical_data = \
-            rotate_data(north_data, east_data, vertical_data, 0.0, 123.45,
-                [0, 0, 1], 77.7)
-        np.testing.assert_array_almost_equal(north_data, new_north_data, 5)
-        np.testing.assert_array_almost_equal(east_data, new_east_data, 5)
-        np.testing.assert_array_almost_equal(vertical_data, new_vertical_data,
-            5)
-        # A rotation around the rotation axis of the earth should not change
-        # the vertical component.
-        new_north_data, new_east_data, new_vertical_data = \
-            rotate_data(north_data, east_data, vertical_data, -55.66, 123.45,
-                [0, 0, 1], 77.7)
-        np.testing.assert_array_almost_equal(vertical_data, new_vertical_data,
-            5)
-        # The same is true for any other rotation with an axis through the
-        # center of the earth.
-        new_north_data, new_east_data, new_vertical_data = \
-            rotate_data(north_data, east_data, vertical_data, -55.66, 123.45,
-                [123, 345.0, 0.234], 77.7)
-        np.testing.assert_array_almost_equal(vertical_data, new_vertical_data,
-            5)
-        # Any data along the Greenwich meridian and the opposite one should not
-        # change with a rotation around the "East Pole" or the "West Pole".
-        new_north_data, new_east_data, new_vertical_data = \
-            rotate_data(north_data, east_data, vertical_data, 0.0, 0.0,
-                [0, 1, 0], 55.0)
-        np.testing.assert_array_almost_equal(north_data, new_north_data, 5)
-        np.testing.assert_array_almost_equal(east_data, new_east_data, 5)
-        np.testing.assert_array_almost_equal(vertical_data, new_vertical_data,
-            5)
-        new_north_data, new_east_data, new_vertical_data = \
-            rotate_data(north_data, east_data, vertical_data, 0.0, 0.0,
-                [0, -1, 0], 55.0)
-        np.testing.assert_array_almost_equal(north_data, new_north_data, 5)
-        np.testing.assert_array_almost_equal(east_data, new_east_data, 5)
-        np.testing.assert_array_almost_equal(vertical_data, new_vertical_data,
-            5)
-        # A rotation of one hundred degree around the x-axis inverts (in this
-        # case) north and east components.
-        new_north_data, new_east_data, new_vertical_data = \
-            rotate_data(north_data, east_data, vertical_data, 0.0, 90.0,
-                [1, 0, 0], 180.0)
-        np.testing.assert_array_almost_equal(north_data, -new_north_data, 5)
-        np.testing.assert_array_almost_equal(east_data, -new_east_data, 5)
-        np.testing.assert_array_almost_equal(vertical_data, new_vertical_data,
-            5)
-
-    def test_rotate_moment_tensor(self):
-        """
-        Tests the moment tensor rotation.
-        """
-        # A full rotation should not change anything.
-        Mrr, Mtt, Mpp, Mrt, Mrp, Mtp = rotate_moment_tensor(1, 2, 3, 4,
-            5, 6, 7, 8, [9, 10, 11], 360)
-        self.assertAlmostEqual(Mrr, 1.0, 6)
-        self.assertAlmostEqual(Mtt, 2.0, 6)
-        self.assertAlmostEqual(Mpp, 3.0, 6)
-        self.assertAlmostEqual(Mrt, 4.0, 6)
-        self.assertAlmostEqual(Mrp, 5.0, 6)
-        self.assertAlmostEqual(Mtp, 6.0, 6)
-
-        # The following ones are tested against a well proven Matlab script by
-        # Andreas Fichtner.
-        Mrr, Mtt, Mpp, Mrt, Mrp, Mtp = rotate_moment_tensor(
-            -0.704, 0.071, 0.632, 0.226, -0.611, 3.290,
-            colat2lat(26.08), -21.17,
-            [0, 1, 0], 57.5)
-        Mrr_new, Mtt_new, Mpp_new, Mrt_new, Mrp_new, Mtp_new = \
-            [-0.70400000, 2.04919171, -1.34619171, 0.02718681, -0.65089007,
-            2.83207047]
-        self.assertAlmostEqual(Mrr, Mrr_new, 6)
-        self.assertAlmostEqual(Mtt, Mtt_new, 6)
-        self.assertAlmostEqual(Mpp, Mpp_new, 6)
-        self.assertAlmostEqual(Mrt, Mrt_new, 6)
-        self.assertAlmostEqual(Mrp, Mrp_new, 6)
-        self.assertAlmostEqual(Mtp, Mtp_new, 6)
-        # Another example.
-        Mrr, Mtt, Mpp, Mrt, Mrp, Mtp = rotate_moment_tensor(
-            -0.818, -1.300, 2.120, 1.720, 2.290, -0.081,
-            colat2lat(53.51), -9.87,
-            [np.sqrt(2) / 2, -np.sqrt(2) / 2, 0], -31.34)
-        Mrr_new, Mtt_new, Mpp_new, Mrt_new, Mrp_new, Mtp_new = \
-            [-0.81800000, -0.69772178, 1.51772178, 2.55423451, 1.29552541,
-            1.30522545]
-        self.assertAlmostEqual(Mrr, Mrr_new, 6)
-        self.assertAlmostEqual(Mtt, Mtt_new, 6)
-        self.assertAlmostEqual(Mpp, Mpp_new, 6)
-        self.assertAlmostEqual(Mrt, Mrt_new, 6)
-        self.assertAlmostEqual(Mrp, Mrp_new, 6)
-        self.assertAlmostEqual(Mtp, Mtp_new, 6)
-        # The same as before, but with a non-normalized axis. Should work just
-        # as well.
-        Mrr, Mtt, Mpp, Mrt, Mrp, Mtp = rotate_moment_tensor(
-            -0.818, -1.300, 2.120, 1.720, 2.290, -0.081,
-            colat2lat(53.51), -9.87,
-            [11.12, -11.12, 0], -31.34)
-        Mrr_new, Mtt_new, Mpp_new, Mrt_new, Mrp_new, Mtp_new = \
-            [-0.81800000, -0.69772178, 1.51772178, 2.55423451, 1.29552541,
-            1.30522545]
-        self.assertAlmostEqual(Mrr, Mrr_new, 6)
-        self.assertAlmostEqual(Mtt, Mtt_new, 6)
-        self.assertAlmostEqual(Mpp, Mpp_new, 6)
-        self.assertAlmostEqual(Mrt, Mrt_new, 6)
-        self.assertAlmostEqual(Mrp, Mrp_new, 6)
-        self.assertAlmostEqual(Mtp, Mtp_new, 6)
-        # One more.
-        Mrr, Mtt, Mpp, Mrt, Mrp, Mtp = rotate_moment_tensor(
-            0.952, -1.030, 0.076, 0.226, -0.040, -0.165,
-            colat2lat(63.34), 55.80,
-            [np.sqrt(3) / 3, -np.sqrt(3) / 3, -np.sqrt(3) / 3], 123.45)
-        Mrr_new, Mtt_new, Mpp_new, Mrt_new, Mrp_new, Mtp_new = \
-            [0.95200000, -0.41458722, -0.53941278, -0.09170855, 0.21039378,
-            0.57370606]
-        self.assertAlmostEqual(Mrr, Mrr_new, 6)
-        self.assertAlmostEqual(Mtt, Mtt_new, 6)
-        self.assertAlmostEqual(Mpp, Mpp_new, 6)
-        self.assertAlmostEqual(Mrt, Mrt_new, 6)
-        self.assertAlmostEqual(Mrp, Mrp_new, 6)
-        self.assertAlmostEqual(Mtp, Mtp_new, 6)
-
+    :param min_lat: The minimum latitude.
+    :param max_lat: The maximum latitude.
+    :param min_lng: The minimum longitude.
+    :param max_lng: The maximum longitude.
+    :param rotation_axis: The rotation axis in degree.
+    :param rotation_angle_in_degree: The rotation angle in degree.
+    """
+    border = get_border_latlng_list(
+        min_lat, max_lat, min_lng, max_lng, number_of_points_per_side=25,
+        rotation_axis=rotation_axis,
+        rotation_angle_in_degree=rotation_angle_in_degree)
+    border = np.array(border)
+    lats = border[:, 0]
+    lngs = border[:, 1]
+    return {
+        "minimum_latitude": lats.min(),
+        "maximum_latitude": lats.max(),
+        "minimum_longitude": lngs.min(),
+        "maximum_longitude": lngs.max()}
 
 if __name__ == '__main__':
-    # Run the doctests.
     import doctest
-    # Run the unittests.
     doctest.testmod()
-    unittest.main()

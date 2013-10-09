@@ -32,11 +32,11 @@ REQUIRED_CONFIGURATION = {
     "mesh_min_depth_in_km": (float, "The minimum depth of the mesh in km"),
     "mesh_max_depth_in_km": (float, "The maximum depth of the mesh in km"),
     "nx_global": (int, "Number of elements in theta directions. Please refer "
-        "to the SES3D manual for a more extensive description"),
+                  "to the SES3D manual for a more extensive description"),
     "ny_global": (int, "Number of elements in phi directions. Please refer "
-        "to the SES3D manual for a more extensive description"),
+                  "to the SES3D manual for a more extensive description"),
     "nz_global": (int, "Number of elements in r directions. Please refer "
-        "to the SES3D manual for a more extensive description"),
+                  "to the SES3D manual for a more extensive description"),
     "px": (int, "Number of processors in theta direction"),
     "py": (int, "Number of processors in phi direction"),
     "pz": (int, "Number of processors in r direction"),
@@ -49,31 +49,38 @@ REQUIRED_CONFIGURATION = {
 # one being the actual default value.
 DEFAULT_CONFIGURATION = {
     "event_tag": ("1", str, "The name of the event. Should be numeric for "
-        "now."),
+                  "now."),
     "is_dissipative": (True, bool, "Dissipative simulation or not"),
     "output_displacement": (False, bool, "Output the displacement field"),
-    "displacement_snapshot_sampling":
-        (10000, int, "Sampling rate of output displacement field"),
-    "lagrange_polynomial_degree":
-        (4, int, "Degree of the Lagrange Polynomials"),
-    "simulation_type": ("normal simulation", str, "The type of simulation to "
+    "displacement_snapshot_sampling": (
+        10000, int, "Sampling rate of output displacement field"),
+    "lagrange_polynomial_degree": (
+        4, int, "Degree of the Lagrange Polynomials"),
+    "simulation_type": (
+        "normal simulation", str, "The type of simulation to "
         "perform. One of 'normal simulation', 'adjoint forward', "
         "'adjoint backward'"),
-    "adjoint_forward_sampling_rate": (15, int, "The sampling rate of the "
-        "adjoint forward field for an ajoint simulation run"),
-    "adjoint_forward_wavefield_output_folder": ("", str,
-        "The output folder of the adjoint forward field if requested. If "
-        "empty, it will be set to a subfolder of the the output directory."),
-    "rotation_angle_in_degree": (0.0, float,
-        "A possible rotation of the mesh. All data will be rotated in the "
-        "opposite way. Useful for simulation close to the equator."),
-    "rotation_axis": ([0.0, 0.0, 1.0], lambda x: map(float, x),
+    "adjoint_forward_sampling_rate": (
+        15, int, "The sampling rate of the adjoint forward field for an "
+        "adjoint simulation run"),
+    "adjoint_forward_wavefield_output_folder": (
+        "", str, "The output folder of the adjoint forward field if "
+        "requested. If empty, it will be set to a subfolder of the the output "
+        "directory."),
+    "rotation_angle_in_degree": (
+        0.0, float, "A possible rotation of the mesh. All data will be "
+        "rotated in the opposite way. Useful for simulation close to the "
+        "equator."),
+    "rotation_axis": (
+        [0.0, 0.0, 1.0], lambda x: map(float, x),
         "The rotation angle given as [x, y, z] in correspondance with the "
         "SES3D coordinate system."),
-    "Q_model_relaxation_times": ([1.7308, 14.3961, 22.9973],
+    "Q_model_relaxation_times": (
+        [1.7308, 14.3961, 22.9973],
         lambda x: map(float, x),
         "The relaxations times for the different Q model mechanisms"),
-    "Q_model_weights_of_relaxation_mechanisms": ([2.5100, 2.4354, 0.0879],
+    "Q_model_weights_of_relaxation_mechanisms": (
+        [2.5100, 2.4354, 0.0879],
         lambda x: map(float, x),
         "The weights for relaxations mechanisms for the Q model mechanisms")
 }
@@ -103,7 +110,7 @@ def write(config, events, stations):
 
     # Map and assert the simulation type.
     sim_map = {"normal simulation": 0, "adjoint forward": 1,
-        "adjoint reverse": 2}
+               "adjoint reverse": 2}
 
     if config.simulation_type not in sim_map:
         msg = "simulation_type needs to be on of %s." % \
@@ -133,7 +140,8 @@ def write(config, events, stations):
 
     # Rotate coordinates and moment tensor if requested.
     if config.rotation_angle_in_degree:
-        lat, lng = rotations.rotate_lat_lon(event["latitude"],
+        lat, lng = rotations.rotate_lat_lon(
+            event["latitude"],
             event["longitude"], config.rotation_axis,
             config.rotation_angle_in_degree)
         m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = rotations.rotate_moment_tensor(
@@ -143,8 +151,9 @@ def write(config, events, stations):
             config.rotation_angle_in_degree)
     else:
         lat, lng = (event["latitude"], event["longitude"])
-        m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (event["m_rr"], event["m_tt"],
-            event["m_pp"], event["m_rt"], event["m_rp"], event["m_tp"])
+        m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (
+            event["m_rr"], event["m_tt"], event["m_pp"], event["m_rt"],
+            event["m_rp"], event["m_tp"])
 
     # Check if the event still lies within bounds. Otherwise the whole
     # simulation does not make much sense.
@@ -279,9 +288,9 @@ def write(config, events, stations):
     for station in stations:
         # Also rotate each station if desired.
         if config.rotation_angle_in_degree:
-            lat, lng = rotations.rotate_lat_lon(station["latitude"],
-                station["longitude"], config.rotation_axis,
-                config.rotation_angle_in_degree)
+            lat, lng = rotations.rotate_lat_lon(
+                station["latitude"], station["longitude"],
+                config.rotation_axis, config.rotation_angle_in_degree)
         else:
             lat, lng = (station["latitude"], station["longitude"])
 
@@ -293,15 +302,16 @@ def write(config, events, stations):
             continue
 
         depth = -1.0 * (station["elevation_in_m"] -
-            station["local_depth_in_m"])
+                        station["local_depth_in_m"])
         if depth < 0:
             depth = 0.0
         recfile_parts.append("{network:_<2s}.{station:_<5s}.___".format(
             network=station["id"].split(".")[0],
             station=station["id"].split(".")[1]))
-        recfile_parts.append("{colatitude:.6f} {longitude:.6f} {depth:.1f}"
+        recfile_parts.append(
+            "{colatitude:.6f} {longitude:.6f} {depth:.1f}"
             .format(colatitude=rotations.lat2colat(float(lat)),
-                longitude=float(lng), depth=float(depth)))
+                    longitude=float(lng), depth=float(depth)))
     recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
     # Put it in the collected dictionary
@@ -317,10 +327,11 @@ def write(config, events, stations):
         "{relax_times}\n"
         "WEIGHTS OF RELAXATION MECHANISMS =========\n"
         "{relax_weights}").format(
-            relax_times="\n".join(["%.6f" % _i for _i in
-                config.Q_model_relaxation_times]),
-            relax_weights="\n".join(["%.6f" % _i for _i in
-                config.Q_model_weights_of_relaxation_mechanisms]))
+        relax_times="\n".join(["%.6f" % _i for _i in
+                               config.Q_model_relaxation_times]),
+        relax_weights="\n".join([
+            "%.6f" % _i for _i in
+            config.Q_model_weights_of_relaxation_mechanisms]))
 
     output_files["relax"] = relax_file
 
@@ -329,7 +340,7 @@ def write(config, events, stations):
     #==========================================================================
     # Also write the source time function.
     output_files["stf"] = "\n".join(["%e" % _i for
-        _i in config.source_time_function])
+                                     _i in config.source_time_function])
 
     #==========================================================================
     # finalize
