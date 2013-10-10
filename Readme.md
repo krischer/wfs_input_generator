@@ -8,19 +8,29 @@ These input files are very solver dependent and have their own quirks.
 This module attempts to create a generic input file generator that hides the actual
 input files' syntax and is steered with a nice Python API.
 
-It is most useful for performing simulations of real earthquakes. The module reads
-QuakeML and SEED files and derives the necessary information from them. Instead
-of reading from QuakeML and SEED files, the necessary information can also be given
-as Python dictionaries.
+It is most useful for performing simulations of real earthquakes. The module reads the necessary
+information from several file formats.
 
 A main focus of the development is to make it as easy as possible to add support for
 further input file formats. This is described later on in more detail.
 
+The following sketch shows a short overview of what this module does:
+
+![Flow](https://raw.github.com/krischer/wfs_input_generator/master/misc/wfs_input_gen_flow.png)
+
 ## Installation
 
 ### Requirements:
-    * ObsPy >= 0.8.3
-    * flake8 >= 2.0 (only for running the tests)
+
+* Python 2.7.x
+* ObsPy >= 0.8.3
+
+#### Additional requirements for running the test suite
+
+* pytest
+* flake8 >= 2.0
+* mock
+
 
 ### Installation
 
@@ -35,28 +45,42 @@ The recommended way to install the waveform solver input file generator is via
 a developer installation. This means that you are still able to edit the code
 and add new generators.
 
-To do this, either use
-
-```bash
-python setup.py develop
-```
-
-or
-
 ```bash
 pip install -v -e .
 ```
 
-Both work fine.
+To also install the requirements for the tests, run
+
+```bash
+pip install -v -e .[tests]
+```
 
 ## Usage
 
-```python
->>> from wfs_input_generator import InputFileGenerator
->>> gen = InputFileGenerator()
+A short Python script is necessary to steer the input file generation.
 
-# Add an event. Only QuakeML with a given moment tensor right now.
->>> gen.add_events("quake.xml")
+The first step it to create an `InputFileGenerator` object.
+
+```python
+from wfs_input_generator import InputFileGenerator
+gen = InputFileGenerator()
+```
+
+The object requires seismic events, which act as the sources, seismic stations,
+which act as the receivers and finally some solver specific configuration.
+
+### Adding events.
+
+Events are added with the help of the `add_events()` method. Different formats
+are supported. The function can be called as often as necessary.
+
+```python
+# Add a QuakeML file.
+gen.add_events("quake.xml")
+
+# Add a list of QuakeML files.
+gen.add_events("...")
+```
 
 # Add some stations. SEED/XSEED/SAC
 >>> gen.add_stations(["station1.seed", "station2.seed"])
