@@ -5,8 +5,8 @@ virtualenv:
   system_site_packages: true
 before_install:
   - sudo apt-get install -qq gfortran python-dev python-numpy python-scipy python-suds python-lxml python-sqlalchemy python-matplotlib
-  - pip install --use-mirrors flake8
-  - pip install --use-mirrors pytest
+  - pip install --use-mirrors -U flake8
+  - pip install --use-mirrors -U pytest
   - pip install --use-mirrors obspy
 script:
   - cd $TRAVIS_BUILD_DIR/wfs_input_generator; py.test
