@@ -53,9 +53,9 @@ def test_code_formatting():
     assert count == 0
 
 
-def test_adding_station_as_SEED_files():
+def test_adding_stations_as_SEED_files():
     """
-    Tests the reading of SEED files.
+    Tests adding stations as SEED files.
     """
     seed_file_1 = os.path.join(DATA, "dataless.seed.BW_FURT")
     seed_file_2 = os.path.join(DATA, "dataless.seed.BW_RJOB")
@@ -77,7 +77,22 @@ def test_adding_station_as_SEED_files():
           "local_depth_in_m": 0.0}]
 
 
-def test_adding_station_as_dictionaries():
+def test_adding_a_single_station_dictionary():
+    """
+    Tests adding a single station dictionary.
+    """
+    station = {
+        "id": "BW.FURT",
+        "latitude": 48.162899,
+        "longitude": 11.2752,
+        "elevation_in_m": 565.0,
+        "local_depth_in_m": 10.0}
+    gen = InputFileGenerator()
+    gen.add_stations(station)
+    assert [station] == gen._stations
+
+
+def test_adding_station_as_list_of_dictionaries():
     """
     Checks that stations can also be passed as dictionaries.
     """
@@ -167,6 +182,14 @@ def test_adding_single_and_multiple_station():
     gen1.add_stations([station_1, station_2])
     gen2.add_stations(station_1)
     gen2.add_stations(station_2)
+    assert sorted(gen1._stations) == sorted(gen2._stations)
+
+    # Now with JSON.
+    gen1 = InputFileGenerator()
+    gen2 = InputFileGenerator()
+    gen1.add_stations(json.dumps([station_1, station_2]))
+    gen2.add_stations(json.dumps(station_1))
+    gen2.add_stations(json.dumps(station_2))
     assert sorted(gen1._stations) == sorted(gen2._stations)
 
 
