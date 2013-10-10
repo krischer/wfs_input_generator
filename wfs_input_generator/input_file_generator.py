@@ -10,6 +10,9 @@ solvers.
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)
 """
+from wfs_input_generator.station_xml_helper \
+    import extract_coordinates_from_StationXML
+
 import copy
 import glob
 import inspect
@@ -178,6 +181,16 @@ class InputFileGenerator(object):
                 is_seed = False
             if is_seed is True:
                 self._parse_seed(station_item, all_stations)
+                continue
+
+            # StationXML
+            try:
+                stations = extract_coordinates_from_StationXML(station_item)
+                for station in stations:
+                    all_stations[station["id"]] = station
+            except:
+                pass
+            else:
                 continue
 
             msg = "Warning: Could not read %s." % station_item
