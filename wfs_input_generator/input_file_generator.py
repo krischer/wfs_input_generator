@@ -166,6 +166,14 @@ class InputFileGenerator(object):
                     stat["longitude"] = float(tr.stats.sac.stlo)
                     stat["elevation_in_m"] = float(tr.stats.sac.stel)
                     stat["local_depth_in_m"] = float(tr.stats.sac.stdp)
+                    # lat/lng/ele must be given.
+                    if stat["latitude"] == -12345.0 or \
+                            stat["longitude"] == -12345.0 or \
+                            stat["elevation_in_m"] == -12345.0:
+                        continue
+                    # Local may be neclected.
+                    if stat["local_depth_in_m"] == -12345.0:
+                        del stat["local_depth_in_m"]
                     if stat["id"] in all_stations:
                         all_stations[stat["id"]].update(stat)
                     else:
