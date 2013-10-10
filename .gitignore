@@ -1,2 +1,4 @@
 wfs_input_generator.egg-info
 *.pyc
+.coverage
+htmlcov
