@@ -1025,3 +1025,57 @@ def test_config_raises_error_if_wrong_type():
     # Same with JSON if it is not a JSON object but a list.
     with pytest.raises(ValueError):
         gen.add_configuration(json.dumps([{"something": "new"}]))
+
+
+def test_station_filter():
+    """
+    Tests the filtering of the stations.
+    """
+    stations = [
+        {"id": "HT.HORT",
+         "latitude": 40.5978,
+         "longitude": 23.0995,
+         "elevation_in_m": 925.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.LIT",
+         "latitude": 40.1003,
+         "longitude": 22.489,
+         "elevation_in_m": 568.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.PAIG",
+         "latitude": 39.9363,
+         "longitude": 23.6768,
+         "elevation_in_m": 213.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.SOH",
+         "latitude": 40.8206,
+         "longitude": 23.3556,
+         "elevation_in_m": 728.0,
+         "local_depth_in_m": 0.0},
+        {"id": "AA.THE",
+         "latitude": 40.6319,
+         "longitude": 22.9628,
+         "elevation_in_m": 124.0,
+         "local_depth_in_m": 0.0},
+        {"id": "BL.XOR",
+         "latitude": 39.366,
+         "longitude": 23.192,
+         "elevation_in_m": 500.0,
+         "local_depth_in_m": 0.0}]
+
+    gen = InputFileGenerator()
+
+    # No applied filter should just result in the same stations being available
+    # everywhere.
+    assert sorted(gen._filtered_stations) == sorted(gen._stations)
+
+    # Wildcards are ok.
+    gen.station_filter = ["HT.*", "AA.*"]
+    # Only the last stations should not be available.
+    assert sorted(gen._filtered_stations) == sorted(stations[:-1])
+
+    # Removing the filter should make the missing stations reappear.
+    gen.station_filter = None
+    assert sorted(gen._filtered_stations) == sorted(gen._stations)
+    gen.station_filter = []
+    assert sorted(gen._filtered_stations) == sorted(gen._stations)
