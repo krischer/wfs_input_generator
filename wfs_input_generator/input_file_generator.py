@@ -118,15 +118,14 @@ class InputFileGenerator(object):
             try:
                 cat = readEvents(event)
             except:
-                msg = "Could not read %s." % str(event)
-                raise TypeError(msg)
+                pass
             else:
                 for event in cat:
                     self._parse_event(event)
                 continue
 
-            msg = "Warning: Could not read %s." % event
-            print msg
+            msg = "Could not read %s." % event
+            raise ValueError(msg)
         # Make sure each event is unique.
         self._events = unique_list(self._events)
 
@@ -207,10 +206,7 @@ class InputFileGenerator(object):
                         float(station_item["local_depth_in_m"])
                 except:
                     stat["local_depth_in_m"] = 0.0
-                if stat["id"] in all_stations:
-                    all_stations[stat["id"]].update(stat)
-                else:
-                    all_stations[stat["id"]] = stat
+                all_stations[stat["id"]] = stat
                 continue
 
             # Also accepts SAC files.
@@ -266,8 +262,8 @@ class InputFileGenerator(object):
             else:
                 continue
 
-            msg = "Warning: Could not read %s." % station_item
-            print msg
+            msg = "Could not read %s." % station_item
+            raise ValueError(msg)
 
         self._stations.extend(list(all_stations.values()))
         self._stations = unique_list(self._stations)

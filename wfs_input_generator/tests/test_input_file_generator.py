@@ -488,6 +488,15 @@ def test_station_dicts_with_invalid_information_raise():
         gen.add_stations(station)
 
 
+def test_adding_invalid_file_to_station_raises():
+    """
+    Adding some invalid things should of course raise.
+    """
+    gen = InputFileGenerator()
+    with pytest.raises(ValueError):
+        gen.add_stations("some_nonesense")
+
+
 def test_reading_QuakeML_files():
     """
     Tests the reading of QuakeML Files.
@@ -828,3 +837,31 @@ def test_event_dictionary_automatic_type_conversion():
         "m_rt": -9.35e+18,
         "m_rp": -8.38e+18,
         "m_tp": -6.44e+18}]
+
+
+def test_adding_dict_with_missing_keys():
+    """
+    Tests the adding of a dictionary with missing keys.
+    """
+    event = {
+        "latitude": 45.0,
+        "longitude": 12.1,
+        "depth_in_km": 13.0,
+        "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+        "m_rr": -2.11e+18,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18}
+    gen = InputFileGenerator()
+    with pytest.raises(ValueError):
+        gen.add_events(event)
+
+
+def test_adding_invalid_file_to_event_raises():
+    """
+    Adding some invalid things should of course raise.
+    """
+    gen = InputFileGenerator()
+    with pytest.raises(ValueError):
+        gen.add_events("some_nonesense")
