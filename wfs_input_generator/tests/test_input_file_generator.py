@@ -16,7 +16,7 @@ import flake8.main
 import io
 import inspect
 import json
-from obspy.core import UTCDateTime
+import obspy
 import os
 import pytest
 import warnings
@@ -453,8 +453,8 @@ def test_automatic_type_converstion_for_station_dict():
     """
     # All the coordinate values should be converted to floats.
     station = {"id": "BW.FURT",
-               "latitude": 1,
-               "longitude": 2,
+               "latitude": "1",
+               "longitude": "2",
                "elevation_in_m": "3",
                "local_depth_in_m": "4"}
     gen = InputFileGenerator()
@@ -463,6 +463,29 @@ def test_automatic_type_converstion_for_station_dict():
     assert type(gen._stations[0]["longitude"]) == float
     assert type(gen._stations[0]["elevation_in_m"]) == float
     assert type(gen._stations[0]["local_depth_in_m"]) == float
+
+    assert gen._stations == [{
+        "id": "BW.FURT",
+        "latitude": 1.0,
+        "longitude": 2.0,
+        "elevation_in_m": 3.0,
+        "local_depth_in_m": 4.0}]
+
+
+def test_station_dicts_with_invalid_information_raise():
+    """
+    Station dicts that have invalid types that cannot be converted should
+    raise!
+    """
+    # All the coordinate values should be converted to floats.
+    station = {"id": "BW.FURT",
+               "latitude": "A",
+               "longitude": 2,
+               "elevation_in_m": 3,
+               "local_depth_in_m": 4}
+    gen = InputFileGenerator()
+    with pytest.raises(ValueError):
+        gen.add_stations(station)
 
 
 def test_reading_QuakeML_files():
@@ -480,7 +503,7 @@ def test_reading_QuakeML_files():
         [{"latitude": 45.0,
           "longitude": 12.1,
           "depth_in_km": 13.0,
-          "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+          "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
           "m_rr": -2.11e+18,
           "m_tt": -4.22e+19,
           "m_pp": 4.43e+19,
@@ -490,7 +513,7 @@ def test_reading_QuakeML_files():
          {"latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
-          "origin_time": UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+          "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
           "m_rr": 1.02e+20,
           "m_tt": -7.96e+19,
           "m_pp": -2.19e+19,
@@ -507,7 +530,7 @@ def test_reading_events_from_dictionary():
         "latitude": 45.0,
         "longitude": 12.1,
         "depth_in_km": 13.0,
-        "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+        "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
         "m_rr": -2.11e+18,
         "m_tt": -4.22e+19,
         "m_pp": 4.43e+19,
@@ -518,7 +541,7 @@ def test_reading_events_from_dictionary():
         "latitude": 13.93,
         "longitude": -92.47,
         "depth_in_km": 28.7,
-        "origin_time": UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+        "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
         "m_rr": 1.02e+20,
         "m_tt": -7.96e+19,
         "m_pp": -2.19e+19,
@@ -528,3 +551,65 @@ def test_reading_events_from_dictionary():
     gen = InputFileGenerator()
     gen.add_events(events)
     assert sorted(gen._events) == sorted(events)
+
+
+def test_adding_single_event_dictionary():
+    """
+    Adding a single event dictionary.
+    """
+    event = {
+        "latitude": 45.0,
+        "longitude": 12.1,
+        "depth_in_km": 13.0,
+        "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+        "m_rr": -2.11e+18,
+        "m_tt": -4.22e+19,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18}
+    gen = InputFileGenerator()
+    gen.add_events(event)
+    assert gen._events == [event]
+
+
+def test_event_dictionary_automatic_type_conversion():
+    """
+    The types for the event dictionary should also undergo automatic type
+    conversion.
+    """
+    event = {
+        "latitude": "1",
+        "longitude": "2",
+        "depth_in_km": "3",
+        "origin_time": "2012-01-01T00:00:00.000000Z",
+        "m_rr": "-2.11e+18",
+        "m_tt": "-4.22e+19",
+        "m_pp": "4.43e+19",
+        "m_rt": "-9.35e+18",
+        "m_rp": "-8.38e+18",
+        "m_tp": "-6.44e+18"}
+    gen = InputFileGenerator()
+    gen.add_events(event)
+    assert type(gen._events[0]["latitude"]) == float
+    assert type(gen._events[0]["longitude"]) == float
+    assert type(gen._events[0]["depth_in_km"]) == float
+    assert type(gen._events[0]["origin_time"]) == obspy.UTCDateTime
+    assert type(gen._events[0]["m_rr"]) == float
+    assert type(gen._events[0]["m_tt"]) == float
+    assert type(gen._events[0]["m_pp"]) == float
+    assert type(gen._events[0]["m_rt"]) == float
+    assert type(gen._events[0]["m_rp"]) == float
+    assert type(gen._events[0]["m_tp"]) == float
+
+    assert gen._events == [{
+        "latitude": 1.0,
+        "longitude": 2.0,
+        "depth_in_km": 3.0,
+        "origin_time": obspy.UTCDateTime(2012, 1, 1),
+        "m_rr": -2.11e+18,
+        "m_tt": -4.22e+19,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18}]
