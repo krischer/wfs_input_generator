@@ -409,9 +409,15 @@ class InputFileGenerator(object):
 
         # Make sure only unique stations and events are passed on. Sort
         # stations by id.
-        _stations = sorted(unique_list(self._filtered_stations),
-                           key=lambda x: x["id"])
-        _events = unique_list(self._filtered_events)
+        _stations = copy.deepcopy(sorted(unique_list(self._filtered_stations),
+                                         key=lambda x: x["id"]))
+        _events = copy.deepcopy(unique_list(self._filtered_events))
+        # Remove the "_event_id"s everywhere
+        for event in _events:
+            try:
+                del event["_event_id"]
+            except:
+                pass
 
         # Set the correct write function.
         writer = self.__write_functions[format]
