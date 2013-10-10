@@ -92,6 +92,31 @@ def test_adding_stations_as_SAC_files():
     assert round(gen._stations[0]["local_depth_in_m"] - 145.0, 5) == 0
 
 
+def test_adding_sac_file_without_coordinates():
+    """
+    This sac file has no coordinates, thus no station should actually be added.
+    """
+    sac_file = os.path.join(DATA, "example_without_coordinates.sac")
+    gen = InputFileGenerator()
+    gen.add_stations(sac_file)
+    assert gen._stations == []
+
+
+def test_adding_sac_file_without_local_depth():
+    """
+    This file has no local depth. This should be ok.
+    """
+    sac_file = os.path.join(DATA, "example_without_local_depth.sac")
+    gen = InputFileGenerator()
+    gen.add_stations(sac_file)
+
+    assert gen._stations[0]["id"] == "IU.ANMO"
+    assert round(gen._stations[0]["latitude"] - 34.94598, 5) == 0
+    assert round(gen._stations[0]["longitude"] - -106.45713, 5) == 0
+    assert round(gen._stations[0]["elevation_in_m"] - 1671.0, 5) == 0
+    assert "local_depth_in_m" not in gen._stations[0]
+
+
 def test_adding_a_single_station_dictionary():
     """
     Tests adding a single station dictionary.
