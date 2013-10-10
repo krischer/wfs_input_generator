@@ -77,6 +77,22 @@ def test_adding_stations_as_SEED_files():
           "local_depth_in_m": 0.0}]
 
 
+def test_adding_stations_as_SAC_files():
+    """
+    Tests adding stations as SAC files.
+    """
+    sac_file = os.path.join(DATA, "example.sac")
+    gen = InputFileGenerator()
+    gen.add_stations(sac_file)
+
+    assert gen._stations == [{
+        "id": "IU.ANMO",
+        "latitude": 34.94598,
+        "longitude": -106.45713,
+        "elevation_in_m": 1671.0,
+        "local_depth_in_m": 145.0}]
+
+
 def test_adding_a_single_station_dictionary():
     """
     Tests adding a single station dictionary.
