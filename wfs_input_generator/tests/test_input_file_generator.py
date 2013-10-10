@@ -14,6 +14,7 @@ from wfs_input_generator import InputFileGenerator
 import flake8
 import flake8.main
 import inspect
+import json
 from obspy.core import UTCDateTime
 import os
 import pytest
@@ -93,6 +94,43 @@ def test_adding_station_as_dictionaries():
          "local_depth_in_m": 2.0}]
     gen = InputFileGenerator()
     gen.add_stations(stations)
+    assert sorted(stations) == sorted(gen._stations)
+
+
+def test_adding_a_single_station_as_JSON():
+    """
+    Asserts that a single station can be added as JSON.
+    """
+    station = {
+        "id": "BW.FURT",
+        "latitude": 48.162899,
+        "longitude": 11.2752,
+        "elevation_in_m": 565.0,
+        "local_depth_in_m": 10.0}
+    json_station = json.dumps(station)
+    gen = InputFileGenerator()
+    gen.add_stations(json_station)
+    assert [station] == gen._stations
+
+
+def test_adding_multiple_stations_as_JSON():
+    """
+    Tests that stations can be added as a JSON list.
+    """
+    stations = [{
+        "id": "BW.FURT",
+        "latitude": 48.162899,
+        "longitude": 11.2752,
+        "elevation_in_m": 565.0,
+        "local_depth_in_m": 10.0},
+        {"id": "BW.RJOB",
+         "latitude": 47.737167,
+         "longitude": 12.795714,
+         "elevation_in_m": 860.0,
+         "local_depth_in_m": 2.0}]
+    json_stations = json.dumps(stations)
+    gen = InputFileGenerator()
+    gen.add_stations(json_stations)
     assert sorted(stations) == sorted(gen._stations)
 
 
