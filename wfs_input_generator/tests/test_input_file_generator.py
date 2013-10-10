@@ -575,7 +575,8 @@ def test_reading_QuakeML_files():
           "m_pp": 4.43e+19,
           "m_rt": -9.35e+18,
           "m_rp": -8.38e+18,
-          "m_tp": -6.44e+18},
+          "m_tp": -6.44e+18,
+          "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
          {"latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
@@ -585,7 +586,8 @@ def test_reading_QuakeML_files():
           "m_pp": -2.19e+19,
           "m_rt": 6.94e+19,
           "m_rp": -4.08e+19,
-          "m_tp": 4.09e+19}]
+          "m_tp": 4.09e+19,
+          "_event_id": "smi:local/Event/2013-01-07T13:58:41.209477"}]
 
 
 def test_adding_events_as_URL():
@@ -603,7 +605,8 @@ def test_adding_events_as_URL():
              "m_pp": 4.43e+19,
              "m_rt": -9.35e+18,
              "m_rp": -8.38e+18,
-             "m_tp": -6.44e+18}
+             "m_tp": -6.44e+18,
+             "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"}
 
     quake_ml_file = os.path.join(DATA, "event1.xml")
     with open(quake_ml_file, "rb") as fh:
@@ -644,7 +647,8 @@ def test_adding_a_event_object():
          "m_pp": 4.43e+19,
          "m_rt": -9.35e+18,
          "m_rp": -8.38e+18,
-         "m_tp": -6.44e+18}]
+         "m_tp": -6.44e+18,
+         "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"}]
 
 
 def test_adding_a_list_of_event_object():
@@ -670,7 +674,8 @@ def test_adding_a_list_of_event_object():
           "m_pp": 4.43e+19,
           "m_rt": -9.35e+18,
           "m_rp": -8.38e+18,
-          "m_tp": -6.44e+18},
+          "m_tp": -6.44e+18,
+          "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
          {"latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
@@ -680,7 +685,8 @@ def test_adding_a_list_of_event_object():
           "m_pp": -2.19e+19,
           "m_rt": 6.94e+19,
           "m_rp": -4.08e+19,
-          "m_tp": 4.09e+19}]
+          "m_tp": 4.09e+19,
+          "_event_id": "smi:local/Event/2013-01-07T13:58:41.209477"}]
 
 
 def test_adding_a_catalog_object():
@@ -706,7 +712,8 @@ def test_adding_a_catalog_object():
           "m_pp": 4.43e+19,
           "m_rt": -9.35e+18,
           "m_rp": -8.38e+18,
-          "m_tp": -6.44e+18},
+          "m_tp": -6.44e+18,
+          "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
          {"latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
@@ -716,7 +723,8 @@ def test_adding_a_catalog_object():
           "m_pp": -2.19e+19,
           "m_rt": 6.94e+19,
           "m_rp": -4.08e+19,
-          "m_tp": 4.09e+19}]
+          "m_tp": 4.09e+19,
+          "_event_id": "smi:local/Event/2013-01-07T13:58:41.209477"}]
 
 
 def test_reading_QuakeML_from_BytesIO():
@@ -746,7 +754,8 @@ def test_reading_QuakeML_from_BytesIO():
           "m_pp": 4.43e+19,
           "m_rt": -9.35e+18,
           "m_rp": -8.38e+18,
-          "m_tp": -6.44e+18},
+          "m_tp": -6.44e+18,
+          "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
          {"latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
@@ -756,7 +765,8 @@ def test_reading_QuakeML_from_BytesIO():
           "m_pp": -2.19e+19,
           "m_rt": 6.94e+19,
           "m_rp": -4.08e+19,
-          "m_tp": 4.09e+19}]
+          "m_tp": 4.09e+19,
+          "_event_id": "smi:local/Event/2013-01-07T13:58:41.209477"}]
 
 
 def test_reading_events_from_dictionary():
