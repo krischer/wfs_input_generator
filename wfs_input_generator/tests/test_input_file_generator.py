@@ -1090,3 +1090,99 @@ def test_station_filter():
     assert sorted(gen._filtered_stations) == sorted(gen._stations)
     gen.station_filter = []
     assert sorted(gen._filtered_stations) == sorted(gen._stations)
+
+
+def test_event_filter():
+    """
+    Tests the filtering of the events.
+
+    This is funky. If any filter is given, it will remove all events that do
+    not have an event_id.
+    """
+    events = \
+        [{"latitude": 45.0,
+          "longitude": 12.1,
+          "depth_in_km": 13.0,
+          "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+          "m_rr": -2.11e+18,
+          "m_tt": -4.22e+19,
+          "m_pp": 4.43e+19,
+          "m_rt": -9.35e+18,
+          "m_rp": -8.38e+18,
+          "m_tp": -6.44e+18,
+          "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
+         {"latitude": 13.93,
+          "longitude": -92.47,
+          "depth_in_km": 28.7,
+          "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+          "m_rr": 1.02e+20,
+          "m_tt": -7.96e+19,
+          "m_pp": -2.19e+19,
+          "m_rt": 6.94e+19,
+          "m_rp": -4.08e+19,
+          "m_tp": 4.09e+19,
+          "_event_id": "smi:local/Event/2013-01-07T13:58:41.209477"}]
+
+    event_file_1 = os.path.join(DATA, "event1.xml")
+    event_file_2 = os.path.join(DATA, "event2.xml")
+    gen = InputFileGenerator()
+    gen.add_events([event_file_1, event_file_2])
+
+    assert sorted(gen._events) == sorted(events)
+
+    # No applied filter should just result in the same stations being available
+    # everywhere.
+    assert sorted(gen._filtered_events) == sorted(gen._events)
+
+    # Events filters are a simple list of URLS.
+    gen.events_filter = ["smi:local/Event/2013-01-07T13:58:41.209477"]
+    # Only the last event should now be available.
+    assert sorted(gen._filtered_events) == sorted(events[1:])
+
+    # Removing the filter should make the missing events reappear.
+    gen.event_filter = None
+    assert sorted(gen._filtered_events) == sorted(gen._events)
+    gen.station_filter = []
+    assert sorted(gen._filtered_events) == sorted(gen._events)
+
+
+def test_event_filter_removed_everything_without_an_id():
+    """
+    An applied event filter will remove all events without an id.
+    """
+    events = [{
+        "latitude": 45.0,
+        "longitude": 12.1,
+        "depth_in_km": 13.0,
+        "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+        "m_rr": -2.11e+18,
+        "m_tt": -4.22e+19,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18
+    }, {
+        "latitude": 13.93,
+        "longitude": -92.47,
+        "depth_in_km": 28.7,
+        "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+        "m_rr": 1.02e+20,
+        "m_tt": -7.96e+19,
+        "m_pp": -2.19e+19,
+        "m_rt": 6.94e+19,
+        "m_rp": -4.08e+19,
+        "m_tp": 4.09e+19}]
+    gen = InputFileGenerator()
+    gen.add_events(events)
+
+    assert sorted(gen._filtered_events) == sorted(events)
+
+    # Applying a filter will remove everything.
+    gen.event_filter = ["smi://some/url"]
+    assert sorted(gen._filtered_events) == []
+
+    # Removing the filter should make the missing events reappear.
+    gen.event_filter = None
+    assert sorted(gen._filtered_events) == sorted(gen._events)
+    gen.station_filter = []
+    assert sorted(gen._filtered_events) == sorted(gen._events)
