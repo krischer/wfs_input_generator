@@ -78,6 +78,27 @@ def test_adding_stations_as_SEED_files():
           "local_depth_in_m": 0.0}]
 
 
+def test_adding_stations_as_SEED_files_via_BytesIO():
+    """
+    Tests adding stations as SEED files.
+    """
+    seed_file = os.path.join(DATA, "dataless.seed.BW_FURT")
+
+    with open(seed_file, "rb") as fh:
+        seed_file_mem_file = io.BytesIO(fh.read())
+
+    gen = InputFileGenerator()
+    gen.add_stations(seed_file_mem_file)
+
+    # Sort to be able to compare.
+    assert gen._stations == \
+        [{"id": "BW.FURT",
+          "latitude": 48.162899,
+          "longitude": 11.2752,
+          "elevation_in_m": 565.0,
+          "local_depth_in_m": 0.0}]
+
+
 def test_adding_stations_as_SAC_files():
     """
     Tests adding stations as SAC files.

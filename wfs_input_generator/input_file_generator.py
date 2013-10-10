@@ -124,6 +124,13 @@ class InputFileGenerator(object):
         all_stations = {}
 
         for station_item in stations:
+            # Store the original pointer position to be able to restore it.
+            original_position = None
+            try:
+                original_position = station_item.tell()
+                station_item.seek(original_position, 0)
+            except:
+                pass
 
             # Download it if it is some kind of URL.
             if isinstance(station_item, basestring) and "://" in station_item:
@@ -183,12 +190,19 @@ class InputFileGenerator(object):
                     continue
                 continue
 
+            # Reset pointer.
+            if original_position is not None:
+                station_item.seek(original_position, 0)
+
             # SEED / XML-SEED
             try:
                 Parser(station_item)
                 is_seed = True
             except:
                 is_seed = False
+            # Reset.
+            if original_position is not None:
+                station_item.seek(original_position, 0)
             if is_seed is True:
                 self._parse_seed(station_item, all_stations)
                 continue
