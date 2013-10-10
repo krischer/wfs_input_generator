@@ -532,4 +532,5 @@ class InputFileGenerator(object):
             "m_pp": mt.m_pp,
             "m_rt": mt.m_rt,
             "m_rp": mt.m_rp,
-            "m_tp": mt.m_tp})
+            "m_tp": mt.m_tp,
+            "_event_id": event.resource_id.resource_id})
