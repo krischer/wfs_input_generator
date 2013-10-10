@@ -18,6 +18,7 @@ import glob
 import inspect
 import io
 import json
+import obspy
 from obspy import readEvents
 from obspy.core import AttribDict, read
 from obspy.core.event import Event
@@ -68,14 +69,39 @@ class InputFileGenerator(object):
             if isinstance(event, Event):
                 self._parse_event(event)
                 continue
+            # If it is a dict do some checks and add it.
             elif isinstance(event, dict):
-                self._events.append(event)
+                required_keys = ["latitude", "longitude", "depth_in_km",
+                                 "origin_time", "m_rr", "m_tt", "m_pp", "m_rt",
+                                 "m_rp", "m_tp"]
+                for key in required_keys:
+                    if key not in event:
+                        msg = (
+                            "Each station events needs to at least have "
+                            "{keys} keys.").format(
+                            keys=", ".join(required_keys))
+                        raise ValueError(msg)
+                # Create new dict to not carry around any additional keys.
+                ev = {
+                    "latitude": float(event["latitude"]),
+                    "longitude": float(event["longitude"]),
+                    "depth_in_km": float(event["depth_in_km"]),
+                    "origin_time": obspy.UTCDateTime(event["origin_time"]),
+                    "m_rr": float(event["m_rr"]),
+                    "m_tt": float(event["m_tt"]),
+                    "m_pp": float(event["m_pp"]),
+                    "m_rt": float(event["m_rt"]),
+                    "m_rp": float(event["m_rp"]),
+                    "m_tp": float(event["m_tp"])}
+                self._events.append(ev)
                 continue
+
             try:
                 cat = readEvents(event)
             except:
                 msg = "Could not read %s." % str(event)
                 raise TypeError(msg)
+
             for event in cat:
                 self._parse_event(event)
         # Make sure each event is unique.
