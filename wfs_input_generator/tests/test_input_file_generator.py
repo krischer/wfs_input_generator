@@ -16,6 +16,7 @@ import flake8.main
 import io
 import inspect
 import json
+import mock
 import obspy
 import os
 import pytest
@@ -295,6 +296,62 @@ def test_adding_stations_as_StationXML_BytesIO():
     assert sorted(stations) == sorted(gen._stations)
 
 
+def test_adding_stations_as_URL():
+    """
+    StationXML uploading via a memory file.
+
+    Mock the actual downloading.
+    """
+    stations = [
+        {"id": "HT.HORT",
+         "latitude": 40.5978,
+         "longitude": 23.0995,
+         "elevation_in_m": 925.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.LIT",
+         "latitude": 40.1003,
+         "longitude": 22.489,
+         "elevation_in_m": 568.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.PAIG",
+         "latitude": 39.9363,
+         "longitude": 23.6768,
+         "elevation_in_m": 213.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.SOH",
+         "latitude": 40.8206,
+         "longitude": 23.3556,
+         "elevation_in_m": 728.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.THE",
+         "latitude": 40.6319,
+         "longitude": 22.9628,
+         "elevation_in_m": 124.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.XOR",
+         "latitude": 39.366,
+         "longitude": 23.192,
+         "elevation_in_m": 500.0,
+         "local_depth_in_m": 0.0}]
+
+    station_xml_file = os.path.join(DATA, "station.xml")
+    with open(station_xml_file, "rb") as fh:
+        data = fh.read()
+
+    gen = InputFileGenerator()
+
+    # Mock the URL
+    with mock.patch("urllib2.urlopen") as patch:
+        class Dummy(object):
+            def read(self):
+                return data
+        patch.return_value = Dummy()
+        gen.add_stations("http://some_url.com")
+
+    patch.assert_called_once_with("http://some_url.com")
+    assert sorted(stations) == sorted(gen._stations)
+
+
 def test_adding_single_and_multiple_station():
     """
     Reading all files at once or seperate should make not difference.
@@ -529,6 +586,41 @@ def test_reading_QuakeML_files():
           "m_rt": 6.94e+19,
           "m_rp": -4.08e+19,
           "m_tp": 4.09e+19}]
+
+
+def test_adding_events_as_URL():
+    """
+    QuakeML uploading via a memory file.
+
+    Mock the actual downloading.
+    """
+    event = {"latitude": 45.0,
+             "longitude": 12.1,
+             "depth_in_km": 13.0,
+             "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+             "m_rr": -2.11e+18,
+             "m_tt": -4.22e+19,
+             "m_pp": 4.43e+19,
+             "m_rt": -9.35e+18,
+             "m_rp": -8.38e+18,
+             "m_tp": -6.44e+18}
+
+    quake_ml_file = os.path.join(DATA, "event1.xml")
+    with open(quake_ml_file, "rb") as fh:
+        data = fh.read()
+
+    gen = InputFileGenerator()
+
+    # Mock the URL
+    with mock.patch("urllib2.urlopen") as patch:
+        class Dummy(object):
+            def read(self):
+                return data
+        patch.return_value = Dummy()
+        gen.add_events("http://some_url.com")
+
+    patch.assert_called_once_with("http://some_url.com")
+    assert [event] == gen._events
 
 
 def test_adding_a_event_object():
