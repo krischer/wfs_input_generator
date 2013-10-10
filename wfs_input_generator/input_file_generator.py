@@ -116,7 +116,9 @@ class InputFileGenerator(object):
                 stations = json_s
 
         # Thin wrapper to enable single element treatment.
-        if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
+        if isinstance(stations, dict) or not hasattr(stations, "__iter__") or \
+                (hasattr(stations, "read") and
+                 hasattr(stations.read, "__call__")):
             stations = [stations, ]
 
         all_stations = {}
