@@ -522,6 +522,46 @@ def test_reading_QuakeML_files():
           "m_tp": 4.09e+19}]
 
 
+def test_reading_QuakeML_from_BytesIO():
+    """
+    Tests the reading of QuakeML from BytesIO.
+    """
+    event_file_1 = os.path.join(DATA, "event1.xml")
+    event_file_2 = os.path.join(DATA, "event2.xml")
+
+    with open(event_file_1, "rb") as fh:
+        event_file_1_mem = io.BytesIO(fh.read())
+
+    with open(event_file_2, "rb") as fh:
+        event_file_2_mem = io.BytesIO(fh.read())
+
+    gen = InputFileGenerator()
+    gen.add_events([event_file_1_mem, event_file_2_mem])
+
+    # Sort to be able to compare.
+    assert sorted(gen._events) == \
+        [{"latitude": 45.0,
+          "longitude": 12.1,
+          "depth_in_km": 13.0,
+          "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+          "m_rr": -2.11e+18,
+          "m_tt": -4.22e+19,
+          "m_pp": 4.43e+19,
+          "m_rt": -9.35e+18,
+          "m_rp": -8.38e+18,
+          "m_tp": -6.44e+18},
+         {"latitude": 13.93,
+          "longitude": -92.47,
+          "depth_in_km": 28.7,
+          "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+          "m_rr": 1.02e+20,
+          "m_tt": -7.96e+19,
+          "m_pp": -2.19e+19,
+          "m_rt": 6.94e+19,
+          "m_rp": -4.08e+19,
+          "m_tp": 4.09e+19}]
+
+
 def test_reading_events_from_dictionary():
     """
     Tests that events can also be passed as dictionaries.
@@ -570,6 +610,29 @@ def test_adding_single_event_dictionary():
         "m_tp": -6.44e+18}
     gen = InputFileGenerator()
     gen.add_events(event)
+    assert gen._events == [event]
+
+
+def test_additional_attributes_from_event_dicts_are_removed():
+    """
+    No need to carry around additional attributes.
+    """
+    event = {
+        "latitude": 45.0,
+        "longitude": 12.1,
+        "depth_in_km": 13.0,
+        "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+        "m_rr": -2.11e+18,
+        "m_tt": -4.22e+19,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18,
+        "extra": "blub"}
+    gen = InputFileGenerator()
+    gen.add_events(event)
+
+    del event["extra"]
     assert gen._events == [event]
 
 
