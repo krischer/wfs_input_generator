@@ -1011,3 +1011,17 @@ def test_configuration_via_JSON():
         "test": "4",
         "something_else": 2,
         "and_more": 3.0}
+
+
+def test_config_raises_error_if_wrong_type():
+    """
+    The configuration method should raise in case a wrong type is added.
+    """
+    gen = InputFileGenerator()
+
+    with pytest.raises(ValueError):
+        gen.add_configuration("something")
+
+    # Same with JSON if it is not a JSON object but a list.
+    with pytest.raises(ValueError):
+        gen.add_configuration(json.dumps([{"something": "new"}]))
