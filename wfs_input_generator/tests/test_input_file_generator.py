@@ -296,9 +296,9 @@ def test_adding_stations_as_StationXML_BytesIO():
     assert sorted(stations) == sorted(gen._stations)
 
 
-def test_adding_stations_as_URL():
+def test_adding_stations_as_URLs():
     """
-    StationXML uploading via a memory file.
+    StationXML should be downloaded if necessary.
 
     Mock the actual downloading.
     """
@@ -590,7 +590,7 @@ def test_reading_QuakeML_files():
 
 def test_adding_events_as_URL():
     """
-    QuakeML uploading via a memory file.
+    QuakeMLs should be downloaded if necessary.
 
     Mock the actual downloading.
     """
