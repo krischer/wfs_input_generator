@@ -967,7 +967,7 @@ def test_configuration_via_a_dictionary():
     gen.config.test = "1"
     assert gen.config == {"test": "1"}
 
-    gen.add_to_configuration({
+    gen.add_configuration({
         "something_else": 2,
         "and_more": 3.0})
 
@@ -977,7 +977,7 @@ def test_configuration_via_a_dictionary():
         "and_more": 3.0}
 
     # Adding the something that already exists overwrites.
-    gen.add_to_configuration({
+    gen.add_configuration({
         "test": "4"})
 
     assert gen.config == {
@@ -994,7 +994,7 @@ def test_configuration_via_JSON():
     gen.config.test = "1"
     assert gen.config == {"test": "1"}
 
-    gen.add_to_configuration(json.dumps({
+    gen.add_configuration(json.dumps({
         "something_else": 2,
         "and_more": 3.0}))
 
@@ -1004,7 +1004,7 @@ def test_configuration_via_JSON():
         "and_more": 3.0}
 
     # Adding the something that already exists overwrites.
-    gen.add_to_configuration(json.dumps({
+    gen.add_configuration(json.dumps({
         "test": "4"}))
 
     assert gen.config == {

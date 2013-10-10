@@ -49,6 +49,30 @@ class InputFileGenerator(object):
         self._events = []
         self._stations = []
 
+    def add_configuration(self, config):
+        """
+        Adds all items in config to the configuration.
+
+        Useful for bulk configuration from external sources.
+
+        :type config: dict or str
+        :param config: Contains the new configuration items. Can be either a
+            dictionary or a JSON document.
+        """
+        try:
+            doc = json.loads(config)
+        except:
+            pass
+        else:
+            if isinstance(doc, dict):
+                config = doc
+
+        if not isinstance(config, dict):
+            msg = "config must be either a dict or a single JSON document"
+            raise ValueError(msg)
+
+        self.config.__dict__.update(config)
+
     def add_events(self, events):
         """
         Add one or more events to the input file generator. Most inversions
