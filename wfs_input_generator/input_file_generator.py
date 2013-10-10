@@ -81,6 +81,10 @@ class InputFileGenerator(object):
 
         # Loop over all events.
         for event in events:
+            # Download it if it is some kind of URL.
+            if isinstance(event, basestring) and "://" in event:
+                event = io.BytesIO(urllib2.urlopen(event).read())
+
             if isinstance(event, Event):
                 self._parse_event(event)
                 continue
@@ -116,9 +120,13 @@ class InputFileGenerator(object):
             except:
                 msg = "Could not read %s." % str(event)
                 raise TypeError(msg)
+            else:
+                for event in cat:
+                    self._parse_event(event)
+                continue
 
-            for event in cat:
-                self._parse_event(event)
+            msg = "Warning: Could not read %s." % event
+            print msg
         # Make sure each event is unique.
         self._events = unique_list(self._events)
 
