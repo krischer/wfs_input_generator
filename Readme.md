@@ -2,25 +2,32 @@
 
 [![Build Status](https://travis-ci.org/krischer/wfs_input_generator.png?branch=master)](https://travis-ci.org/krischer/wfs_input_generator)
 
-Seismic waveform solvers are generally written in a high-performance language and
-require carefully crafted input files to work.
-These input files are very solver dependent and have their own quirks.
-This module attempts to create a generic input file generator that hides the actual
-input files' syntax and is steered with a nice Python API.
+Seismic waveform solvers are generally written in a high-performance language
+and require carefully crafted input files to work.  These input files are very
+solver dependent and have their own quirks.  This module attempts to create a
+generic input file generator that hides the actual input files' syntax and is
+steered with a usable Python API.
 
-It is most useful for performing simulations of real earthquakes. The module reads the necessary
-information from several file formats.
+It is most useful for performing simulations of real earthquakes. The module
+reads the necessary information from several file formats commonly in use in
+the field.
 
-A main focus of the development is to make it as easy as possible to add support for
-further input file formats. This is described later on in more detail.
+A main focus of the development is to make it as easy as possible to add
+support for further waveform solver input file formats. This is described later
+on in more detail.
 
 The following sketch shows a short overview of what this module does:
 
 ![Flow](https://raw.github.com/krischer/wfs_input_generator/master/misc/wfs_input_gen_flow.png)
 
-## Installation
 
-### Requirements:
+## Dependencies and Installation
+
+The module is written in 100 % Python and thus only has very minimal
+dependencies. It currently only works with Python 2.7.x as ObsPy does not yet
+support Python 3.x.
+
+### Requirements
 
 * Python 2.7.x
 * ObsPy >= 0.8.3
@@ -31,27 +38,30 @@ The following sketch shows a short overview of what this module does:
 * flake8 >= 2.0
 * mock
 
-
 ### Installation
 
-Checkout the repository.
+#### User Installation
+
+To install the most recent version, make sure ObsPy is installed and execute
 
 ```bash
-git clone https://github.com/krischer/wfs_input_generator.git
-cd wfs_input_generator
-```
-
-The recommended way to install the waveform solver input file generator is via
-a developer installation. This means that you are still able to edit the code
-and add new generators.
-
-```bash
-pip install -v -e .
+$ pip install https://github.com/krischer/wfs_input_generator/archive/master.zip
 ```
 
 To also install the requirements for the tests, run
 
 ```bash
+$ pip install https://github.com/krischer/wfs_input_generator/archive/master.zip[tests]
+```
+
+#### Developer Installation
+
+If you want to develop your own backends for writing input files for other
+solver you have to install the wfs_input_generator with in-place installation.
+
+```bash
+git clone https://github.com/krischer/wfs_input_generator.git
+cd wfs_input_generator
 pip install -v -e .[tests]
 ```
 
@@ -67,34 +77,168 @@ gen = InputFileGenerator()
 ```
 
 The object requires seismic events, which act as the sources, seismic stations,
-which act as the receivers and finally some solver specific configuration.
+which act as the receivers and finally some solver specific configuration to be
+able to eventually generate input files for different solvers.
 
-### Adding events.
+The events and stations can be the same for every solver, but the rest of the
+configuration cannot be unified; the different solvers are simply require very
+different parameters.
 
-Events are added with the help of the `add_events()` method. Different formats
-are supported. The function can be called as often as necessary.
+
+### Adding Events
+
+Events or seismic sources are added with the help of the `add\_events()`
+method. Different formats are supported. The function can be called as often as
+necessary to add as many events as desired. Duplicates will be automatically
+discarded.
+
+Many solvers are only able to accept a single event and thus will raise an
+error upon input file creation if multiple events are present.
+
 
 ```python
-# Add a QuakeML file.
+# Add a QuakeML files.
 gen.add_events("quake.xml")
+gen.add_events(["path/to/quake1.xml", "path/to/quake2.xml"])
 
-# Add a list of QuakeML files.
-gen.add_events("...")
+# Add a QuakeML with a URL to a webservice.
+gen.add_events("http://earthquakes.gov/quakeml?parameters=all")
+
+# Directly add an event as a dictionary.
+gen.add_events({
+    "latitude": 45.0,
+    "longitude": 12.1,
+    "depth_in_km": 13.0,
+    "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+    "m_rr": -2.11e+18,
+    "m_tt": -4.22e+19,
+    "m_pp": 4.43e+19,
+    "m_rt": -9.35e+18,
+    "m_rp": -8.38e+18,
+    "m_tp": -6.44e+18})
+gen.add_events([{...}, {...}, ...])
+
+# JSON also works. Either as a single JSON object as are JSON arrays of objects.
+json_str = """
+{
+    "latitude": 45.0,
+    "longitude": 12.1,
+    "depth_in_km": 13.0,
+    "origin_time": "2012-04-12T07:15:48.500000Z",
+    "m_rr": -2.11e+18,
+    "m_tt": -4.22e+19,
+    "m_pp": 4.43e+19,
+    "m_rt": -9.35e+18,
+    "m_rp": -8.38e+18,
+    "m_tp": -6.44e+18
+}
+"""
+gen.add_events(json_string)
+
+json_str = """
+[{...}, {...}]]
+"""
+gen.add_events(json_str)
 ```
 
-```
-# Add some stations. SEED/XSEED/SAC
->>> gen.add_stations(["station1.seed", "station2.seed"])
 
+### Adding Stations
+
+The stations will act as the receivers during the simulation. Again, the most
+common formats are supported to facilitate integration into existing workflows.
+
+```python
+# Add one or more (X)SEED files.
+gen.add_stations("station1.seed")
+gen.add_stations(["station2.seed", "station3_xseed.xml"])
+
+# StationXML works just fine.
+gen.add_stations("station4.xml")
+gen.add_stations(["station5.ml", "station6.xml"])
+
+# Webservices serving StationXML or (X)SEED work by simply providing the URL.
+gen.add_stations("http://fdsn_webservice.org/...")
+
+# There is also legacy support for coordinates embedded into SAC files.
+gen.add_stations("station7.sac")
+gen.add_stations(["station8.sac", "station9.sac"])
+
+# Furthermore Python dictionaries are fine.
+gen.add_stations({
+    "id": "BW.FURT",
+    "latitude": 48.162899,
+    "longitude": 11.2752,
+    "elevation_in_m": 565.0,
+    "local_depth_in_m": 10.0})
+gen.add_stations([{...}, {...}, ...])
+
+# As are JSON objects and arrays of objects.
+json_str = """
+{
+    "id": "BW.FURT",
+    "latitude": 48.162899,
+    "longitude": 11.2752,
+    "elevation_in_m": 565.0,
+    "local_depth_in_m": 10.0})
+}
+"""
+gen.add_stations(json_str)
+
+json_str = """
+[{...}, {...}, ...]
+"""
+gen.add_stations(json_str)
+```
+
+### Event and Station Filters
+
+Events and stations can furthermore be filtered. This is useful for using the
+same (potentially very large) StationXML and QuakeML files for many
+simulations. Simply provide a different filter for each run restricting the
+existing dataset.
+
+Filters are defined as positive filters, thus they describe what should be the
+content of the input files and not what should be neglected.
+
+You can set and change the filters at any time during the setup process. They
+are applied at input file creation time.
+
+#### Event Filters
+
+Event filters are only useful for QuakeML input as they depend on the public id
+of an event. They are simply a list of event ids.
+
+```python
+get.event_filter = ["smi:local/event_id_1", "smi:/local_event_id_2"]
+
+# A JSON array also works.
+get.event_filter = '["smi:local/event_id_1", "smi:/local_event_id_2"]'
+```
+
+#### Stations Filters
+
+Station filters are a list of station ids, consisting of the network id,
+a dot, and the station id. UNIX style wildcards are supported.
+
+```python
+get.station_filter = ["BW.FURT", "TA.A*", "TA.Y?H"]
+
+# Again JSON arrays are just as fine.
+get.station_filter = '["BW.FURT", "TA.A*", "TA.Y?H"]'
+```
+
+### Solver Specific Configuration
+
+```python
 # Add some solver specific documentation.
->>> gen.config.time_stepping = 5.5
+gen.config.time_stepping = 5.5
 
 # Get a list of available output format
->>> gen.get_available_formats()
+gen.get_available_formats()
 ['ses3d_4_0', 'ses3d_muc_svnr276']
 
 # Write the input files to a specified folder.
->>> gen.write(format="ses3d_svnr276", output_dir="solver_input_files")
+gen.write(format="ses3d_svnr276", output_dir="solver_input_files")
 ```
 
 ## How to add support for a new solver
