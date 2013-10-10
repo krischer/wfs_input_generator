@@ -1146,6 +1146,26 @@ def test_event_filter():
     assert sorted(gen._filtered_events) == sorted(gen._events)
 
 
+def test_event_filter_JSON():
+    """
+    Event filters can be set as JSON.
+    """
+    filters = ["smi:some/url", "smi:some/other/url"]
+    gen = InputFileGenerator()
+    gen.event_filter = json.dumps(filters)
+    assert gen.event_filter == filters
+
+
+def test_station_filter_JSON():
+    """
+    station filters can be set as JSON.
+    """
+    filters = ["BW.HH*", "NE.*"]
+    gen = InputFileGenerator()
+    gen.station_filter = json.dumps(filters)
+    assert gen.station_filter == filters
+
+
 def test_event_filter_removed_everything_without_an_id():
     """
     An applied event filter will remove all events without an id.
