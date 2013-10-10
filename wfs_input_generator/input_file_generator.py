@@ -61,10 +61,25 @@ class InputFileGenerator(object):
         :param events: A list of filenames, a list of obspy.core.event.Event
             objects, or an obspy.core.event.Catalog object.
         """
+        # Try to interpret it as json. If it works and results in a list or
+        # dicionary, use it!
+        try:
+            json_e = json.loads(events)
+        except:
+            pass
+        else:
+            # A simple string is also a valid JSON document.
+            if isinstance(json_e, list) or isinstance(json_e, dict):
+                events = json_e
+
+        # Thin wrapper to enable single element treatment.
         if isinstance(events, Event) or isinstance(events, dict) or \
-                not hasattr(events, "__iter__"):
+                not hasattr(events, "__iter__") or \
+                (hasattr(events, "read") and
+                 hasattr(events.read, "__call__")):
             events = [events, ]
 
+        # Loop over all events.
         for event in events:
             if isinstance(event, Event):
                 self._parse_event(event)
