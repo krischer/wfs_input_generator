@@ -522,6 +522,102 @@ def test_reading_QuakeML_files():
           "m_tp": 4.09e+19}]
 
 
+def test_adding_a_event_object():
+    """
+    Tests adding an already existing event object.
+    """
+    event_file = os.path.join(DATA, "event1.xml")
+
+    event = obspy.readEvents(event_file)[0]
+
+    gen = InputFileGenerator()
+    gen.add_events([event])
+
+    assert gen._events == [
+        {"latitude": 45.0,
+         "longitude": 12.1,
+         "depth_in_km": 13.0,
+         "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+         "m_rr": -2.11e+18,
+         "m_tt": -4.22e+19,
+         "m_pp": 4.43e+19,
+         "m_rt": -9.35e+18,
+         "m_rp": -8.38e+18,
+         "m_tp": -6.44e+18}]
+
+
+def test_adding_a_list_of_event_object():
+    """
+    Tests adding an already existing event object.
+    """
+    event_file_1 = os.path.join(DATA, "event1.xml")
+    event_file_2 = os.path.join(DATA, "event2.xml")
+
+    event_1 = obspy.readEvents(event_file_1)[0]
+    event_2 = obspy.readEvents(event_file_2)[0]
+
+    gen = InputFileGenerator()
+    gen.add_events([event_1, event_2])
+
+    assert sorted(gen._events) == \
+        [{"latitude": 45.0,
+          "longitude": 12.1,
+          "depth_in_km": 13.0,
+          "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+          "m_rr": -2.11e+18,
+          "m_tt": -4.22e+19,
+          "m_pp": 4.43e+19,
+          "m_rt": -9.35e+18,
+          "m_rp": -8.38e+18,
+          "m_tp": -6.44e+18},
+         {"latitude": 13.93,
+          "longitude": -92.47,
+          "depth_in_km": 28.7,
+          "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+          "m_rr": 1.02e+20,
+          "m_tt": -7.96e+19,
+          "m_pp": -2.19e+19,
+          "m_rt": 6.94e+19,
+          "m_rp": -4.08e+19,
+          "m_tp": 4.09e+19}]
+
+
+def test_adding_a_catalog_object():
+    """
+    Tests adding an obspy.core.event.Catalog object.
+    """
+    event_file_1 = os.path.join(DATA, "event1.xml")
+    event_file_2 = os.path.join(DATA, "event2.xml")
+
+    cat = obspy.readEvents(event_file_1)
+    cat += obspy.readEvents(event_file_2)
+
+    gen = InputFileGenerator()
+    gen.add_events(cat)
+
+    assert sorted(gen._events) == \
+        [{"latitude": 45.0,
+          "longitude": 12.1,
+          "depth_in_km": 13.0,
+          "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+          "m_rr": -2.11e+18,
+          "m_tt": -4.22e+19,
+          "m_pp": 4.43e+19,
+          "m_rt": -9.35e+18,
+          "m_rp": -8.38e+18,
+          "m_tp": -6.44e+18},
+         {"latitude": 13.93,
+          "longitude": -92.47,
+          "depth_in_km": 28.7,
+          "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
+          "m_rr": 1.02e+20,
+          "m_tt": -7.96e+19,
+          "m_pp": -2.19e+19,
+          "m_rt": 6.94e+19,
+          "m_rp": -4.08e+19,
+          "m_tp": 4.09e+19}]
+
+
 def test_reading_QuakeML_from_BytesIO():
     """
     Tests the reading of QuakeML from BytesIO.
