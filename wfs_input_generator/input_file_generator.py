@@ -314,6 +314,11 @@ class InputFileGenerator(object):
 
     @station_filter.setter
     def station_filter(self, value):
+        try:
+            value = json.loads(value)
+        except:
+            pass
+
         if not hasattr(value, "__iter__") and value is not None:
             msg = "Needs to be a list or other iterable."
             raise TypeError(msg)
@@ -342,6 +347,11 @@ class InputFileGenerator(object):
 
     @event_filter.setter
     def event_filter(self, value):
+        try:
+            value = json.loads(value)
+        except:
+            pass
+
         if not hasattr(value, "__iter__") and value is not None:
             msg = "Needs to be a list or other iterable."
             raise TypeError(msg)
