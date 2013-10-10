@@ -85,12 +85,11 @@ def test_adding_stations_as_SAC_files():
     gen = InputFileGenerator()
     gen.add_stations(sac_file)
 
-    assert gen._stations == [{
-        "id": "IU.ANMO",
-        "latitude": 34.94598,
-        "longitude": -106.45713,
-        "elevation_in_m": 1671.0,
-        "local_depth_in_m": 145.0}]
+    assert gen._stations[0]["id"] == "IU.ANMO"
+    assert round(gen._stations[0]["latitude"] - 34.94598, 5) == 0
+    assert round(gen._stations[0]["longitude"] - -106.45713, 5) == 0
+    assert round(gen._stations[0]["elevation_in_m"] - 1671.0, 5) == 0
+    assert round(gen._stations[0]["local_depth_in_m"] - 145.0, 5) == 0
 
 
 def test_adding_a_single_station_dictionary():
