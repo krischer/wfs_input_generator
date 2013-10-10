@@ -183,11 +183,17 @@ def test_local_depth_will_be_set_to_zero():
          "latitude": 47.737167,
          "longitude": 12.795714,
          "elevation_in_m": 860.0}]
+    json_stations = json.dumps(stations)
     gen = InputFileGenerator()
     gen.add_stations(stations)
     # Now add the local depth again.
     stations[0]["local_depth_in_m"] = 0.0
     stations[1]["local_depth_in_m"] = 0.0
+    assert sorted(stations) == sorted(gen._stations)
+
+    # Repeat with the JSON variant.
+    gen = InputFileGenerator()
+    gen.add_stations(json_stations)
     assert sorted(stations) == sorted(gen._stations)
 
 
@@ -233,6 +239,18 @@ def test_id_lat_lon_ele_are_necessary():
     with pytest.raises(ValueError):
         gen.add_stations(station_4)
     # The last one not.
+    gen.add_stations(station_5)
+
+    # Do exactly the same with JSON variants.
+    gen = InputFileGenerator()
+    with pytest.raises(ValueError):
+        gen.add_stations(json.dumps(station_1))
+    with pytest.raises(ValueError):
+        gen.add_stations(json.dumps(station_2))
+    with pytest.raises(ValueError):
+        gen.add_stations(json.dumps(station_3))
+    with pytest.raises(ValueError):
+        gen.add_stations(json.dumps(station_4))
     gen.add_stations(station_5)
 
 
