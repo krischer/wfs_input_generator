@@ -52,7 +52,7 @@ def test_code_formatting():
     assert count == 0
 
 
-def test_reading_SEED_files():
+def test_adding_station_as_SEED_files():
     """
     Tests the reading of SEED files.
     """
@@ -76,7 +76,27 @@ def test_reading_SEED_files():
           "local_depth_in_m": 0.0}]
 
 
-def test_adding_single_and_multiple_items():
+def test_adding_station_as_dictionaries():
+    """
+    Checks that stations can also be passed as dictionaries.
+    """
+    stations = [{
+        "id": "BW.FURT",
+        "latitude": 48.162899,
+        "longitude": 11.2752,
+        "elevation_in_m": 565.0,
+        "local_depth_in_m": 10.0},
+        {"id": "BW.RJOB",
+         "latitude": 47.737167,
+         "longitude": 12.795714,
+         "elevation_in_m": 860.0,
+         "local_depth_in_m": 2.0}]
+    gen = InputFileGenerator()
+    gen.add_stations(stations)
+    assert sorted(stations) == sorted(gen._stations)
+
+
+def test_adding_single_and_multiple_station():
     """
     Reading all files at once or seperate should make not difference.
     """
@@ -110,26 +130,6 @@ def test_adding_single_and_multiple_items():
     gen2.add_stations(station_1)
     gen2.add_stations(station_2)
     assert sorted(gen1._stations) == sorted(gen2._stations)
-
-
-def test_passing_station_dictionaries():
-    """
-    Checks that stations can also be passed as dictionaries.
-    """
-    stations = [{
-        "id": "BW.FURT",
-        "latitude": 48.162899,
-        "longitude": 11.2752,
-        "elevation_in_m": 565.0,
-        "local_depth_in_m": 10.0},
-        {"id": "BW.RJOB",
-         "latitude": 47.737167,
-         "longitude": 12.795714,
-         "elevation_in_m": 860.0,
-         "local_depth_in_m": 2.0}]
-    gen = InputFileGenerator()
-    gen.add_stations(stations)
-    assert sorted(stations) == sorted(gen._stations)
 
 
 def test_local_depth_will_be_set_to_zero():
