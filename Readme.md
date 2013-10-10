@@ -82,6 +82,7 @@ gen.add_events("quake.xml")
 gen.add_events("...")
 ```
 
+```
 # Add some stations. SEED/XSEED/SAC
 >>> gen.add_stations(["station1.seed", "station2.seed"])
 
