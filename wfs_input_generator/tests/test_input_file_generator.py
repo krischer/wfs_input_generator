@@ -1064,6 +1064,7 @@ def test_station_filter():
          "local_depth_in_m": 0.0}]
 
     gen = InputFileGenerator()
+    gen.add_stations(stations)
 
     # No applied filter should just result in the same stations being available
     # everywhere.

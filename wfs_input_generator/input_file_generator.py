@@ -14,6 +14,7 @@ from wfs_input_generator.station_xml_helper \
     import extract_coordinates_from_StationXML
 
 import copy
+import fnmatch
 import glob
 import inspect
 import io
@@ -48,6 +49,7 @@ class InputFileGenerator(object):
         self.config = AttribDict()
         self._events = []
         self._stations = []
+        self.__station_filter = None
 
     def add_configuration(self, config):
         """
@@ -292,6 +294,30 @@ class InputFileGenerator(object):
         self._stations.extend(list(all_stations.values()))
         self._stations = unique_list(self._stations)
 
+    @property
+    def _filtered_stations(self):
+        if not self.station_filter:
+            return self._stations
+
+        def filt(station):
+            for pattern in self.station_filter:
+                if fnmatch.fnmatch(station["id"], pattern):
+                    return True
+            return False
+
+        return filter(filt, self._stations)
+
+    @property
+    def station_filter(self):
+        return self.__station_filter
+
+    @station_filter.setter
+    def station_filter(self, value):
+        if not hasattr(value, "__iter__") and value is not None:
+            msg = "Needs to be a list or other iterable."
+            raise TypeError(msg)
+        self.__station_filter = value
+
     def _parse_seed(self, station_item, all_stations):
         """
         Helper function to parse SEED and XSEED files.
@@ -354,9 +380,9 @@ class InputFileGenerator(object):
 
         # Make sure only unique stations and events are passed on. Sort
         # stations by id.
-        self._stations = sorted(unique_list(self._stations),
-                                key=lambda x: x["id"])
-        self._events = unique_list(self._events)
+        _stations = sorted(unique_list(self._filtered_stations),
+                           key=lambda x: x["id"])
+        _events = unique_list(self._events)
 
         # Set the correct write function.
         writer = self.__write_functions[format]
@@ -391,8 +417,8 @@ class InputFileGenerator(object):
 
         # Call the write function. The write function is supposed to raise the
         # appropriate error in case anything is amiss.
-        input_files = writer["function"](config=config, events=self._events,
-                                         stations=self._stations)
+        input_files = writer["function"](config=config, events=_events,
+                                         stations=_stations)
 
         # If an output directory is given, it will be used.
         if output_dir:
