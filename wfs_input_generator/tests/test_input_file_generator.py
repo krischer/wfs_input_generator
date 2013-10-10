@@ -957,3 +957,57 @@ def test_adding_invalid_file_to_event_raises():
     gen = InputFileGenerator()
     with pytest.raises(ValueError):
         gen.add_events("some_nonesense")
+
+
+def test_configuration_via_a_dictionary():
+    """
+    Tests that a dictionary can be used to update the configuration.
+    """
+    gen = InputFileGenerator()
+    gen.config.test = "1"
+    assert gen.config == {"test": "1"}
+
+    gen.add_to_configuration({
+        "something_else": 2,
+        "and_more": 3.0})
+
+    assert gen.config == {
+        "test": "1",
+        "something_else": 2,
+        "and_more": 3.0}
+
+    # Adding the something that already exists overwrites.
+    gen.add_to_configuration({
+        "test": "4"})
+
+    assert gen.config == {
+        "test": "4",
+        "something_else": 2,
+        "and_more": 3.0}
+
+
+def test_configuration_via_JSON():
+    """
+    A JSON document can also be used.
+    """
+    gen = InputFileGenerator()
+    gen.config.test = "1"
+    assert gen.config == {"test": "1"}
+
+    gen.add_to_configuration(json.dumps({
+        "something_else": 2,
+        "and_more": 3.0}))
+
+    assert gen.config == {
+        "test": "1",
+        "something_else": 2,
+        "and_more": 3.0}
+
+    # Adding the something that already exists overwrites.
+    gen.add_to_configuration(json.dumps({
+        "test": "4"}))
+
+    assert gen.config == {
+        "test": "4",
+        "something_else": 2,
+        "and_more": 3.0}
