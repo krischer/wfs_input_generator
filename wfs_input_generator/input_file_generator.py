@@ -13,6 +13,7 @@ solvers.
 import copy
 import glob
 import inspect
+import json
 from obspy import readEvents
 from obspy.core import AttribDict, read
 from obspy.core.event import Event
@@ -98,6 +99,16 @@ class InputFileGenerator(object):
         :param stations: The stations for which output files should be
             generated.
         """
+        # Try to interpret it as json. If it works and results in a list or
+        # dicionary, use it!
+        try:
+            json_s = json.loads(stations)
+        except:
+            pass
+        else:
+            # A simple string is also a valid JSON document.
+            if isinstance(json_s, list) or isinstance(json_s, dict):
+                stations = json_s
         all_stations = {}
         # Thin wrapper to enable single element treatment.
         if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
