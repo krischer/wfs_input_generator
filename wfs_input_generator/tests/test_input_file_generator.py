@@ -149,6 +149,47 @@ def test_adding_multiple_stations_as_JSON():
     assert sorted(stations) == sorted(gen._stations)
 
 
+def test_adding_stations_as_StationXML():
+    """
+    Tests adding stations as StationXML.
+    """
+    stations = [
+        {"id": "HT.HORT",
+         "latitude": 40.5978,
+         "longitude": 23.0995,
+         "elevation_in_m": 925.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.LIT",
+         "latitude": 40.1003,
+         "longitude": 22.489,
+         "elevation_in_m": 568.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.PAIG",
+         "latitude": 39.9363,
+         "longitude": 23.6768,
+         "elevation_in_m": 213.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.SOH",
+         "latitude": 40.8206,
+         "longitude": 23.3556,
+         "elevation_in_m": 728.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.THE",
+         "latitude": 40.6319,
+         "longitude": 22.9628,
+         "elevation_in_m": 124.0,
+         "local_depth_in_m": 0.0},
+        {"id": "HT.XOR",
+         "latitude": 39.366,
+         "longitude": 23.192,
+         "elevation_in_m": 500.0,
+         "local_depth_in_m": 0.0}]
+    station_xml_file = os.path.join(DATA, "station.xml")
+    gen = InputFileGenerator()
+    gen.add_stations(station_xml_file)
+    assert sorted(stations) == sorted(gen._stations)
+
+
 def test_adding_single_and_multiple_station():
     """
     Reading all files at once or seperate should make not difference.

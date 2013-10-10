@@ -57,7 +57,7 @@ def test_dictionary_extraction_from_file():
          "latitude": 39.366,
          "longitude": 23.192,
          "elevation_in_m": 500.0,
-         "local_depth_in_m": 0.0},
+         "local_depth_in_m": 0.0}
         ])
 
 
@@ -102,5 +102,5 @@ def test_dictionary_extraction_from_BytesIO():
          "latitude": 39.366,
          "longitude": 23.192,
          "elevation_in_m": 500.0,
-         "local_depth_in_m": 0.0},
+         "local_depth_in_m": 0.0}
         ])
