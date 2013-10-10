@@ -1135,7 +1135,7 @@ def test_event_filter():
     assert sorted(gen._filtered_events) == sorted(gen._events)
 
     # Events filters are a simple list of URLS.
-    gen.events_filter = ["smi:local/Event/2013-01-07T13:58:41.209477"]
+    gen.event_filter = ["smi:local/Event/2013-01-07T13:58:41.209477"]
     # Only the last event should now be available.
     assert sorted(gen._filtered_events) == sorted(events[1:])
 

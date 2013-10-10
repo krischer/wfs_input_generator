@@ -50,6 +50,7 @@ class InputFileGenerator(object):
         self._events = []
         self._stations = []
         self.__station_filter = None
+        self.__event_filter = None
 
     def add_configuration(self, config):
         """
@@ -318,6 +319,34 @@ class InputFileGenerator(object):
             raise TypeError(msg)
         self.__station_filter = value
 
+    @property
+    def _filtered_events(self):
+        if not self.event_filter:
+            return self._events
+
+        def filt(event):
+            # No id will remove the event.
+            if "_event_id" not in event:
+                return False
+
+            for event_id in self.event_filter:
+                if event["_event_id"].lower() == event_id.lower():
+                    return True
+            return False
+
+        return filter(filt, self._events)
+
+    @property
+    def event_filter(self):
+        return self.__event_filter
+
+    @event_filter.setter
+    def event_filter(self, value):
+        if not hasattr(value, "__iter__") and value is not None:
+            msg = "Needs to be a list or other iterable."
+            raise TypeError(msg)
+        self.__event_filter = value
+
     def _parse_seed(self, station_item, all_stations):
         """
         Helper function to parse SEED and XSEED files.
@@ -382,7 +411,7 @@ class InputFileGenerator(object):
         # stations by id.
         _stations = sorted(unique_list(self._filtered_stations),
                            key=lambda x: x["id"])
-        _events = unique_list(self._events)
+        _events = unique_list(self._filtered_events)
 
         # Set the correct write function.
         writer = self.__write_functions[format]
