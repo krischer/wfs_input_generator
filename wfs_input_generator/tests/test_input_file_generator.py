@@ -573,6 +573,62 @@ def test_adding_single_event_dictionary():
     assert gen._events == [event]
 
 
+def test_adding_single_event_JSON():
+    """
+    Adding a single event as a JSON file.
+    """
+    event = {
+        "latitude": 45.0,
+        "longitude": 12.1,
+        "depth_in_km": 13.0,
+        "origin_time": str(obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000)),
+        "m_rr": -2.11e+18,
+        "m_tt": -4.22e+19,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18}
+    gen = InputFileGenerator()
+    gen.add_events(json.dumps(event))
+
+    event["origin_time"] = obspy.UTCDateTime(event["origin_time"])
+    assert gen._events == [event]
+
+
+def test_adding_multiple_events_JSON():
+    """
+    Tests adding multiple events as JSON.
+    """
+    events = [{
+        "latitude": 45.0,
+        "longitude": 12.1,
+        "depth_in_km": 13.0,
+        "origin_time": str(obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000)),
+        "m_rr": -2.11e+18,
+        "m_tt": -4.22e+19,
+        "m_pp": 4.43e+19,
+        "m_rt": -9.35e+18,
+        "m_rp": -8.38e+18,
+        "m_tp": -6.44e+18
+    }, {
+        "latitude": 13.93,
+        "longitude": -92.47,
+        "depth_in_km": 28.7,
+        "origin_time": str(obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000)),
+        "m_rr": 1.02e+20,
+        "m_tt": -7.96e+19,
+        "m_pp": -2.19e+19,
+        "m_rt": 6.94e+19,
+        "m_rp": -4.08e+19,
+        "m_tp": 4.09e+19}]
+    gen = InputFileGenerator()
+    gen.add_events(json.dumps(events))
+
+    events[0]["origin_time"] = obspy.UTCDateTime(events[0]["origin_time"])
+    events[1]["origin_time"] = obspy.UTCDateTime(events[1]["origin_time"])
+    assert sorted(gen._events) == sorted(events)
+
+
 def test_event_dictionary_automatic_type_conversion():
     """
     The types for the event dictionary should also undergo automatic type
