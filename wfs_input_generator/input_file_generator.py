@@ -13,6 +13,7 @@ solvers.
 import copy
 import glob
 import inspect
+import io
 import json
 from obspy import readEvents
 from obspy.core import AttribDict, read
@@ -20,6 +21,7 @@ from obspy.core.event import Event
 from obspy.sac.core import isSAC
 from obspy.xseed import Parser
 import os
+import urllib2
 
 
 def unique_list(items):
@@ -109,11 +111,20 @@ class InputFileGenerator(object):
             # A simple string is also a valid JSON document.
             if isinstance(json_s, list) or isinstance(json_s, dict):
                 stations = json_s
-        all_stations = {}
+
         # Thin wrapper to enable single element treatment.
         if isinstance(stations, dict) or not hasattr(stations, "__iter__"):
             stations = [stations, ]
+
+        all_stations = {}
+
         for station_item in stations:
+
+            # Download it if it is some kind of URL.
+            if isinstance(station_item, basestring) and "://" in station_item:
+                station_item = io.BytesIO(urllib2.urlopen(station_item).read())
+
+            # If it is a dict do some checks and add it.
             if isinstance(station_item, dict):
                 if "latitude" not in station_item or \
                         "longitude" not in station_item or \
@@ -140,7 +151,8 @@ class InputFileGenerator(object):
                 else:
                     all_stations[stat["id"]] = stat
                 continue
-            # Check if the file is a sac file.
+
+            # Also accepts SAC files.
             if isSAC(station_item):
                 st = read(station_item)
                 for tr in st:
@@ -158,7 +170,7 @@ class InputFileGenerator(object):
                     continue
                 continue
 
-            # Check if the file is readable by the parser.
+            # SEED / XML-SEED
             try:
                 Parser(station_item)
                 is_seed = True
