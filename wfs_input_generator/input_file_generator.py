@@ -26,6 +26,7 @@ from obspy.sac.core import isSAC
 from obspy.xseed import Parser
 import os
 import urllib2
+import warnings
 
 
 def unique_list(items):
@@ -224,14 +225,13 @@ class InputFileGenerator(object):
                     if stat["latitude"] == -12345.0 or \
                             stat["longitude"] == -12345.0 or \
                             stat["elevation_in_m"] == -12345.0:
+                        warnings.warn("No coordinates for channel '%s'."
+                                      % str(tr))
                         continue
                     # Local may be neclected.
                     if stat["local_depth_in_m"] == -12345.0:
                         del stat["local_depth_in_m"]
-                    if stat["id"] in all_stations:
-                        all_stations[stat["id"]].update(stat)
-                    else:
-                        all_stations[stat["id"]] = stat
+                    all_stations[stat["id"]] = stat
                     continue
                 continue
 
@@ -255,11 +255,11 @@ class InputFileGenerator(object):
             # StationXML
             try:
                 stations = extract_coordinates_from_StationXML(station_item)
-                for station in stations:
-                    all_stations[station["id"]] = station
             except:
                 pass
             else:
+                for station in stations:
+                    all_stations[station["id"]] = station
                 continue
 
             msg = "Could not read %s." % station_item
