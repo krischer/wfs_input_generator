@@ -1,5 +1,7 @@
 ## Waveform Solver Input File Generator
 
+[![Build Status](https://travis-ci.org/krischer/wfs_input_generator.png?branch=master)](https://travis-ci.org/krischer/wfs_input_generator)
+
 Seismic waveform solvers are generally written in a high-performance language and
 require carefully crafted input files to work.
 These input files are very solver dependent and have their own quirks.
