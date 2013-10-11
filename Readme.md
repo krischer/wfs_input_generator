@@ -303,9 +303,9 @@ gen.write(format="ses3d_4_0", output_dir="solver_input_files")
 
 ## Adding Support for a new Solver
 
-Adding support for a new solver (from now on called a backend) is simply a
-matter of adding a new python script. The input file generator main class
-will take care of discovering and using it.
+Adding support for a new solver (also called a backend) is simply a matter of
+adding a new python script. The input file generator main class will take care
+of discovering and using it.
 
 All backends have to be stored in the `wfs_input_generator/backends`
 subdirectory. It has to have the name `write_SOLVER.py` where `SOLVER` shoud
@@ -319,30 +319,84 @@ The file has to contain three things, the definition of the required
 parameters, the definition of the optional parameters and a `write()`
 function.
 
-The file has to contain a function akin to the following:
+The wfs_input_generator module will take care that all required parameters will
+be present and that all parameters have the correct type.
+
+### Definition of the Required Parameters
+
+The required parameters are specified in the file in a variable called
+`REQUIRED_CONFIGURATION`. It is a dictionary with the keys being the parameter
+names and the values a two-tuple of type and description.
 
 ```python
-def write(config, events, stations, output_directory):
-    # Logic here
+REQUIRED_CONFIGURATION = {
+    "some_parameter": (str, "This does something"),
+    "another_parameters": (float, "This does something else),
+    "one_more": (lambda x: map(float, x), "This will always be a list of floats")
+}
 ```
 
-It will be called by the `InputFileGenerator.write()` method if the
-corresponding format has been requested.
+### Definition of the Optional Parameters
 
-The write function has to accept four arguments in the given order.
+The optional parameters are specified in the file in a variable called
+`DEFAULT_CONFIGURATION`. It is another dictionary. The keys are once again the
+parameters names, the values this time a three-tuple of default value, type,
+and description.
 
-### The config argument
-The config argument is a `obspy.core.AttribDict` instance and contains any user
-specfied configuration values.
+```python
+DEFAULT_CONFIGURATION = {
+    "some_required_parameter": ("default", str, "A parameter"),
+    ...
+}
+```
 
-### The events argument
+### The write() function
+
+The `write()` function will be called to assemble the input files. This is the
+actual job of any backend.
+
+The file has to have a call signature akin to
+
+```python
+def write(config, events, stations):
+    # Logic here
+    return {
+        "filename_1": content_1,
+        "filename_2": content_2
+    }
+```
+
+and return a dictionary with the keys being the names of the files to be
+generated and the values being the actual contents. Unicode should work just
+fine.
+
+At any point you can be sure that the contents of the three arguments are fine.
+You do not need to perform any type checking or test for missing parameters.
+The module takes care that the parameters are sanitized.
+
+What you need to do is check things that cannot be caught by the parameter
+specification or something else, e.g. raise an error if more than one event is
+present but the solver can only deal with one event at a time and similar
+things.
+
+#### The config argument
+
+The config argument is a `obspy.core.AttribDict` instance and will contain all
+the values specified in `REQUIRED_CONFIGURATION` and `DEFAULT_CONFIGURATION`.
+All parameters will be present; the `wfs_input_generator` module assures that
+the user specified all required parameters. Also all optional parameters will
+be present; values that the user did not specify will be replaced by the
+default values.
+
+#### The events argument
+
 It is a list of dictionaries. You can be sure they have the following format:
 
 ```python
 {"latitude": 28.7,
  "longitude": -113.1,
  "depth_in_km": 13.0,
- "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+ "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
  "m_rr": -2.11e+18,
  "m_tt": -4.22e+19,
  "m_pp": 4.43e+19,
@@ -351,9 +405,10 @@ It is a list of dictionaries. You can be sure they have the following format:
  "m_tp": -6.44e+18}
 ```
 The `origin_time` value will be an `obspy.UTCDateTime` instance, the rest
-ordinary floats.
+ordinary floats. Again no need to check for any missing parameters. They will
+all be present and have the correct type.
 
-### The stations argument
+#### The stations argument
 It is a list of dictionaries. You can be sure they have the following format:
 
 ```python
@@ -365,13 +420,3 @@ It is a list of dictionaries. You can be sure they have the following format:
 ```
 
 The `id` value will be a string and all other values will be floats.
-
-### The output_directory argument
-This is a string containing the directory where all files should be written to.
-You can be sure that the directory exists. Please create filenames in the following way to ensure cross-platform compatibility:
-
-```python
-path = os.path.join(output_directory, "new_file.txt")
-```
-
-This will generate the absolute path of the `new_file.txt` file in the output_directory.
