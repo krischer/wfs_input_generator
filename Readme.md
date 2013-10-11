@@ -301,14 +301,23 @@ contents.
 gen.write(format="ses3d_4_0", output_dir="solver_input_files")
 ```
 
-## How to add support for a new solver
-Adding support for a new solver is simply a matter of adding a new python
-script. The input file generator main class will take care of finding it and
-calling it.
+## Adding Support for a new Solver
 
-Put the file in the `wfs_input_generator/backends` subdirectory. It has to have
-the name `write_SOLVER.py` where `SOLVER` shoud be a very accurate description
-of the used solver.
+Adding support for a new solver (from now on called a backend) is simply a
+matter of adding a new python script. The input file generator main class
+will take care of discovering and using it.
+
+All backends have to be stored in the `wfs_input_generator/backends`
+subdirectory. It has to have the name `write_SOLVER.py` where `SOLVER` shoud
+be a very accurate description of the used solver.
+
+The best way to add a new solver is to use
+[an existing one](https://github.com/krischer/wfs_input_generator/blob/master/wfs_input_generator/backends/write_ses3d_4_0.py)
+as a template.
+
+The file has to contain three things, the definition of the required
+parameters, the definition of the optional parameters and a `write()`
+function.
 
 The file has to contain a function akin to the following:
 
