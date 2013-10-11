@@ -31,6 +31,29 @@ The following sketch shows a short overview of the module's workings:
 ![Flow](https://raw.github.com/krischer/wfs_input_generator/master/misc/wfs_input_gen_flow.png)
 
 
+## Navigation
+
+* [Dependencies and Installation](#dependencies-and-installation)
+    * [Requirements](#requirements)
+    * [Installation](#installation)
+        * [User Installation](#user-installation)
+        * [Developer Installation](#developer-installation)
+        * [Running the Tests](#running-the-tests)
+* [Usage](#usage)
+    * [Adding Events](#adding-events)
+    * [Adding Stations](#adding-stations)
+    * [Event and Station Filters](#event-and-station-filters)
+        * [Event Filters](#event-filters)
+        * [Station Filters](#station-filters)
+    * [Solver Specific Configuration](#solver-specific-configuration)
+* [Adding Support for a New Solver](#adding-support-for-a-new-solver)
+    * [Definition of the Required Parameters](#definition-of-the-required-parameters)
+    * [Definition of the Optional Parameters](#definition-of-the-optional-parameters)
+    * [The write() Function](#the-write-function)
+        * [The config Argument](#the-config-argument)
+        * [The events Argument](#the-events-argument)
+        * [The stations Argument](#the-stations-argument)
+
 ## Dependencies and Installation
 
 The module is written in pure Python and thus only has very minimal
@@ -92,6 +115,8 @@ Test session starts (darwin, 2.7.5)
 If you intend on developing for this module, please write tests for your
 additions and also guard against regressions by ensuring the existing test
 suite passes.
+
+
 
 ## Usage
 
@@ -252,7 +277,7 @@ gen.event_filter = '["smi:local/event_id_1", "smi:/local_event_id_2"]'
 ```
 
 
-#### Stations Filters
+#### Station Filters
 
 Station filters are a list of station ids. UNIX style wildcards are supported.
 
@@ -323,6 +348,8 @@ contents.
 gen.write(format="ses3d_4_0", output_dir="solver_input_files")
 ```
 
+
+
 ## Adding Support for a new Solver
 
 Adding support for a new solver (also called a backend) is simply a matter of
@@ -372,7 +399,7 @@ DEFAULT_CONFIGURATION = {
 }
 ```
 
-### The write() function
+### The write() Function
 
 The `write()` function will be called to assemble the input files. This is the
 actual job of any backend.
@@ -403,7 +430,7 @@ specification or something else, e.g. raise an error if more than one event is
 present but the solver can only deal with one event at a time and similar
 things.
 
-#### The config argument
+#### The config Argument
 
 The config argument is a `obspy.core.AttribDict` instance and will contain all
 the values specified in `REQUIRED_CONFIGURATION` and `DEFAULT_CONFIGURATION`.
@@ -412,7 +439,7 @@ the user specified all required parameters. Also all optional parameters will
 be present; values that the user did not specify will be replaced by the
 default values.
 
-#### The events argument
+#### The events Argument
 
 It is a list of dictionaries. You can be sure they have the following format:
 
@@ -433,7 +460,7 @@ The `origin_time` value will be an `obspy.UTCDateTime` instance, the rest
 ordinary floats. Again no need to check for any missing parameters. They will
 all be present and have the correct type.
 
-#### The stations argument
+#### The stations Argument
 It is a list of dictionaries. You can be sure they have the following format:
 
 ```python
