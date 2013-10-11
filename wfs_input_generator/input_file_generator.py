@@ -529,6 +529,15 @@ class InputFileGenerator(object):
         self.__find_write_scripts()
         return list(self.__write_functions.keys())
 
+    def get_config_params(self, solver_name):
+        self.__find_write_scripts()
+        if solver_name not in self.__write_functions.keys():
+            msg = "Solver '%s' not found." % solver_name
+            raise ValueError(msg)
+        writer = self.__write_functions[solver_name]
+
+        return writer["required_config"], writer["default_config"]
+
     def _parse_event(self, event):
         """
         Check and parse events.
