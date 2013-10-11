@@ -306,7 +306,7 @@ Adding support for a new solver is simply a matter of adding a new python
 script. The input file generator main class will take care of finding it and
 calling it.
 
-Put the file in the `wfs_input_generator/writers` subdirectory. It has to have
+Put the file in the `wfs_input_generator/backends` subdirectory. It has to have
 the name `write_SOLVER.py` where `SOLVER` shoud be a very accurate description
 of the used solver.
 

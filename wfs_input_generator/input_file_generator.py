@@ -489,15 +489,15 @@ class InputFileGenerator(object):
         defined as being in the folder "writer" and having a name of the form
         "write_XXX.py". It furthermore needs to have a write() method.
         """
-        # Most generic way to get the 'writers' subdirectory.
+        # Most generic way to get the 'backends' subdirectory.
         write_dir = os.path.join(os.path.dirname(inspect.getfile(
-            inspect.currentframe())), "writers")
+            inspect.currentframe())), "backends")
         files = glob.glob(os.path.join(write_dir, "write_*.py"))
         import_names = [os.path.splitext(os.path.basename(_i))[0]
                         for _i in files]
         write_functions = {}
         for name in import_names:
-            module_name = "writers.%s" % name
+            module_name = "backends.%s" % name
             try:
                 module = __import__(
                     module_name, globals(), locals(),
