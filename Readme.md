@@ -250,15 +250,15 @@ If needed the supported output formats of the module can be queried:
 
 ```python
 >>> gen.get_available_formats()
->>> ['ses3d_4_0', 'SPECFEM3D_CARTESIAN']
+['ses3d_4_0', 'SPECFEM3D_CARTESIAN']
 ```
 
 It is also possible to request the parameters needed for a specific solver. The
-'get_config_params()' method returns two dictionaries. The first one describes
-the required parameters. The keys are the parameter names and the values a
-two-tuple of type and description. The second one is the optional parameters.
-The keys are once again the parameters names, the values this time a
-three-tuple of default value, type, and description.
+`get_config_params()` method returns two dictionaries. The first one describes
+the required parameters; the keys are the parameter names and the values a
+two-tuple of type and description. The second one describes the optional
+parameters. The keys are once again the parameters names, the values this time
+a three-tuple of default value, type, and description.
 
 ```python
 >>> required, optional = gen.get_config_params('ses3d_4_0')
