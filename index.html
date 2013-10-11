@@ -1,0 +1,551 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Wfs input generator by krischer</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Wfs input generator</h1>
+        <p class="header">API to generate input files for many different seismic waveform solvers</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/krischer/wfs_input_generator/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/krischer/wfs_input_generator/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/krischer/wfs_input_generator">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/krischer">krischer</a></p>
+
+
+      </header>
+      <section>
+        <h2>
+<a name="waveform-solver-input-file-generator" class="anchor" href="#waveform-solver-input-file-generator"><span class="octicon octicon-link"></span></a>Waveform Solver Input File Generator</h2>
+
+<p>Seismic waveform solvers are generally written in a high-performance language
+and are controlled with the help of carefully crafted input files. These input
+files are very solver dependent and have their own quirks. The present module
+attempts to create a generic input file generator that hides the actual input
+files' syntax and has a usable Python API.</p>
+
+<p>From a high-level point of view the solvers require three distinct types of
+input: the sources, the receivers, and a detailed configuration of the solver
+which includes all the remaining parts like time-stepping, the domain setup,
+which type of simulation to perform, and many more.</p>
+
+<p>The <code>wfs_input_generator</code> module is able to extract the list of sources (or
+        seimic events) and the list of receivers (or seismic stations) from
+various common formats that are readily available. It also helps with the
+solver specific configuration, other then the input file formatting, by
+dividing the configuration values in a (hopefully) small set of required
+parameters and a larger list of optional ones with sensible default values.
+Furthermore it takes care of a lot of sanity, type, and availability checks
+with the goal of producing only valid input files.</p>
+
+<p>A main focus of the development was to make it as easy as possible to add
+support for further waveform solver input file formats. This is achieved by
+employing a system of simple backends; one for each supported solver.</p>
+
+<p>The following sketch shows a short overview of the module's workings:</p>
+
+<p><img src="https://raw.github.com/krischer/wfs_input_generator/master/misc/wfs_input_gen_flow.png" alt="Flow"></p>
+
+<h2>
+<a name="navigation" class="anchor" href="#navigation"><span class="octicon octicon-link"></span></a>Navigation</h2>
+
+<ul>
+<li>
+<a href="#dependencies-and-installation">Dependencies and Installation</a>
+
+<ul>
+<li><a href="#requirements">Requirements</a></li>
+<li>
+<a href="#installation">Installation</a>
+
+<ul>
+<li><a href="#user-installation">User Installation</a></li>
+<li><a href="#developer-installation">Developer Installation</a></li>
+<li><a href="#running-the-tests">Running the Tests</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<a href="#usage">Usage</a>
+
+<ul>
+<li><a href="#adding-events">Adding Events</a></li>
+<li><a href="#adding-stations">Adding Stations</a></li>
+<li>
+<a href="#event-and-station-filters">Event and Station Filters</a>
+
+<ul>
+<li><a href="#event-filters">Event Filters</a></li>
+<li><a href="#station-filters">Station Filters</a></li>
+</ul>
+</li>
+<li><a href="#solver-specific-configuration">Solver Specific Configuration</a></li>
+</ul>
+</li>
+<li>
+<a href="#adding-support-for-a-new-solver">Adding Support for a New Solver</a>
+
+<ul>
+<li><a href="#definition-of-the-required-parameters">Definition of the Required Parameters</a></li>
+<li><a href="#definition-of-the-optional-parameters">Definition of the Optional Parameters</a></li>
+<li>
+<a href="#the-write-function">The write() Function</a>
+
+<ul>
+<li><a href="#the-config-argument">The config Argument</a></li>
+<li><a href="#the-events-argument">The events Argument</a></li>
+<li><a href="#the-stations-argument">The stations Argument</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul><h2>
+<a name="dependencies-and-installation" class="anchor" href="#dependencies-and-installation"><span class="octicon octicon-link"></span></a>Dependencies and Installation</h2>
+
+<p>The module is written in pure Python and thus only has very minimal
+dependencies. It currently only works with Python 2.7.x as ObsPy does not yet
+support Python 3.x.</p>
+
+<h3>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h3>
+
+<ul>
+<li>Python 2.7.x</li>
+<li>ObsPy &gt;= 0.8.3</li>
+</ul><h4>
+<a name="additional-requirements-for-running-the-test-suite" class="anchor" href="#additional-requirements-for-running-the-test-suite"><span class="octicon octicon-link"></span></a>Additional requirements for running the test suite:</h4>
+
+<ul>
+<li>pytest</li>
+<li>flake8 &gt;= 2.0</li>
+<li>mock</li>
+</ul><h3>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h3>
+
+<h4>
+<a name="user-installation" class="anchor" href="#user-installation"><span class="octicon octicon-link"></span></a>User Installation</h4>
+
+<p>To install the most recent version, make sure ObsPy is installed and execute</p>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>pip install https://github.com/krischer/wfs_input_generator/archive/master.zip
+</pre></div>
+
+<p>To also install the requirements for the tests, run</p>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>pip install https://github.com/krischer/wfs_input_generator/archive/master.zip<span class="o">[</span>tests<span class="o">]</span>
+</pre></div>
+
+<h4>
+<a name="developer-installation" class="anchor" href="#developer-installation"><span class="octicon octicon-link"></span></a>Developer Installation</h4>
+
+<p>If you want to develop your own backends for writing input files for new
+solvers you have to install the wfs_input_generator with an in-place
+installation.</p>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span>git clone https://github.com/krischer/wfs_input_generator.git
+<span class="nv">$ </span><span class="nb">cd </span>wfs_input_generator
+<span class="nv">$ </span>pip install -v -e .<span class="o">[</span>tests<span class="o">]</span>
+</pre></div>
+
+<h4>
+<a name="running-the-tests" class="anchor" href="#running-the-tests"><span class="octicon octicon-link"></span></a>Running the Tests</h4>
+
+<p>The simplest way to launch the tests is to use the <code>py.test</code> command in the
+main <code>wfs_input_generator</code> directory. It will take care of discovering and
+executing all tests.</p>
+
+<div class="highlight highlight-bash"><pre><span class="nv">$ </span><span class="nb">cd </span>wfs_input_generator
+<span class="nv">$ </span>py.test
+Test session starts <span class="o">(</span>darwin, 2.7.5<span class="o">)</span>
+    ...
+</pre></div>
+
+<p>If you intend on developing for this module, please write tests for your
+additions and also guard against regressions by ensuring the existing test
+suite passes.</p>
+
+<h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
+
+<p>The input file generation is steered with a Python script.</p>
+
+<p>The first step it to create an <code>InputFileGenerator</code> object.</p>
+
+<div class="highlight highlight-python"><pre><span class="kn">from</span> <span class="nn">wfs_input_generator</span> <span class="kn">import</span> <span class="n">InputFileGenerator</span>
+<span class="n">gen</span> <span class="o">=</span> <span class="n">InputFileGenerator</span><span class="p">()</span>
+</pre></div>
+
+<p>This object requires seismic events, which act as the sources, seismic
+stations, which act as the receivers and finally some solver specific
+configuration to be able to eventually generate input files for different
+solvers.</p>
+
+<p>The events and stations can be the same for every solver, but the rest of the
+configuration cannot be unified; the different solvers simply require very
+different parameters.</p>
+
+<h3>
+<a name="adding-events" class="anchor" href="#adding-events"><span class="octicon octicon-link"></span></a>Adding Events</h3>
+
+<p>Events or seismic sources are added with the help of the <code>add_events()</code> method.
+Different formats are supported. The function can be called as often as
+necessary to add as many events as desired. Duplicates will be automatically
+discarded.</p>
+
+<p>Many solvers are only able to accept a single event and thus will raise an
+error upon input file creation if multiple events are present.</p>
+
+<p>Different ways to add one or more events are demonstrated by example:</p>
+
+<div class="highlight highlight-python"><pre><span class="c"># Add one or more QuakeML files.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">(</span><span class="s">"quake.xml"</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">([</span><span class="s">"path/to/quake1.xml"</span><span class="p">,</span> <span class="s">"path/to/quake2.xml"</span><span class="p">])</span>
+
+<span class="c"># Add QuakeML with the URL to a webservice.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">(</span><span class="s">"http://earthquakes.gov/quakeml?parameters=all"</span><span class="p">)</span>
+
+<span class="c"># Directly add an event as a dictionary. Also a list of events.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">({</span>
+    <span class="s">"latitude"</span><span class="p">:</span> <span class="mf">45.0</span><span class="p">,</span>
+    <span class="s">"longitude"</span><span class="p">:</span> <span class="mf">12.1</span><span class="p">,</span>
+    <span class="s">"depth_in_km"</span><span class="p">:</span> <span class="mf">13.0</span><span class="p">,</span>
+    <span class="s">"origin_time"</span><span class="p">:</span>
+        <span class="n">obspy</span><span class="o">.</span><span class="n">UTCDateTime</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">500000</span><span class="p">),</span>
+    <span class="s">"m_rr"</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.11e+18</span><span class="p">,</span>
+    <span class="s">"m_tt"</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.22e+19</span><span class="p">,</span>
+    <span class="s">"m_pp"</span><span class="p">:</span> <span class="mf">4.43e+19</span><span class="p">,</span>
+    <span class="s">"m_rt"</span><span class="p">:</span> <span class="o">-</span><span class="mf">9.35e+18</span><span class="p">,</span>
+    <span class="s">"m_rp"</span><span class="p">:</span> <span class="o">-</span><span class="mf">8.38e+18</span><span class="p">,</span>
+    <span class="s">"m_tp"</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.44e+18</span><span class="p">})</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">([{</span><span class="o">...</span><span class="p">},</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span> <span class="o">...</span><span class="p">])</span>
+
+<span class="c"># JSON also works. Either as a single JSON object or as an arrays of objects.</span>
+<span class="n">json_str</span> <span class="o">=</span> <span class="s">"""</span>
+<span class="s">{</span>
+<span class="s">    "latitude": 45.0,</span>
+<span class="s">    "longitude": 12.1,</span>
+<span class="s">    "depth_in_km": 13.0,</span>
+<span class="s">    "origin_time": "2012-04-12T07:15:48.500000Z",</span>
+<span class="s">    "m_rr": -2.11e+18,</span>
+<span class="s">    "m_tt": -4.22e+19,</span>
+<span class="s">    "m_pp": 4.43e+19,</span>
+<span class="s">    "m_rt": -9.35e+18,</span>
+<span class="s">    "m_rp": -8.38e+18,</span>
+<span class="s">    "m_tp": -6.44e+18</span>
+<span class="s">}</span>
+<span class="s">"""</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+
+<span class="n">json_str</span> <span class="o">=</span> <span class="s">"""</span>
+<span class="s">[{...}, {...}]]</span>
+<span class="s">"""</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_events</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="adding-stations" class="anchor" href="#adding-stations"><span class="octicon octicon-link"></span></a>Adding Stations</h3>
+
+<p>The stations will act as the receivers during the simulation. Again, the most
+common formats are supported to facilitate integration into existing workflows.</p>
+
+<div class="highlight highlight-python"><pre><span class="c"># Add one or more (X)SEED files.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">(</span><span class="s">"station1.seed"</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">([</span><span class="s">"station2.seed"</span><span class="p">,</span> <span class="s">"station3_xseed.xml"</span><span class="p">])</span>
+
+<span class="c"># StationXML works just fine.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">(</span><span class="s">"station4.xml"</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">([</span><span class="s">"station5.ml"</span><span class="p">,</span> <span class="s">"station6.xml"</span><span class="p">])</span>
+
+<span class="c"># Webservices serving StationXML or (X)SEED work by</span>
+<span class="c"># simply providing the URL.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">(</span><span class="s">"http://fdsn_webservice.org/..."</span><span class="p">)</span>
+
+<span class="c"># There is also legacy support for coordinates</span>
+<span class="c"># embedded into SAC files.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">(</span><span class="s">"station7.sac"</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">([</span><span class="s">"station8.sac"</span><span class="p">,</span> <span class="s">"station9.sac"</span><span class="p">])</span>
+
+<span class="c"># Furthermore Python dictionaries are fine. The id is</span>
+<span class="c"># a simple string but for many purposes it should be</span>
+<span class="c"># NETWORK_ID.STATION_ID as defined in the SEED manual.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">({</span>
+    <span class="s">"id"</span><span class="p">:</span> <span class="s">"BW.FURT"</span><span class="p">,</span>
+    <span class="s">"latitude"</span><span class="p">:</span> <span class="mf">48.162899</span><span class="p">,</span>
+    <span class="s">"longitude"</span><span class="p">:</span> <span class="mf">11.2752</span><span class="p">,</span>
+    <span class="s">"elevation_in_m"</span><span class="p">:</span> <span class="mf">565.0</span><span class="p">,</span>
+    <span class="s">"local_depth_in_m"</span><span class="p">:</span> <span class="mf">10.0</span><span class="p">})</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">([{</span><span class="o">...</span><span class="p">},</span> <span class="p">{</span><span class="o">...</span><span class="p">},</span> <span class="o">...</span><span class="p">])</span>
+
+<span class="c"># JSON objects and arrays of objects.</span>
+<span class="n">json_str</span> <span class="o">=</span> <span class="s">"""</span>
+<span class="s">{</span>
+<span class="s">    "id": "BW.FURT",</span>
+<span class="s">    "latitude": 48.162899,</span>
+<span class="s">    "longitude": 11.2752,</span>
+<span class="s">    "elevation_in_m": 565.0,</span>
+<span class="s">    "local_depth_in_m": 10.0})</span>
+<span class="s">}</span>
+<span class="s">"""</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+
+<span class="n">json_str</span> <span class="o">=</span> <span class="s">"""</span>
+<span class="s">[{...}, {...}, ...]</span>
+<span class="s">"""</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_stations</span><span class="p">(</span><span class="n">json_str</span><span class="p">)</span>
+</pre></div>
+
+<h3>
+<a name="event-and-station-filters" class="anchor" href="#event-and-station-filters"><span class="octicon octicon-link"></span></a>Event and Station Filters</h3>
+
+<p>Events and stations can be filtered. This is useful for using the same
+(potentially very large) StationXML and QuakeML files for many simulations.
+Simply provide a different filter for each run restricting the existing
+dataset.</p>
+
+<p>Filters are defined as positive filters, thus they describe what should be the
+content of the input files and not what should be neglected.</p>
+
+<p>You can set and change the filters at any time during the setup process. They
+are applied at input file creation time.</p>
+
+<h4>
+<a name="event-filters" class="anchor" href="#event-filters"><span class="octicon octicon-link"></span></a>Event Filters</h4>
+
+<p>Event filters are only useful for QuakeML input as they depend on the public id
+of an event. They are simply a list of one ore more event ids. Note that any
+event not having an event id will be discarded as soon as a filter is present.</p>
+
+<div class="highlight highlight-python"><pre><span class="n">gen</span><span class="o">.</span><span class="n">event_filter</span> <span class="o">=</span> <span class="p">[</span><span class="s">"smi:local/event_id_1"</span><span class="p">,</span> <span class="s">"smi:/local_event_id_2"</span><span class="p">]</span>
+
+<span class="c"># A JSON array also works.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">event_filter</span> <span class="o">=</span> <span class="s">'["smi:local/event_id_1", "smi:/local_event_id_2"]'</span>
+</pre></div>
+
+<h4>
+<a name="station-filters" class="anchor" href="#station-filters"><span class="octicon octicon-link"></span></a>Station Filters</h4>
+
+<p>Station filters are a list of station ids. UNIX style wildcards are supported.</p>
+
+<div class="highlight highlight-python"><pre><span class="n">gen</span><span class="o">.</span><span class="n">station_filter</span> <span class="o">=</span> <span class="p">[</span><span class="s">"BW.FURT"</span><span class="p">,</span> <span class="s">"TA.A*"</span><span class="p">,</span> <span class="s">"TA.Y?H"</span><span class="p">]</span>
+
+<span class="c"># Again JSON arrays are just as fine.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">station_filter</span> <span class="o">=</span> <span class="s">'["BW.FURT", "TA.A*", "TA.Y?H"]'</span>
+</pre></div>
+
+<h3>
+<a name="solver-specific-configuration" class="anchor" href="#solver-specific-configuration"><span class="octicon octicon-link"></span></a>Solver Specific Configuration</h3>
+
+<p>The rest of the configuration is unfortunately very solver dependent. The
+inputs they require are just too different to make it feasible to extract a
+common subset.</p>
+
+<p>If needed the supported output formats of the module can be queried:</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_available_formats</span><span class="p">()</span>
+<span class="p">[</span><span class="s">'ses3d_4_0'</span><span class="p">,</span> <span class="s">'SPECFEM3D_CARTESIAN'</span><span class="p">]</span>
+</pre></div>
+
+<p>It is also possible to request the parameters needed for a specific solver. The
+<code>get_config_params()</code> method returns two dictionaries. The first one describes
+the required parameters; the keys are the parameter names and the values a
+two-tuple of type and description. The second one describes the optional
+parameters. The keys are once again the parameters names, the values this time
+a three-tuple of default value, type, and description.</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">required</span><span class="p">,</span> <span class="n">optional</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_config_params</span><span class="p">(</span><span class="s">'ses3d_4_0'</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">required</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">(</span><span class="s">'mesh_max_longitude'</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="s">'The maximum longitude of the mesh'</span><span class="p">))</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">optional</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+<span class="p">(</span><span class="s">'adjoint_forward_sampling_rate'</span><span class="p">,</span> <span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="s">'The sampling...'</span><span class="p">)</span>
+</pre></div>
+
+<p>Once the necessary parameters are known they can be set in a couple of
+different ways. The required parameters must be set before a file can be
+written, otherwise an error will be raised. If no value is given for an
+optional parameter, its default value will be used. Automatic type conversion
+will be performed by the <code>write()</code> method. If it fails an error will be
+raised.</p>
+
+<div class="highlight highlight-python"><pre><span class="c"># Directly attach attributes to the config object.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">time_stepping</span> <span class="o">=</span> <span class="mf">5.5</span>
+
+<span class="c"># Set values from a dictionary.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_configuration</span><span class="p">({</span><span class="s">'some_value'</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+                       <span class="s">'other_value'</span><span class="p">:</span> <span class="mi">2</span><span class="p">})</span>
+
+<span class="c"># From a JSON string.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">add_configuration</span><span class="p">(</span><span class="s">'{"some_value":2, ...}'</span><span class="p">)</span>
+</pre></div>
+
+<p>The last step is to actually write the input files. Per default it will return
+a dictionary with the keys being the filenames and the values being the file
+contents.</p>
+
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">output</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">"ses3d_4_0"</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">output</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="p">[</span><span class="s">'stf'</span><span class="p">,</span> <span class="s">'relax'</span><span class="p">,</span> <span class="s">'setup'</span><span class="p">,</span> <span class="s">'event_list'</span><span class="p">,</span> <span class="s">'event_1'</span><span class="p">,</span> <span class="s">'recfile_1'</span><span class="p">]</span>
+
+<span class="c"># One can also directly write the files to a specified folder.</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">"ses3d_4_0"</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s">"solver_input_files"</span><span class="p">)</span>
+</pre></div>
+
+<h2>
+<a name="adding-support-for-a-new-solver" class="anchor" href="#adding-support-for-a-new-solver"><span class="octicon octicon-link"></span></a>Adding Support for a new Solver</h2>
+
+<p>Adding support for a new solver (also called a backend) is simply a matter of
+adding a new Python script. The input file generator main class will take care
+of discovering and using it.</p>
+
+<p>All backends have to be stored in the <code>wfs_input_generator/backends</code>
+subdirectory. It has to have the name <code>write_SOLVER.py</code> where <code>SOLVER</code> should
+be an accurate description of the used solver.</p>
+
+<p>The best way to add a new solver is to use
+<a href="https://github.com/krischer/wfs_input_generator/blob/master/wfs_input_generator/backends/write_ses3d_4_0.py">an existing one</a>
+as a template.</p>
+
+<p>The file has to contain three things, the definition of the required
+parameters, the definition of the optional parameters, and a <code>write()</code>
+function.</p>
+
+<p>The wfs_input_generator module will take care that all required parameters will
+be present and that all parameters have the correct type.</p>
+
+<h3>
+<a name="definition-of-the-required-parameters" class="anchor" href="#definition-of-the-required-parameters"><span class="octicon octicon-link"></span></a>Definition of the Required Parameters</h3>
+
+<p>The required parameters are specified in the file in a variable called
+<code>REQUIRED_CONFIGURATION</code>. It is a dictionary with the keys being the parameter
+names and the values a two-tuple of type and description.</p>
+
+<div class="highlight highlight-python"><pre><span class="n">REQUIRED_CONFIGURATION</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"some_parameter"</span><span class="p">:</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="s">"This does something"</span><span class="p">),</span>
+    <span class="s">"another_parameters"</span><span class="p">:</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="s">"This does something else),</span>
+    <span class="s">"one_more"</span><span class="p">:</span> <span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="n">x</span><span class="p">),</span> <span class="s">"This will always be a list of floats"</span><span class="p">)</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="definition-of-the-optional-parameters" class="anchor" href="#definition-of-the-optional-parameters"><span class="octicon octicon-link"></span></a>Definition of the Optional Parameters</h3>
+
+<p>The optional parameters are specified in the file in a variable called
+<code>DEFAULT_CONFIGURATION</code>. It is another dictionary. The keys are once again the
+parameters names, the values this time a three-tuple of default value, type,
+and description.</p>
+
+<div class="highlight highlight-python"><pre><span class="n">DEFAULT_CONFIGURATION</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s">"some_required_parameter"</span><span class="p">:</span> <span class="p">(</span><span class="s">"default"</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="s">"A parameter"</span><span class="p">),</span>
+    <span class="o">...</span>
+<span class="p">}</span>
+</pre></div>
+
+<h3>
+<a name="the-write-function" class="anchor" href="#the-write-function"><span class="octicon octicon-link"></span></a>The write() Function</h3>
+
+<p>The <code>write()</code> function will be called to assemble the input files. This is the
+actual job of any backend.</p>
+
+<p>The file has to have a call signature akin to</p>
+
+<div class="highlight highlight-python"><pre><span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">events</span><span class="p">,</span> <span class="n">stations</span><span class="p">):</span>
+    <span class="c"># Logic here</span>
+    <span class="o">...</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s">"filename_1"</span><span class="p">:</span> <span class="n">content_1</span><span class="p">,</span>
+        <span class="s">"filename_2"</span><span class="p">:</span> <span class="n">content_2</span>
+    <span class="p">}</span>
+</pre></div>
+
+<p>and return a dictionary with the keys being the names of the files to be
+generated and the values being the actual contents. Unicode should work just
+fine.</p>
+
+<p>At any point you can be sure that the contents of the three arguments are fine.
+You do not need to perform any type checking or test for missing parameters.
+The module takes care that the parameters are sanitized.</p>
+
+<p>What you need to do is check things that cannot be caught by the parameter
+specification or something else, e.g. raise an error if more than one event is
+present but the solver can only deal with one event at a time and similar
+things.</p>
+
+<h4>
+<a name="the-config-argument" class="anchor" href="#the-config-argument"><span class="octicon octicon-link"></span></a>The config Argument</h4>
+
+<p>The config argument is a <code>obspy.core.AttribDict</code> instance and will contain all
+the values specified in <code>REQUIRED_CONFIGURATION</code> and <code>DEFAULT_CONFIGURATION</code>.
+All parameters will be present; the <code>wfs_input_generator</code> module assures that
+the user specified all required parameters. Also all optional parameters will
+be present; values that the user did not specify will be replaced by the
+default values.</p>
+
+<h4>
+<a name="the-events-argument" class="anchor" href="#the-events-argument"><span class="octicon octicon-link"></span></a>The events Argument</h4>
+
+<p>It is a list of dictionaries. You can be sure they have the following format:</p>
+
+<div class="highlight highlight-python"><pre><span class="p">{</span><span class="s">"latitude"</span><span class="p">:</span> <span class="mf">28.7</span><span class="p">,</span>
+ <span class="s">"longitude"</span><span class="p">:</span> <span class="o">-</span><span class="mf">113.1</span><span class="p">,</span>
+ <span class="s">"depth_in_km"</span><span class="p">:</span> <span class="mf">13.0</span><span class="p">,</span>
+ <span class="s">"origin_time"</span><span class="p">:</span> <span class="n">obspy</span><span class="o">.</span><span class="n">UTCDateTime</span><span class="p">(</span><span class="mi">2012</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">48</span><span class="p">,</span> <span class="mi">500000</span><span class="p">),</span>
+ <span class="s">"m_rr"</span><span class="p">:</span> <span class="o">-</span><span class="mf">2.11e+18</span><span class="p">,</span>
+ <span class="s">"m_tt"</span><span class="p">:</span> <span class="o">-</span><span class="mf">4.22e+19</span><span class="p">,</span>
+ <span class="s">"m_pp"</span><span class="p">:</span> <span class="mf">4.43e+19</span><span class="p">,</span>
+ <span class="s">"m_rt"</span><span class="p">:</span> <span class="o">-</span><span class="mf">9.35e+18</span><span class="p">,</span>
+ <span class="s">"m_rp"</span><span class="p">:</span> <span class="o">-</span><span class="mf">8.38e+18</span><span class="p">,</span>
+ <span class="s">"m_tp"</span><span class="p">:</span> <span class="o">-</span><span class="mf">6.44e+18</span><span class="p">}</span>
+</pre></div>
+
+<p>The <code>origin_time</code> value will be an <code>obspy.UTCDateTime</code> instance, the rest
+ordinary floats. Again no need to check for any missing parameters. They will
+all be present and have the correct type.</p>
+
+<h4>
+<a name="the-stations-argument" class="anchor" href="#the-stations-argument"><span class="octicon octicon-link"></span></a>The stations Argument</h4>
+
+<p>It is a list of dictionaries. You can be sure they have the following format:</p>
+
+<div class="highlight highlight-python"><pre><span class="p">{</span><span class="s">"id"</span><span class="p">:</span> <span class="s">"BW.FURT"</span><span class="p">,</span>
+ <span class="s">"latitude"</span><span class="p">:</span> <span class="mf">48.162899</span><span class="p">,</span>
+ <span class="s">"longitude"</span><span class="p">:</span> <span class="mf">11.2752</span><span class="p">,</span>
+ <span class="s">"elevation_in_m"</span><span class="p">:</span> <span class="mf">565.0</span><span class="p">,</span>
+ <span class="s">"local_depth_in_m"</span><span class="p">:</span> <span class="mf">0.0</span><span class="p">},</span>
+</pre></div>
+
+<p>The <code>id</code> value will be a string and all other values will be floats.</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-44800463-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
