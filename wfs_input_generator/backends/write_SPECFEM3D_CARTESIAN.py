@@ -45,7 +45,7 @@ DEFAULT_CONFIGURATION = {
         "default", str, "setup the geological models, options are: "
         "default (model parameters described by mesh properties), 1d_prem,"
         "1d_socal,1d_cascadia,aniso,external,gll,salton_trough,tomo"),
-    "APPROXIMATE_(OCEAN_LOAD": (
+    "APPROXIMATE_OCEAN_LOAD": (
         ".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "TOPOGRAPHY": (".false.", str, "see SPECFEM3D_CARTESIAN manual"),
     "ATTENUATION": (".false.", str, "see SPECFEM3D_CARTESIAN manual"),
@@ -127,7 +127,10 @@ DEFAULT_CONFIGURATION = {
         "source time function instead of the source time functions set by "
         "default to represent a (tilted) FORCESOLUTION force point source or "
         "a CMTSOLUTION moment-tensor source."),
-    "GPU_MODE": (".false.", str, "set .true. for GPU support")
+    "GPU_MODE": (".false.", str, "set .true. for GPU support"),
+    "ROTATE_PML_ACTIVATE": (".false.", str, ""),
+    "ROTATE_PML_ANGLE": (0.0, float, ""),
+    "PRINT_SOURCE_TIME_FUNCTION": (".false.", str, "")
 }
 
 
@@ -165,142 +168,142 @@ def write(config, events, stations):
         "Mtp:       {mtp}")
 
     setup_file_template = (
-        "# simulation input parameters\n",
-        "#\n",
-        "# forward or adjoint simulation\n",
-        "# 1 = forward, 2 = adjoint, 3 = both simultaneously\n",
-        "SIMULATION_TYPE                 = {SIMULATION_TYPE}\n",
+        "# simulation input parameters\n"
+        "#\n"
+        "# forward or adjoint simulation\n"
+        "# 1 = forward, 2 = adjoint, 3 = both simultaneously\n"
+        "SIMULATION_TYPE                 = {SIMULATION_TYPE}\n"
         "# 0 = earthquake simulation,  1/2/3 = "
-        "three steps in noise simulation\n",
-        "NOISE_TOMOGRAPHY                = {NOISE_TOMOGRAPHY}\n",
-        "SAVE_FORWARD                    = {SAVE_FORWARD}\n",
-        "\n",
-        "# UTM projection parameters\n",
-        "UTM_PROJECTION_ZONE             = {UTM_PROJECTION_ZONE}\n",
-        "SUPPRESS_UTM_PROJECTION         = {SUPPRESS_UTM_PROJECTION}\n",
-        "\n",
-        "# number of MPI processors\n\n",
-        "NPROC                           = {NPROC}\n",
+        "three steps in noise simulation\n"
+        "NOISE_TOMOGRAPHY                = {NOISE_TOMOGRAPHY}\n"
+        "SAVE_FORWARD                    = {SAVE_FORWARD}\n"
         "\n"
-        "# time step parameters\n",
-        "NSTEP                           = {NSTEP}\n",
-        "DT                              = {DT}\n",
-        "\n",
-        "# number of nodes for 2D and 3D shape functions for hexahedra\n",
-        "# we use either 8-node mesh elements (bricks) or 27-node elements.\n",
+        "# UTM projection parameters\n"
+        "UTM_PROJECTION_ZONE             = {UTM_PROJECTION_ZONE}\n"
+        "SUPPRESS_UTM_PROJECTION         = {SUPPRESS_UTM_PROJECTION}\n"
+        "\n"
+        "# number of MPI processors\n\n"
+        "NPROC                           = {NPROC}\n"
+        "\n"
+        "# time step parameters\n"
+        "NSTEP                           = {NSTEP}\n"
+        "DT                              = {DT}\n"
+        "\n"
+        "# number of nodes for 2D and 3D shape functions for hexahedra\n"
+        "# we use either 8-node mesh elements (bricks) or 27-node elements.\n"
         "# If you use our internal mesher, the only option is 8-node bricks "
-        "(27-node elements are not supported)\n",
+        "(27-node elements are not supported)\n"
         "# CUBIT does not support HEX27 elements either (it can generate them,"
-        " but they are flat, i.e. identical to HEX8).\n",
+        " but they are flat, i.e. identical to HEX8).\n"
         "# To generate HEX27 elements with curvature properly taken into "
-        "account, you can use Gmsh http://geuz.org/gmsh/\n",
-        "NGNOD                       = {NGNOD}\n",
-        "\n",
-        "# models:\n",
-        "# available options are:\n",
-        "#   default (model parameters described by mesh properties)\n",
-        "# 1D models available are:\n",
-        "#   1d_prem,1d_socal,1d_cascadia\n",
-        "# 3D models available are:\n",
-        "#   aniso,external,gll,salton_trough,tomo\n",
-        "MODEL                           = {MODEL}\n",
-        "\n",
-        "# parameters describing the model\n",
-        "APPROXIMATE_OCEAN_LOAD          = {APPROXIMATE_OCEAN_LOAD}\n",
-        "TOPOGRAPHY                      = {TOPOGRAPHY}\n",
-        "ATTENUATION                     = {ATTENUATION}\n",
-        "FULL_ATTENUATION_SOLID          = {FULL_ATTENUATION_SOLID}\n",
-        "ANISOTROPY                      = {ANISOTROPY}\n",
-        "GRAVITY                         = {GRAVITY}\n",
-        "\n",
-        "# path for external tomographic models files\n",
-        "TOMOGRAPHY_PATH                 = {TOMOGRAPHY_PATH}\n",
-        "\n",
-        "# Olsen's constant for Q_mu = constant * v_s attenuation rule\n",
-        "USE_OLSEN_ATTENUATION           = {USE_OLSEN_ATTENUATION}\n",
-        "OLSEN_ATTENUATION_RATIO         = {OLSEN_ATTENUATION_RATIO}\n",
-        "\n",
-        "# C-PML boundary conditions for a regional simulation\n",
-        "PML_CONDITIONS                  = {PML_CONDITIONS}\n",
-        "\n",
-        "# C-PML top surface\n",
-        "PML_INSTEAD_OF_FREE_SURFACE     = {PML_INSTEAD_OF_FREE_SURFACE}\n",
-        "\n",
-        "# C-PML dominant frequency\n",
-        "f0_FOR_PML                      = {f0_FOR_PML}\n",
-        "\n",
+        "account, you can use Gmsh http://geuz.org/gmsh/\n"
+        "NGNOD                       = {NGNOD}\n"
+        "\n"
+        "# models:\n"
+        "# available options are:\n"
+        "#   default (model parameters described by mesh properties)\n"
+        "# 1D models available are:\n"
+        "#   1d_prem,1d_socal,1d_cascadia\n"
+        "# 3D models available are:\n"
+        "#   aniso,external,gll,salton_trough,tomo\n"
+        "MODEL                           = {MODEL}\n"
+        "\n"
+        "# parameters describing the model\n"
+        "APPROXIMATE_OCEAN_LOAD          = {APPROXIMATE_OCEAN_LOAD}\n"
+        "TOPOGRAPHY                      = {TOPOGRAPHY}\n"
+        "ATTENUATION                     = {ATTENUATION}\n"
+        "FULL_ATTENUATION_SOLID          = {FULL_ATTENUATION_SOLID}\n"
+        "ANISOTROPY                      = {ANISOTROPY}\n"
+        "GRAVITY                         = {GRAVITY}\n"
+        "\n"
+        "# path for external tomographic models files\n"
+        "TOMOGRAPHY_PATH                 = {TOMOGRAPHY_PATH}\n"
+        "\n"
+        "# Olsen's constant for Q_mu = constant * v_s attenuation rule\n"
+        "USE_OLSEN_ATTENUATION           = {USE_OLSEN_ATTENUATION}\n"
+        "OLSEN_ATTENUATION_RATIO         = {OLSEN_ATTENUATION_RATIO}\n"
+        "\n"
+        "# C-PML boundary conditions for a regional simulation\n"
+        "PML_CONDITIONS                  = {PML_CONDITIONS}\n"
+        "\n"
+        "# C-PML top surface\n"
+        "PML_INSTEAD_OF_FREE_SURFACE     = {PML_INSTEAD_OF_FREE_SURFACE}\n"
+        "\n"
+        "# C-PML dominant frequency\n"
+        "f0_FOR_PML                      = {f0_FOR_PML}\n"
+        "\n"
         "# parameters used to rotate C-PML boundary conditions by a given "
-        "angle (not implemented yet)\n",
-        "# ROTATE_PML_ACTIVATE           = {ROTATE_PML_ACTIVATE}\n",
-        "# ROTATE_PML_ANGLE              = {ROTATE_PML_ANGLE}\n",
-        "\n",
+        "angle (not implemented yet)\n"
+        "# ROTATE_PML_ACTIVATE           = {ROTATE_PML_ACTIVATE}\n"
+        "# ROTATE_PML_ANGLE              = {ROTATE_PML_ANGLE}\n"
+        "\n"
         "# Stacey absorbing boundary conditions for a regional simulation "
-        "(obsolete, using CPML above is much better)\n",
-        "STACEY_ABSORBING_CONDITIONS     = {STACEY_ABSORBING_CONDITIONS}\n",
-        "\n",
+        "(obsolete, using CPML above is much better)\n"
+        "STACEY_ABSORBING_CONDITIONS     = {STACEY_ABSORBING_CONDITIONS}\n"
+        "\n"
         "# Stacey absorbing top surface (defined in mesh as "
-        "'free_surface_file') (obsolete, using CPML above is much better)\n",
-        "STACEY_INSTEAD_OF_FREE_SURFACE  = {STACEY_INSTEAD_OF_FREE_SURFACE}\n",
-        "\n",
-        "# save AVS or OpenDX movies\n",
-        "# MOVIE_TYPE = 1 to show the top surface\n",
-        "# MOVIE_TYPE = 2 to show all the external faces of the mesh\n",
-        "CREATE_SHAKEMAP                 = {CREATE_SHAKEMAP}\n",
-        "MOVIE_SURFACE                   = {MOVIE_SURFACE}\n",
-        "MOVIE_TYPE                      = {MOVIE_TYPE}\n",
-        "MOVIE_VOLUME                    = {MOVIE_VOLUME}\n",
-        "SAVE_DISPLACEMENT               = {SAVE_DISPLACEMENT}\n",
-        "USE_HIGHRES_FOR_MOVIES          = {USE_HIGHRES_FOR_MOVIES}\n",
-        "NTSTEP_BETWEEN_FRAMES           = {NTSTEP_BETWEEN_FRAMES}\n",
-        "HDUR_MOVIE                      = {HDUR_MOVIE}\n",
-        "\n",
-        "# save AVS or OpenDX mesh files to check the mesh\n",
-        "SAVE_MESH_FILES                 = {SAVE_MESH_FILES}\n",
-        "\n",
-        "# path to store the local database file on each node\n",
-        "LOCAL_PATH                      = {LOCAL_PATH}\n",
+        "'free_surface_file') (obsolete, using CPML above is much better)\n"
+        "STACEY_INSTEAD_OF_FREE_SURFACE  = {STACEY_INSTEAD_OF_FREE_SURFACE}\n"
+        "\n"
+        "# save AVS or OpenDX movies\n"
+        "# MOVIE_TYPE = 1 to show the top surface\n"
+        "# MOVIE_TYPE = 2 to show all the external faces of the mesh\n"
+        "CREATE_SHAKEMAP                 = {CREATE_SHAKEMAP}\n"
+        "MOVIE_SURFACE                   = {MOVIE_SURFACE}\n"
+        "MOVIE_TYPE                      = {MOVIE_TYPE}\n"
+        "MOVIE_VOLUME                    = {MOVIE_VOLUME}\n"
+        "SAVE_DISPLACEMENT               = {SAVE_DISPLACEMENT}\n"
+        "USE_HIGHRES_FOR_MOVIES          = {USE_HIGHRES_FOR_MOVIES}\n"
+        "NTSTEP_BETWEEN_FRAMES           = {NTSTEP_BETWEEN_FRAMES}\n"
+        "HDUR_MOVIE                      = {HDUR_MOVIE}\n"
+        "\n"
+        "# save AVS or OpenDX mesh files to check the mesh\n"
+        "SAVE_MESH_FILES                 = {SAVE_MESH_FILES}\n"
+        "\n"
+        "# path to store the local database file on each node\n"
+        "LOCAL_PATH                      = {LOCAL_PATH}\n"
 
         "# interval at which we output time step info and max of norm of "
-        "displacement\n",
-        "NTSTEP_BETWEEN_OUTPUT_INFO      = {NTSTEP_BETWEEN_OUTPUT_INFO}\n",
-        "\n",
-        "# interval in time steps for writing of seismograms\n",
-        "NTSTEP_BETWEEN_OUTPUT_SEISMOS   = {NTSTEP_BETWEEN_OUTPUT_SEISMOS}\n",
-        "\n",
-        "# interval in time steps for reading adjoint traces\n",
-        "# 0 = read the whole adjoint sources at the same time\n",
-        "NTSTEP_BETWEEN_READ_ADJSRC      = {NTSTEP_BETWEEN_READ_ADJSRC}\n",
-        "\n",
+        "displacement\n"
+        "NTSTEP_BETWEEN_OUTPUT_INFO      = {NTSTEP_BETWEEN_OUTPUT_INFO}\n"
+        "\n"
+        "# interval in time steps for writing of seismograms\n"
+        "NTSTEP_BETWEEN_OUTPUT_SEISMOS   = {NTSTEP_BETWEEN_OUTPUT_SEISMOS}\n"
+        "\n"
+        "# interval in time steps for reading adjoint traces\n"
+        "# 0 = read the whole adjoint sources at the same time\n"
+        "NTSTEP_BETWEEN_READ_ADJSRC      = {NTSTEP_BETWEEN_READ_ADJSRC}\n"
+        "\n"
         "# use a (tilted) FORCESOLUTION force point source (or several) "
-        "instead of a CMTSOLUTION moment-tensor source.\n",
+        "instead of a CMTSOLUTION moment-tensor source.\n"
         "# This can be useful e.g. for oil industry foothills simulations or "
-        "asteroid simulations\n",
+        "asteroid simulations\n"
         "# in which the source is a vertical force, normal force, inclined "
-        "force, impact etc.\n",
+        "force, impact etc.\n"
         "# If this flag is turned on, the FORCESOLUTION file must be edited "
-        "by precising:\n",
-        "# - the corresponding time-shift parameter,\n",
-        "# - the half duration parameter of the source,\n",
-        "# - the coordinates of the source,\n",
-        "# - the magnitude of the force source,\n",
+        "by precising:\n"
+        "# - the corresponding time-shift parameter,\n"
+        "# - the half duration parameter of the source,\n"
+        "# - the coordinates of the source,\n"
+        "# - the magnitude of the force source,\n"
         "# - the components of a (non-unitary) direction vector for the force "
-        "source in the E/N/Z_UP basis.\n",
+        "source in the E/N/Z_UP basis.\n"
         "# The direction vector is made unitary internally in the code and "
-        "thus only its direction matters here;\n",
+        "thus only its direction matters here;\n"
         "# its norm is ignored and the norm of the force used is the factor "
-        "force source times the source time function.\n",
-        "USE_FORCE_POINT_SOURCE          = {USE_FORCE_POINT_SOURCE}\n",
-        "\n",
+        "force source times the source time function.\n"
+        "USE_FORCE_POINT_SOURCE          = {USE_FORCE_POINT_SOURCE}\n"
+        "\n"
         "# set to true to use a Ricker source time function instead of the "
-        "source time functions set by default\n",
+        "source time functions set by default\n"
         "# to represent a (tilted) FORCESOLUTION force point source or a "
-        "CMTSOLUTION moment-tensor source.\n",
-        "USE_RICKER_TIME_FUNCTION        = {USE_RICKER_TIME_FUNCTION}\n",
-        "\n",
-        "# print source time function\n",
-        "PRINT_SOURCE_TIME_FUNCTION      = {PRINT_SOURCE_TIME_FUNCTION}\n",
-        "\n",
-        "# set to true to use GPUs\n",
+        "CMTSOLUTION moment-tensor source.\n"
+        "USE_RICKER_TIME_FUNCTION        = {USE_RICKER_TIME_FUNCTION}\n"
+        "\n"
+        "# print source time function\n"
+        "PRINT_SOURCE_TIME_FUNCTION      = {PRINT_SOURCE_TIME_FUNCTION}\n"
+        "\n"
+        "# set to true to use GPUs\n"
         "GPU_MODE                        = {GPU_MODE}")
 
     event = events[0]
@@ -318,11 +321,11 @@ def write(config, events, stations):
         time_year=float(event["origin_time"].year),
         time_month=float(event["origin_time"].month),
         time_day=float(event["origin_time"].day),
-        time_hh=float(event["origin_time"].hh),
-        time_mm=float(event["origin_time"].mm),
-        time_ss=float(event["origin_time"].ss),
+        time_hh=float(event["origin_time"].hour),
+        time_mm=float(event["origin_time"].minute),
+        time_ss=float(event["origin_time"].second),
         event_mag=magnitude,
-        event_name=event["origin_time"].strptime() + str(magnitude),
+        event_name=str(event["origin_time"]) + str(magnitude),
         event_latitude=float(lat),
         event_longitude=float(lng),
         event_depth=float(event["depth_in_km"]),
@@ -336,19 +339,19 @@ def write(config, events, stations):
         mrp=float(m_rp)
     )
 
-    setup_file = setup_file_template.format()
+    setup_file = setup_file_template.format(**config)
 
     recfile_parts = []
     for station in stations:
         recfile_parts.append(
             "{station:_<5s} {network:_<2s} {latitude:.10f}"
             "{longitude:.10f} {elev:.1f} {buried:.1f}".format(
-                network=station["network"],
-                station=station["id"],
-                latitude=float(station["latitude"]),
-                longitude=float(station["longitude"]),
-                elev=float(station["elevation_in_m"]),
-                buried=float(station["local_depth_in_m"])))
+                network=station["id"].split(".")[0],
+                station=station["id"].split(".")[1],
+                latitude=station["latitude"],
+                longitude=station["longitude"],
+                elev=station["elevation_in_m"],
+                buried=station["local_depth_in_m"]))
     recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
     output_files = {}

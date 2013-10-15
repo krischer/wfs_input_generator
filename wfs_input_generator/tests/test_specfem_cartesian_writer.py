@@ -11,9 +11,7 @@ Test suite for the SPECFEM cartesian backend.
 """
 from wfs_input_generator import InputFileGenerator
 
-import glob
 import inspect
-import numpy as np
 from obspy.core import UTCDateTime
 import os
 
