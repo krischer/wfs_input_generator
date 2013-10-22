@@ -88,3 +88,8 @@ def test_simple():
         "Mrt:         0",
         "Mrp:         0",
         "Mtp:         0"]
+
+    # XXX: Extend test.
+    par_file = input_files["Par_file"]
+    assert "SIMULATION_TYPE" in par_file
+    assert "NSTEP" in par_file
