@@ -22,7 +22,7 @@ DATA = os.path.join(os.path.dirname(os.path.abspath(inspect.getfile(
 
 def test_simple():
     """
-    Very Barebones test. Just assert that some files are actually created.
+    Test a very simple SPECFEM file.
     """
     stations = [
         {
@@ -63,3 +63,28 @@ def test_simple():
     input_files = gen.write(format="SPECFEM3D_CARTESIAN")
 
     assert bool(input_files)
+
+    assert sorted(input_files.keys()) == \
+        sorted(["Par_file", "CMTSOLUTION", "STATIONS"])
+
+    # Assert the STATIONS file.
+    assert input_files["STATIONS"].splitlines() == [
+        "ADVT KO 41.00000 33.12340 10.0 0.0",
+        "AFSR KO 40.00000 33.23450 220.0 0.0"]
+
+    # Assert the CMTSOLUTION file.
+    assert input_files["CMTSOLUTION"].splitlines() == [
+        "PDE 2012 4 12 7 15 48.50 39.26000 41.04000 5.00000 4.7 4.7 "
+        "2012-04-12T07:15:48.500000Z_4.7",
+        "event name:      0000000",
+        "time shift:       0.0000",
+        "half duration:    0.0000",
+        "latitude:       39.26000",
+        "longitude:      41.04000",
+        "depth:          5.00000",
+        "Mrr:         1e+16",
+        "Mtt:         1e+16",
+        "Mpp:         1e+16",
+        "Mrt:         0",
+        "Mrp:         0",
+        "Mtp:         0"]

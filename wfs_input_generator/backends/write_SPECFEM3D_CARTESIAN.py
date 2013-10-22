@@ -297,18 +297,18 @@ def write(config, events, stations):
         "PDE {time_year} {time_month} {time_day} {time_hh} {time_mm} "
         "{time_ss:.2f} {event_latitude:.5f} {event_longitude:.5f} "
         "{event_depth:.5f} {event_mag:.1f} {event_mag:.1f} {event_name}\n"
-        "event name:       {event_name}\n"
-        "time shift:       {time_shift}\n"
-        "half duration:    {half_duration}\n"
-        "latitude:       {event_latitude}\n"
-        "longitude:      {event_longitude}\n"
-        "depth:            {event_depth}\n"
-        "Mrr:       {mrr}\n"
-        "Mtt:       {mtt}\n"
-        "Mpp:       {mpp}\n"
-        "Mrt:       {mrt}\n"
-        "Mrp:       {mrp}\n"
-        "Mtp:       {mtp}")
+        "event name:      0000000\n"
+        "time shift:       0.0000\n"
+        "half duration:    {half_duration:.4f}\n"
+        "latitude:       {event_latitude:.5f}\n"
+        "longitude:      {event_longitude:.5f}\n"
+        "depth:{event_depth: 17.5f}\n"
+        "Mrr:         {mrr:.6g}\n"
+        "Mtt:         {mtt:.6g}\n"
+        "Mpp:         {mpp:.6g}\n"
+        "Mrt:         {mrt:.6g}\n"
+        "Mrp:         {mrp:.6g}\n"
+        "Mtp:         {mtp:.6g}")
 
     # Create the event file.
     if len(events) != 1:
@@ -338,12 +338,11 @@ def write(config, events, stations):
         time_ss=event["origin_time"].second +
         event["origin_time"].microsecond / 1E6,
         event_mag=magnitude,
-        event_name=str(event["origin_time"]) + "_" + str(magnitude),
+        event_name=str(event["origin_time"]) + "_" + ("%.1f" % magnitude),
         event_latitude=float(lat),
         event_longitude=float(lng),
         event_depth=float(event["depth_in_km"]),
-        half_duration=0,
-        time_shift=0,
+        half_duration=0.0,
         mtt=float(m_tt),
         mpp=float(m_pp),
         mrr=float(m_rr),
