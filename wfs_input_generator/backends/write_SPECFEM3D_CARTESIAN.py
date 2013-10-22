@@ -10,6 +10,8 @@ Input file writer for SPECFEM3D_CARTESIAN.
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)
 """
+import math
+
 # Define the required configuration items. The key is always the name of the
 # configuration item and the value is a tuple. The first item in the tuple is
 # the function or type that it will be converted to and the second is the
@@ -292,9 +294,9 @@ def write(config, events, stations):
 
     # The template for the CMTSOLUTION file.
     CMT_SOLUTION_template = (
-        "PDE  {time_year} {time_month} {time_day} {time_hh} {time_mm} "
-        "{time_ss}  {event_latitude} {event_longitude} {event_depth} "
-        "{event_mag} {event_mag} {event_name}\n"
+        "PDE {time_year} {time_month} {time_day} {time_hh} {time_mm} "
+        "{time_ss:.2f} {event_latitude:.5f} {event_longitude:.5f} "
+        "{event_depth:.5f} {event_mag:.1f} {event_mag:.1f} {event_name}\n"
         "event name:       {event_name}\n"
         "time shift:       {time_shift}\n"
         "half duration:    {half_duration}\n"
@@ -314,10 +316,13 @@ def write(config, events, stations):
                "event.")
         raise NotImplementedError(msg)
     event = events[0]
-    try:
-        magnitude = float(event["magnitude"])
-    except:
-        magnitude = 0
+
+    # Calculate the moment magnitude
+    M_0 = 1.0 / math.sqrt(2.0) * math.sqrt(
+        event["m_rr"] ** 2 +
+        event["m_tt"] ** 2 +
+        event["m_pp"] ** 2)
+    magnitude = 2.0 / 3.0 * math.log10(M_0) - 6.0
 
     lat, lng = (event["latitude"], event["longitude"])
     m_rr, m_tt, m_pp, m_rt, m_rp, m_tp = (
@@ -325,14 +330,15 @@ def write(config, events, stations):
         event["m_rp"], event["m_tp"])
 
     CMT_SOLUTION_file = CMT_SOLUTION_template.format(
-        time_year=float(event["origin_time"].year),
-        time_month=float(event["origin_time"].month),
-        time_day=float(event["origin_time"].day),
-        time_hh=float(event["origin_time"].hour),
-        time_mm=float(event["origin_time"].minute),
-        time_ss=float(event["origin_time"].second),
+        time_year=event["origin_time"].year,
+        time_month=event["origin_time"].month,
+        time_day=event["origin_time"].day,
+        time_hh=event["origin_time"].hour,
+        time_mm=event["origin_time"].minute,
+        time_ss=event["origin_time"].second +
+        event["origin_time"].microsecond / 1E6,
         event_mag=magnitude,
-        event_name=str(event["origin_time"]) + str(magnitude),
+        event_name=str(event["origin_time"]) + "_" + str(magnitude),
         event_latitude=float(lat),
         event_longitude=float(lng),
         event_depth=float(event["depth_in_km"]),
@@ -349,8 +355,8 @@ def write(config, events, stations):
     station_parts = []
     for station in stations:
         station_parts.append(
-            "{station:_<5s} {network:_<2s} {latitude:.10f}"
-            "{longitude:.10f} {elev:.1f} {buried:.1f}".format(
+            "{station:s} {network:s} {latitude:.5f} "
+            "{longitude:.5f} {elev:.1f} {buried:.1f}".format(
                 network=station["id"].split(".")[0],
                 station=station["id"].split(".")[1],
                 latitude=station["latitude"],
