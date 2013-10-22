@@ -343,13 +343,13 @@ def write(config, events, stations):
         event_longitude=float(lng),
         event_depth=float(event["depth_in_km"]),
         half_duration=0.0,
-        mtt=float(m_tt),
-        mpp=float(m_pp),
-        mrr=float(m_rr),
-        mtp=float(m_tp),
-        mrt=float(m_rt),
-        mrp=float(m_rp)
-    )
+        # Convert to dyne * cm.
+        mtt=m_tt * 1E7,
+        mpp=m_pp * 1E7,
+        mrr=m_rr * 1E7,
+        mtp=m_tp * 1E7,
+        mrt=m_rt * 1E7,
+        mrp=m_rp * 1E7)
 
     station_parts = []
     for station in stations:

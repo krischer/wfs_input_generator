@@ -82,9 +82,9 @@ def test_simple():
         "latitude:       39.26000",
         "longitude:      41.04000",
         "depth:          5.00000",
-        "Mrr:         1e+16",
-        "Mtt:         1e+16",
-        "Mpp:         1e+16",
+        "Mrr:         1e+23",
+        "Mtt:         1e+23",
+        "Mpp:         1e+23",
         "Mrt:         0",
         "Mrp:         0",
         "Mtp:         0"]
