@@ -150,24 +150,7 @@ def write(config, events, stations):
         else:
             return ".false."
 
-    CMT_SOLUTION_template = (
-        "PDE  {time_year} {time_month} {time_day} {time_hh} {time_mm} "
-        "{time_ss}  {event_latitude} {event_longitude} {event_depth} "
-        "{event_mag} {event_mag} {event_name}\n"
-        "event name:       {event_name}\n"
-        "time shift:       {time_shift}\n"
-        "half duration:    {half_duration}\n"
-        "latitude:       {event_latitude}\n"
-        "longitude:      {event_longitude}\n"
-        "depth:            {event_depth}\n"
-        "Mrr:       {mrr}\n"
-        "Mtt:       {mtt}\n"
-        "Mpp:       {mpp}\n"
-        "Mrt:       {mrt}\n"
-        "Mrp:       {mrp}\n"
-        "Mtp:       {mtp}")
-
-    setup_file_template = (
+    par_file_template = (
         "# simulation input parameters\n"
         "#\n"
         "# forward or adjoint simulation\n"
@@ -305,7 +288,31 @@ def write(config, events, stations):
         "\n"
         "# set to true to use GPUs\n"
         "GPU_MODE                        = {GPU_MODE}")
+    par_file = par_file_template.format(**config)
 
+    # The template for the CMTSOLUTION file.
+    CMT_SOLUTION_template = (
+        "PDE  {time_year} {time_month} {time_day} {time_hh} {time_mm} "
+        "{time_ss}  {event_latitude} {event_longitude} {event_depth} "
+        "{event_mag} {event_mag} {event_name}\n"
+        "event name:       {event_name}\n"
+        "time shift:       {time_shift}\n"
+        "half duration:    {half_duration}\n"
+        "latitude:       {event_latitude}\n"
+        "longitude:      {event_longitude}\n"
+        "depth:            {event_depth}\n"
+        "Mrr:       {mrr}\n"
+        "Mtt:       {mtt}\n"
+        "Mpp:       {mpp}\n"
+        "Mrt:       {mrt}\n"
+        "Mrp:       {mrp}\n"
+        "Mtp:       {mtp}")
+
+    # Create the event file.
+    if len(events) != 1:
+        msg = ("The SPECFEM backend can currently only deal with a single "
+               "event.")
+        raise NotImplementedError(msg)
     event = events[0]
     try:
         magnitude = float(event["magnitude"])
@@ -339,11 +346,9 @@ def write(config, events, stations):
         mrp=float(m_rp)
     )
 
-    setup_file = setup_file_template.format(**config)
-
-    recfile_parts = []
+    station_parts = []
     for station in stations:
-        recfile_parts.append(
+        station_parts.append(
             "{station:_<5s} {network:_<2s} {latitude:.10f}"
             "{longitude:.10f} {elev:.1f} {buried:.1f}".format(
                 network=station["id"].split(".")[0],
@@ -352,21 +357,11 @@ def write(config, events, stations):
                 longitude=station["longitude"],
                 elev=station["elevation_in_m"],
                 buried=station["local_depth_in_m"]))
-    recfile_parts.insert(0, "%i" % (len(recfile_parts) // 2))
 
+    # Put the files int he output directory.
     output_files = {}
-
-    # Put it in the collected dictionary.
-    output_files["event_1"] = CMT_SOLUTION_file
-    output_files["event_list"] = \
-        "{0:<44d}! n_events = number of events\n{0}".format(1)
-
-    output_files["recfile"] = "\n".join(recfile_parts)
-
-    output_files["setup"] = setup_file
-
-    # Make sure all output files have an empty new line at the end.
-    for key in output_files.iterkeys():
-        output_files[key] += "\n"
+    output_files["Par_file"] = par_file
+    output_files["CMTSOLUTION"] = CMT_SOLUTION_file
+    output_files["STATIONS"] = "\n".join(station_parts)
 
     return output_files
