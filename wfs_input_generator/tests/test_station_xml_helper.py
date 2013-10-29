@@ -56,8 +56,7 @@ def test_dictionary_extraction_from_file():
         {"id": "HT.XOR",
          "latitude": 39.366,
          "longitude": 23.192,
-         "elevation_in_m": 500.0,
-         "local_depth_in_m": 0.0}
+         "elevation_in_m": 500.0}
         ])
 
 
@@ -101,6 +100,5 @@ def test_dictionary_extraction_from_BytesIO():
         {"id": "HT.XOR",
          "latitude": 39.366,
          "longitude": 23.192,
-         "elevation_in_m": 500.0,
-         "local_depth_in_m": 0.0}
+         "elevation_in_m": 500.0}
         ])

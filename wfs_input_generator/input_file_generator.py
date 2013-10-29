@@ -233,7 +233,7 @@ class InputFileGenerator(object):
                     stat["local_depth_in_m"] = \
                         float(station_item["local_depth_in_m"])
                 except:
-                    stat["local_depth_in_m"] = 0.0
+                    pass
                 all_stations[stat["id"]] = stat
                 continue
 
@@ -292,7 +292,29 @@ class InputFileGenerator(object):
             msg = "Could not read %s." % station_item
             raise ValueError(msg)
 
-        self._stations.extend(list(all_stations.values()))
+        self.__add_stations(all_stations.values())
+
+    def __add_stations(self, stations):
+        """
+        Helper function to assure all supported file formats result in the same
+        station dictionary format.
+
+        Will set the local depth to zero if not found. Should work across all
+        formats.
+        """
+        _s = []
+        for station_item in stations:
+            station = {"latitude": float(station_item["latitude"]),
+                       "longitude": float(station_item["longitude"]),
+                       "elevation_in_m": float(station_item["elevation_in_m"]),
+                       "id": str(station_item["id"])}
+            try:
+                station["local_depth_in_m"] = \
+                    float(station_item["local_depth_in_m"])
+            except:
+                station["local_depth_in_m"] = 0.0
+            _s.append(station)
+        self._stations.extend(_s)
         self._stations = unique_list(self._stations)
 
     @property

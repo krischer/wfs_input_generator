@@ -137,7 +137,8 @@ def test_adding_sac_file_without_local_depth():
     assert round(gen._stations[0]["latitude"] - 34.94598, 5) == 0
     assert round(gen._stations[0]["longitude"] - -106.45713, 5) == 0
     assert round(gen._stations[0]["elevation_in_m"] - 1671.0, 5) == 0
-    assert "local_depth_in_m" not in gen._stations[0]
+    # Local depth will be set to 0 in case it is not available.
+    assert gen._stations[0]["local_depth_in_m"] == 0
 
 
 def test_adding_a_single_station_dictionary():
