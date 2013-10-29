@@ -4094,7 +4094,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>90</Azimuth>
         <Dip>0</Dip>
         <SampleRate>20</SampleRate>
@@ -4155,7 +4154,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>0</Dip>
         <SampleRate>20</SampleRate>
@@ -4216,7 +4214,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>-90</Dip>
         <SampleRate>20</SampleRate>
@@ -4277,7 +4274,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>90</Azimuth>
         <Dip>0</Dip>
         <SampleRate>100</SampleRate>
@@ -4338,7 +4334,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>0</Dip>
         <SampleRate>100</SampleRate>
@@ -4399,7 +4394,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>-90</Dip>
         <SampleRate>100</SampleRate>
@@ -4460,7 +4454,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>90</Azimuth>
         <Dip>0</Dip>
         <SampleRate>1</SampleRate>
@@ -4521,7 +4514,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>0</Dip>
         <SampleRate>1</SampleRate>
@@ -4582,7 +4574,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>-90</Dip>
         <SampleRate>1</SampleRate>
@@ -4643,7 +4634,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>90</Azimuth>
         <Dip>0</Dip>
         <SampleRate>0.1</SampleRate>
@@ -4704,7 +4694,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>0</Dip>
         <SampleRate>0.1</SampleRate>
@@ -4765,7 +4754,6 @@
         <Latitude>39.366</Latitude>
         <Longitude>23.192</Longitude>
         <Elevation>500</Elevation>
-        <Depth>0</Depth>
         <Azimuth>0</Azimuth>
         <Dip>-90</Dip>
         <SampleRate>0.1</SampleRate>
