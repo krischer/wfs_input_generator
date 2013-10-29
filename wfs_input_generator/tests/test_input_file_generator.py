@@ -12,6 +12,7 @@ Test suite for the waveform solver input file generator.
 from wfs_input_generator import InputFileGenerator
 
 import flake8
+import flake8.engine
 import flake8.main
 import io
 import inspect
@@ -42,7 +43,7 @@ def test_code_formatting():
     if not os.path.exists(os.path.join(root_dir, "setup.py")):
         msg = "Could not find project root."
         raise Exception(msg)
-    count = 0
+    files = []
     for dirpath, _, filenames in os.walk(root_dir):
         filenames = [_i for _i in filenames if
                      os.path.splitext(_i)[-1] == os.path.extsep + "py"]
@@ -50,9 +51,11 @@ def test_code_formatting():
             continue
         for py_file in filenames:
             full_path = os.path.join(dirpath, py_file)
-            if flake8.main.check_file(full_path):
-                count += 1
-    assert count == 0
+            files.append(full_path)
+    flake8_style = flake8.engine.get_style_guide(
+        parse_argv=False, config_file=flake8.main.DEFAULT_CONFIG)
+    report = flake8_style.check_files(files)
+    assert report.get_count() == 0
 
 
 def test_adding_stations_as_SEED_files():
