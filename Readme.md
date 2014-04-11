@@ -166,6 +166,8 @@ gen.add_events({
     "depth_in_km": 13.0,
     "origin_time":
         obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+    # The description is optional and does not have to be given.
+    "description": "Some event I care about",
     "m_rr": -2.11e+18,
     "m_tt": -4.22e+19,
     "m_pp": 4.43e+19,
@@ -448,6 +450,8 @@ It is a list of dictionaries. You can be sure they have the following format:
  "longitude": -113.1,
  "depth_in_km": 13.0,
  "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+ # Description will be either a string describing the event or `None`.
+ "description": "Place of event",
  "m_rr": -2.11e+18,
  "m_tt": -4.22e+19,
  "m_pp": 4.43e+19,
