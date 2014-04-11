@@ -140,6 +140,10 @@ class InputFileGenerator(object):
                     "m_rt": float(event["m_rt"]),
                     "m_rp": float(event["m_rp"]),
                     "m_tp": float(event["m_tp"])}
+                if "description" in event:
+                    ev["description"] = event["description"]
+                else:
+                    ev["description"] = None
                 self._events.append(ev)
                 continue
 
@@ -597,6 +601,10 @@ class InputFileGenerator(object):
             msg = "Every event needs all six moment tensor components."
             raise ValueError(msg)
 
+        # Extract event descriptions.
+        if event.event_descriptions:
+            description = ", ".join(i.text for i in event.event_descriptions)
+
         # Now the event should be valid.
         self._events.append({
             "latitude": origin.latitude,
@@ -609,4 +617,5 @@ class InputFileGenerator(object):
             "m_rt": mt.m_rt,
             "m_rp": mt.m_rp,
             "m_tp": mt.m_tp,
-            "_event_id": event.resource_id.resource_id})
+            "_event_id": event.resource_id.resource_id,
+            description: description})
