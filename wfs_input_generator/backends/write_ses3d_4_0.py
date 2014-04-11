@@ -94,9 +94,9 @@ def write(config, events, stations):
     will be raised.
     """
 
-    #==========================================================================
+    # ========================================================================
     # preliminaries
-    #==========================================================================
+    # ========================================================================
 
     if not config.adjoint_forward_wavefield_output_folder:
         config.adjoint_forward_wavefield_output_folder = \
@@ -125,9 +125,9 @@ def write(config, events, stations):
         raise ValueError(msg)
     event = events[0]
 
-    #==========================================================================
+    # ========================================================================
     # setup file
-    #==========================================================================
+    # =========================================================================
 
     # Assemble the mesh to have everything in one place
     mesh = obspy.core.AttribDict()
@@ -200,7 +200,7 @@ def write(config, events, stations):
         theta_max=rotations.lat2colat(float(mesh.min_latitude)),
         phi_min=float(mesh.min_longitude),
         phi_max=float(mesh.max_longitude),
-        ## Min/max radius and depth are inverse to each other.
+        # Min/max radius and depth are inverse to each other.
         z_min=EARTH_RADIUS - (float(mesh.max_depth_in_km) * 1000.0),
         z_max=EARTH_RADIUS - (float(mesh.min_depth_in_km) * 1000.0),
         is_diss=1 if config.is_dissipative else 0,
@@ -215,14 +215,14 @@ def write(config, events, stations):
         pz=config.pz,
         adjoint_flag=simulation_type,
         samp_ad=config.adjoint_forward_sampling_rate,
-        adjoint_wavefield_folder=
-        config.adjoint_forward_wavefield_output_folder)
+        adjoint_wavefield_folder=config
+        .adjoint_forward_wavefield_output_folder)
 
     output_files["setup"] = setup_file
 
-    #==========================================================================
+    # =========================================================================
     # event file
-    #==========================================================================
+    # =========================================================================
 
     event_template = (
         "SIMULATION PARAMETERS ==============================================="
@@ -272,17 +272,17 @@ def write(config, events, stations):
     fn = "event_%s" % config.event_tag
     output_files[fn] = event_file
 
-    #==========================================================================
+    # =========================================================================
     # event_list
-    #==========================================================================
+    # =========================================================================
 
     # Make the event_list. Currently, only one event is used
     output_files["event_list"] = "{0:<44d}! n_events = number of events\n{1}"\
         .format(1, config.event_tag)
 
-    #==========================================================================
+    # =========================================================================
     # recfile
-    #==========================================================================
+    # =========================================================================
 
     recfile_parts = []
     for station in stations:
@@ -318,9 +318,9 @@ def write(config, events, stations):
     fn = "recfile_" + config.event_tag
     output_files[fn] = "\n".join(recfile_parts)
 
-    #==========================================================================
+    # =========================================================================
     # relaxation parameters
-    #==========================================================================
+    # =========================================================================
     # Write the relaxation file.
     relax_file = (
         "RELAXATION TIMES [s] =====================\n"
@@ -335,16 +335,16 @@ def write(config, events, stations):
 
     output_files["relax"] = relax_file
 
-    #==========================================================================
+    # =========================================================================
     # source-time function
-    #==========================================================================
+    # =========================================================================
     # Also write the source time function.
     output_files["stf"] = "\n".join(["%e" % _i for
                                      _i in config.source_time_function])
 
-    #==========================================================================
+    # =========================================================================
     # finalize
-    #==========================================================================
+    # =========================================================================
     # Make sure all output files have an empty new line at the end.
     for key in output_files.iterkeys():
         output_files[key] += "\n\n"
