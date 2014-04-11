@@ -140,8 +140,9 @@ class InputFileGenerator(object):
                     "m_rt": float(event["m_rt"]),
                     "m_rp": float(event["m_rp"]),
                     "m_tp": float(event["m_tp"])}
-                if "description" in event:
-                    ev["description"] = event["description"]
+                if "description" in event and \
+                        event["description"] is not None:
+                    ev["description"] = str(event["description"])
                 else:
                     ev["description"] = None
                 self._events.append(ev)

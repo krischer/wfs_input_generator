@@ -926,6 +926,7 @@ def test_event_dictionary_automatic_type_conversion():
     conversion.
     """
     event = {
+        "description": 1,
         "latitude": "1",
         "longitude": "2",
         "depth_in_km": "3",
@@ -950,8 +951,7 @@ def test_event_dictionary_automatic_type_conversion():
     assert type(gen._events[0]["m_tp"]) == float
 
     assert gen._events == [{
-        # was not given before, will be set to None.
-        "description": None,
+        "description": "1",
         "latitude": 1.0,
         "longitude": 2.0,
         "depth_in_km": 3.0,
