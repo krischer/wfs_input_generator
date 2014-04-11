@@ -570,7 +570,8 @@ def test_reading_QuakeML_files():
 
     # Sort to be able to compare.
     assert sorted(gen._events) == \
-        [{"latitude": 45.0,
+        [{"description": "FICTIONAL EVENT IN BAVARIA",
+          "latitude": 45.0,
           "longitude": 12.1,
           "depth_in_km": 13.0,
           "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
@@ -581,7 +582,8 @@ def test_reading_QuakeML_files():
           "m_rp": -8.38e+18,
           "m_tp": -6.44e+18,
           "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
-         {"latitude": 13.93,
+         {"description": "GUATEMALA",
+          "latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
           "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
@@ -600,7 +602,8 @@ def test_adding_events_as_URL():
 
     Mock the actual downloading.
     """
-    event = {"latitude": 45.0,
+    event = {"description": "FICTIONAL EVENT IN BAVARIA",
+             "latitude": 45.0,
              "longitude": 12.1,
              "depth_in_km": 13.0,
              "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
@@ -642,7 +645,8 @@ def test_adding_a_event_object():
     gen.add_events([event])
 
     assert gen._events == [
-        {"latitude": 45.0,
+        {"description": "FICTIONAL EVENT IN BAVARIA",
+         "latitude": 45.0,
          "longitude": 12.1,
          "depth_in_km": 13.0,
          "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
@@ -669,7 +673,8 @@ def test_adding_a_list_of_event_object():
     gen.add_events([event_1, event_2])
 
     assert sorted(gen._events) == \
-        [{"latitude": 45.0,
+        [{"description": "FICTIONAL EVENT IN BAVARIA",
+          "latitude": 45.0,
           "longitude": 12.1,
           "depth_in_km": 13.0,
           "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
@@ -680,7 +685,8 @@ def test_adding_a_list_of_event_object():
           "m_rp": -8.38e+18,
           "m_tp": -6.44e+18,
           "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
-         {"latitude": 13.93,
+         {"description": "GUATEMALA",
+          "latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
           "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
@@ -707,7 +713,8 @@ def test_adding_a_catalog_object():
     gen.add_events(cat)
 
     assert sorted(gen._events) == \
-        [{"latitude": 45.0,
+        [{"description": "FICTIONAL EVENT IN BAVARIA",
+          "latitude": 45.0,
           "longitude": 12.1,
           "depth_in_km": 13.0,
           "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
@@ -718,7 +725,8 @@ def test_adding_a_catalog_object():
           "m_rp": -8.38e+18,
           "m_tp": -6.44e+18,
           "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
-         {"latitude": 13.93,
+         {"description": "GUATEMALA",
+          "latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
           "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
@@ -749,7 +757,8 @@ def test_reading_QuakeML_from_BytesIO():
 
     # Sort to be able to compare.
     assert sorted(gen._events) == \
-        [{"latitude": 45.0,
+        [{"description": "FICTIONAL EVENT IN BAVARIA",
+          "latitude": 45.0,
           "longitude": 12.1,
           "depth_in_km": 13.0,
           "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
@@ -760,7 +769,8 @@ def test_reading_QuakeML_from_BytesIO():
           "m_rp": -8.38e+18,
           "m_tp": -6.44e+18,
           "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
-         {"latitude": 13.93,
+         {"description": "GUATEMALA",
+          "latitude": 13.93,
           "longitude": -92.47,
           "depth_in_km": 28.7,
           "origin_time": obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000),
@@ -778,6 +788,7 @@ def test_reading_events_from_dictionary():
     Tests that events can also be passed as dictionaries.
     """
     events = [{
+        "description": "Event at a sunny place.",
         "latitude": 45.0,
         "longitude": 12.1,
         "depth_in_km": 13.0,
@@ -789,6 +800,7 @@ def test_reading_events_from_dictionary():
         "m_rp": -8.38e+18,
         "m_tp": -6.44e+18
     }, {
+        "description": "Event at a rainy place.",
         "latitude": 13.93,
         "longitude": -92.47,
         "depth_in_km": 28.7,
@@ -812,6 +824,7 @@ def test_adding_single_event_dictionary():
         "latitude": 45.0,
         "longitude": 12.1,
         "depth_in_km": 13.0,
+        "description": "Some description",
         "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
         "m_rr": -2.11e+18,
         "m_tt": -4.22e+19,
@@ -831,6 +844,7 @@ def test_additional_attributes_from_event_dicts_are_removed():
     event = {
         "latitude": 45.0,
         "longitude": 12.1,
+        "description": "Random description",
         "depth_in_km": 13.0,
         "origin_time": obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
         "m_rr": -2.11e+18,
@@ -856,6 +870,7 @@ def test_adding_single_event_JSON():
         "longitude": 12.1,
         "depth_in_km": 13.0,
         "origin_time": str(obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000)),
+        "description": None,
         "m_rr": -2.11e+18,
         "m_tt": -4.22e+19,
         "m_pp": 4.43e+19,
@@ -875,6 +890,7 @@ def test_adding_multiple_events_JSON():
     """
     events = [{
         "latitude": 45.0,
+        "description": "Some description",
         "longitude": 12.1,
         "depth_in_km": 13.0,
         "origin_time": str(obspy.UTCDateTime(2012, 4, 12, 7, 15, 48, 500000)),
@@ -886,6 +902,7 @@ def test_adding_multiple_events_JSON():
         "m_tp": -6.44e+18
     }, {
         "latitude": 13.93,
+        "description": "Some other description",
         "longitude": -92.47,
         "depth_in_km": 28.7,
         "origin_time": str(obspy.UTCDateTime(2012, 11, 7, 16, 35, 55, 200000)),
@@ -933,6 +950,8 @@ def test_event_dictionary_automatic_type_conversion():
     assert type(gen._events[0]["m_tp"]) == float
 
     assert gen._events == [{
+        # was not given before, will be set to None.
+        "description": None,
         "latitude": 1.0,
         "longitude": 2.0,
         "depth_in_km": 3.0,
@@ -1114,6 +1133,7 @@ def test_event_filter():
           "m_rt": -9.35e+18,
           "m_rp": -8.38e+18,
           "m_tp": -6.44e+18,
+          "description": "FICTIONAL EVENT IN BAVARIA",
           "_event_id": "smi:local/Event/2013-01-05T20:19:58.727909"},
          {"latitude": 13.93,
           "longitude": -92.47,
@@ -1125,6 +1145,7 @@ def test_event_filter():
           "m_rt": 6.94e+19,
           "m_rp": -4.08e+19,
           "m_tp": 4.09e+19,
+          "description": "GUATEMALA",
           "_event_id": "smi:local/Event/2013-01-07T13:58:41.209477"}]
 
     event_file_1 = os.path.join(DATA, "event1.xml")
@@ -1184,7 +1205,8 @@ def test_event_filter_removed_everything_without_an_id():
         "m_pp": 4.43e+19,
         "m_rt": -9.35e+18,
         "m_rp": -8.38e+18,
-        "m_tp": -6.44e+18
+        "m_tp": -6.44e+18,
+        "description": "Some description"
     }, {
         "latitude": 13.93,
         "longitude": -92.47,
@@ -1195,7 +1217,8 @@ def test_event_filter_removed_everything_without_an_id():
         "m_pp": -2.19e+19,
         "m_rt": 6.94e+19,
         "m_rp": -4.08e+19,
-        "m_tp": 4.09e+19}]
+        "m_tp": 4.09e+19,
+        "description": None}]
     gen = InputFileGenerator()
     gen.add_events(events)
 
