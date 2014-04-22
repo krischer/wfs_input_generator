@@ -6,7 +6,7 @@
     <title>Wfs input generator by krischer</title>
 
     <link rel="stylesheet" href="stylesheets/styles.css">
-    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">±
     <script src="javascripts/scale.fix.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!--[if lt IE 9]>
@@ -371,7 +371,7 @@ common subset.</p>
 <p>If needed the supported output formats of the module can be queried:</p>
 
 <div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_available_formats</span><span class="p">()</span>
-<span class="p">[</span><span class="s">'ses3d_4_0'</span><span class="p">,</span> <span class="s">'SPECFEM3D_CARTESIAN'</span><span class="p">]</span>
+<span class="p">[</span><span class="s">'ses3d_4_1'</span><span class="p">,</span> <span class="s">'SPECFEM3D_CARTESIAN'</span><span class="p">]</span>
 </pre></div>
 
 <p>It is also possible to request the parameters needed for a specific solver. The
@@ -381,7 +381,7 @@ two-tuple of type and description. The second one describes the optional
 parameters. The keys are once again the parameters names, the values this time
 a three-tuple of default value, type, and description.</p>
 
-<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">required</span><span class="p">,</span> <span class="n">optional</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_config_params</span><span class="p">(</span><span class="s">'ses3d_4_0'</span><span class="p">)</span>
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">required</span><span class="p">,</span> <span class="n">optional</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">get_config_params</span><span class="p">(</span><span class="s">'ses3d_4_1'</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">required</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
 <span class="p">(</span><span class="s">'mesh_max_longitude'</span><span class="p">,</span> <span class="p">(</span><span class="nb">float</span><span class="p">,</span> <span class="s">'The maximum longitude of the mesh'</span><span class="p">))</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">optional</span><span class="o">.</span><span class="n">items</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
@@ -410,12 +410,12 @@ raised.</p>
 a dictionary with the keys being the filenames and the values being the file
 contents.</p>
 
-<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">output</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">"ses3d_4_0"</span><span class="p">)</span>
+<div class="highlight highlight-python"><pre><span class="o">&gt;&gt;&gt;</span> <span class="n">output</span> <span class="o">=</span> <span class="n">gen</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">"ses3d_4_1"</span><span class="p">)</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">output</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
 <span class="p">[</span><span class="s">'stf'</span><span class="p">,</span> <span class="s">'relax'</span><span class="p">,</span> <span class="s">'setup'</span><span class="p">,</span> <span class="s">'event_list'</span><span class="p">,</span> <span class="s">'event_1'</span><span class="p">,</span> <span class="s">'recfile_1'</span><span class="p">]</span>
 
 <span class="c"># One can also directly write the files to a specified folder.</span>
-<span class="n">gen</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">"ses3d_4_0"</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s">"solver_input_files"</span><span class="p">)</span>
+<span class="n">gen</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">format</span><span class="o">=</span><span class="s">"ses3d_4_1"</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="s">"solver_input_files"</span><span class="p">)</span>
 </pre></div>
 
 <h2>
@@ -430,7 +430,7 @@ subdirectory. It has to have the name <code>write_SOLVER.py</code> where <code>S
 be an accurate description of the used solver.</p>
 
 <p>The best way to add a new solver is to use
-<a href="https://github.com/krischer/wfs_input_generator/blob/master/wfs_input_generator/backends/write_ses3d_4_0.py">an existing one</a>
+<a href="https://github.com/krischer/wfs_input_generator/blob/master/wfs_input_generator/backends/write_ses3d_4_1.py">an existing one</a>
 as a template.</p>
 
 <p>The file has to contain three things, the definition of the required
