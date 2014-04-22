@@ -300,7 +300,7 @@ If needed the supported output formats of the module can be queried:
 
 ```python
 >>> gen.get_available_formats()
-['ses3d_4_0', 'SPECFEM3D_CARTESIAN']
+['ses3d_4_1', 'SPECFEM3D_CARTESIAN']
 ```
 
 It is also possible to request the parameters needed for a specific solver. The
@@ -311,7 +311,7 @@ parameters. The keys are once again the parameters names, the values this time
 a three-tuple of default value, type, and description.
 
 ```python
->>> required, optional = gen.get_config_params('ses3d_4_0')
+>>> required, optional = gen.get_config_params('ses3d_4_1')
 >>> required.items()[0]
 ('mesh_max_longitude', (float, 'The maximum longitude of the mesh'))
 >>> optional.items()[0]
@@ -342,12 +342,12 @@ a dictionary with the keys being the filenames and the values being the file
 contents.
 
 ```python
->>> output = gen.write(format="ses3d_4_0")
+>>> output = gen.write(format="ses3d_4_1")
 >>> output.keys()
 ['stf', 'relax', 'setup', 'event_list', 'event_1', 'recfile_1']
 
 # One can also directly write the files to a specified folder.
-gen.write(format="ses3d_4_0", output_dir="solver_input_files")
+gen.write(format="ses3d_4_1", output_dir="solver_input_files")
 ```
 
 
@@ -363,7 +363,7 @@ subdirectory. It has to have the name `write_SOLVER.py` where `SOLVER` should
 be an accurate description of the used solver.
 
 The best way to add a new solver is to use
-[an existing one](https://github.com/krischer/wfs_input_generator/blob/master/wfs_input_generator/backends/write_ses3d_4_0.py)
+[an existing one](https://github.com/krischer/wfs_input_generator/blob/master/wfs_input_generator/backends/write_ses3d_4_1.py)
 as a template.
 
 The file has to contain three things, the definition of the required
