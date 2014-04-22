@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-Input file writer for SES3D 4.0.
+Input file writer for SES3D 4.1.
 
 :copyright:
     Lion Krischer (krischer@geophysik.uni-muenchen.de), 2013
@@ -51,6 +51,15 @@ DEFAULT_CONFIGURATION = {
     "event_tag": ("1", str, "The name of the event. Should be numeric for "
                   "now."),
     "is_dissipative": (True, bool, "Dissipative simulation or not"),
+    "stf_header": ([
+        "STF written by the wfs_input_generator",
+        "    https://github.com/krischer/wfs_input_generator",
+        "The original source of the STF is not known to the",
+        "input generator module."],
+        lambda x: map(str, x),
+        "The header of the STF function. It serves no purpose but can be "
+        "used to store information about the STF in the first four lines. It "
+        "is a list with up to four entries."),
     "output_displacement": (False, bool, "Output the displacement field"),
     "displacement_snapshot_sampling": (
         10000, int, "Sampling rate of output displacement field"),
@@ -93,7 +102,9 @@ def write(config, events, stations):
     Can only simulate one event at a time. If more events are present, an error
     will be raised.
     """
-
+    if len(config.stf_header) > 4:
+        msg = "The STF header can only be up to 4 lines."
+        raise ValueError(msg)
     # ========================================================================
     # preliminaries
     # ========================================================================
@@ -339,8 +350,15 @@ def write(config, events, stations):
     # source-time function
     # =========================================================================
     # Also write the source time function.
-    output_files["stf"] = "\n".join(["%e" % _i for
-                                     _i in config.source_time_function])
+    stf = []
+    for line in config.stf_header:
+        stf.append("# " + line.strip().replace("\n", " "))
+    # Fill remaining lines.
+    while len(stf) < 4:
+        stf.append("#")
+    stf.extend("%e" % _i for _i in config.source_time_function)
+
+    output_files["stf"] = "\n".join(stf)
 
     # =========================================================================
     # finalize
