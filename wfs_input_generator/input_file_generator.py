@@ -586,8 +586,8 @@ class InputFileGenerator(object):
         foc_mec = event.preferred_focal_mechanism() or \
             event.focal_mechanisms[0]
         # Origin needs to have latitude, longitude, depth and time
-        if not origin.latitude or not origin.longitude or not origin.depth \
-                or not origin.time:
+        if None in (origin.latitude, origin.longitude, origin.depth,
+                    origin.time):
             msg = ("Every event origin needs to have latitude, longitude, "
                    "depth and time")
             raise ValueError(msg)
@@ -597,14 +597,15 @@ class InputFileGenerator(object):
             raise ValueError(msg)
         # Also all six components need to be specified.
         mt = foc_mec.moment_tensor.tensor
-        if not mt.m_rr or not mt.m_tt or not mt.m_pp or not mt.m_rt \
-                or not mt.m_rp or not mt.m_tp:
+        if None in (mt.m_rr, mt.m_tt, mt.m_pp, mt.m_rt, mt.m_rp, mt.m_tp):
             msg = "Every event needs all six moment tensor components."
             raise ValueError(msg)
 
         # Extract event descriptions.
         if event.event_descriptions:
             description = ", ".join(i.text for i in event.event_descriptions)
+        else:
+            description = None
 
         # Now the event should be valid.
         self._events.append({
