@@ -70,5 +70,9 @@ def main():
 
     # Finally write the file to a folder. If not output directory is given, a
     # dictionary containing all the files will be returned.
-    gen.write(format="ses3d_4_0", output_dir="output")
+    gen.write(format="ses3d_4_1", output_dir="output")
     print "Written files to 'output' folder."
+
+
+if __name__ == "__main__":
+    main()
