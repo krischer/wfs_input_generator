@@ -50,8 +50,9 @@ REQUIRED_CONFIGURATION = {
 # REQUIRED_CONFIGURATION except that the tuple now has three items, the first
 # one being the actual default value.
 DEFAULT_CONFIGURATION = {
-    "NOISE_TOMOGRAPHY": (0, int, "flag of noise tomography, "
-        "three steps (1,2,3). If earthquake simulation, set it to 0."),
+    "NOISE_TOMOGRAPHY":
+        (0, int,  "flag of noise tomography, three steps (1,2,3). If "
+                  "earthquake simulation, set it to 0."),
     "SAVE_FORWARD": (False, bool, "save last frame of forward simulation or "
                                   "not"),
     "ANGULAR_WIDTH_XI_IN_DEGREES": (90.0, float, "Width of one side of the "
@@ -59,7 +60,7 @@ DEFAULT_CONFIGURATION = {
     "ANGULAR_WIDTH_ETA_IN_DEGREES": (90.0, float,
                                      "Width of the other side of the chunk"),
     "CENTER_LATITUDE_IN_DEGREES": (40.0, float, "Laitude center of chunk"),
-    "CENTER_LONGITUDE_IN_DEGREES":( 10.0, float, "Longitude center of chunk"),
+    "CENTER_LONGITUDE_IN_DEGREES": (10.0, float, "Longitude center of chunk"),
     "GAMMA_ROTATION_AZIMUTH": (
         20.0, float, "Defines the rotation angle of the chunk about its "
                      "center measured counter clockwise from due North "
@@ -71,11 +72,13 @@ DEFAULT_CONFIGURATION = {
     "GRAVITY": (False, bool, "parameter describing the earth model."),
     "ROTATION": (False, bool, "parameter describing the earth model."),
     "ATTENUATION": (False, bool, "parameter describing the earth model."),
-    "ABSORBING_CONDITIONS": ( False, bool, "absorbing boundary conditions for "
-                                           "a regional simulation"),
+    "ABSORBING_CONDITIONS": (False, bool, "absorbing boundary conditions for "
+                                          "a regional simulation"),
 
-    # to undo attenuation for sensitivity kernel calculations or forward runs with SAVE_FORWARD
-    # use one (and only one) of the two flags below. UNDO_ATTENUATION is much better (it is exact)
+    # to undo attenuation for sensitivity kernel calculations or forward
+    # runs with SAVE_FORWARD
+    # use one (and only one) of the two flags below. UNDO_ATTENUATION is
+    # much better (it is exact)
     # but requires a significant amount of disk space for temporary storage.
     "ATTENUATION_1D_WITH_3D_STORAGE": (True, bool, ""),
     "PARTIAL_PHYS_DISPERSION_ONLY": (True, bool, ""),
@@ -100,7 +103,7 @@ DEFAULT_CONFIGURATION = {
          ".true. Set it to .true. if you have ABSORBING_CONDITIONS above, "
          "because in that case the code will use the three mass matrices "
          "anyway and thus there is no additional cost. this flag is of "
-         "course unused if ROTATION above is set to .false." ),
+         "course unused if ROTATION above is set to .false."),
 
     "USE_LDDRK": (False, bool, "this for LDDRK high-order time scheme instead "
                                "of Newmark"),
@@ -125,12 +128,19 @@ DEFAULT_CONFIGURATION = {
     "NTSTEP_BETWEEN_FRAMES": (100, int, ""),
     "HDUR_MOVIE": (0.0, float, 0.0),
 
-    # save movie in volume.  Will save element if center of element is in prescribed volume
-    # top/bottom: depth in KM, use MOVIE_TOP = -100 to make sure the surface is stored.
-    # west/east: longitude, degrees East [-180/180] top/bottom: latitute, degrees North [-90/90]
-    # start/stop: frames will be stored at MOVIE_START + i*NSTEP_BETWEEN_FRAMES, where i=(0,1,2..) and iNSTEP_BETWEEN_FRAMES <= MOVIE_STOP
-    # movie_volume_type: 1=strain, 2=time integral of strain, 3=\mu*time integral of strain
-    # type 4 saves the trace and deviatoric stress in the whole volume, 5=displacement, 6=velocity
+    # save movie in volume.  Will save element if center of element is in
+    # prescribed volume
+    # top/bottom: depth in KM, use MOVIE_TOP = -100 to make sure the surface
+    #  is stored.
+    # west/east: longitude, degrees East [-180/180] top/bottom: latitute,
+    # degrees North [-90/90]
+    # start/stop: frames will be stored at MOVIE_START +
+    # i*NSTEP_BETWEEN_FRAMES, where i=(0,1,2..) and iNSTEP_BETWEEN_FRAMES <=
+    #  MOVIE_STOP
+    # movie_volume_type: 1=strain, 2=time integral of strain, 3=\mu*time
+    # integral of strain
+    # type 4 saves the trace and deviatoric stress in the whole volume,
+    # 5=displacement, 6=velocity
     "MOVIE_VOLUME_TYPE": (2, int, ""),
     "MOVIE_TOP_KM": (-100.0, float, ""),
     "MOVIE_BOTTOM_KM": (1000.0, float, ""),
@@ -201,10 +211,10 @@ DEFAULT_CONFIGURATION = {
     "USE_FULL_TISO_MANTLE": (False, bool,
                              "forces transverse isotropy for all mantle "
                              "elements (default is to use transverse isotropy "
-                             "only between MOHO and 220) means we allow radial "
-                             "anisotropy between the bottom of the crust to "
-                             "the bottom of the transition zone, i.e., "
-                             "660~km depth."),
+                             "only between MOHO and 220) means we allow "
+                             "radial anisotropy between the bottom of the "
+                             "crust to the bottom of the transition zone, "
+                             "i.e., 660~km depth."),
     "SAVE_SOURCE_MASK": (False, bool, "output kernel mask to zero out source "
                                       "region to remove large values near "
                                       "the sources in the sensitivity "
@@ -263,7 +273,6 @@ def write(config, events, stations):
         config.EXTERNAL_SOURCE_TIME_FUNCTION = True
     else:
         config.EXTERNAL_SOURCE_TIME_FUNCTION = False
-
 
     def fbool(value):
         """
