@@ -269,8 +269,11 @@ def write(config, events, stations):
         raise NotImplementedError
 
     # Map the source time function.
-    if config.SOURCE_TIME_FUNCTION:
+    output_files = {}
+    if len(config.SOURCE_TIME_FUNCTION):
         config.EXTERNAL_SOURCE_TIME_FUNCTION = True
+        stf = ["%e" % _i for _i in config.SOURCE_TIME_FUNCTION]
+        output_files["STF"] = "\n".join(stf)
     else:
         config.EXTERNAL_SOURCE_TIME_FUNCTION = False
 
@@ -367,7 +370,6 @@ def write(config, events, stations):
                 buried=station["local_depth_in_m"]))
 
     # Put the files int he output directory.
-    output_files = {}
     output_files["Par_file"] = par_file
     output_files["CMTSOLUTION"] = CMT_SOLUTION_file
     output_files["STATIONS"] = "\n".join(station_parts)

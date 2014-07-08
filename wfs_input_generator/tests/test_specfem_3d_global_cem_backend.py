@@ -12,6 +12,7 @@ Test suite for the SPECFEM cartesian backend.
 from wfs_input_generator import InputFileGenerator
 
 import inspect
+import numpy as np
 from obspy.core import UTCDateTime
 import os
 
@@ -107,3 +108,76 @@ def test_simple():
     for actual, expected in zip(actual_par_file_lines,
                                 expected_par_file_lines):
         assert actual == expected
+
+
+def test_external_source_time_function():
+    """
+    Test a very simple SPECFEM file.
+    """
+    stations = [
+        {
+            "id": "KO.ADVT",
+            "latitude": 41.0,
+            "longitude": 33.1234,
+            "elevation_in_m": 10
+        }, {
+            "id": "KO.AFSR",
+            "latitude": 40.000,
+            "longitude": 33.2345,
+            "elevation_in_m": 220
+        }
+    ]
+    event = {
+        "latitude": 39.260,
+        "longitude": 41.040,
+        "depth_in_km": 5.0,
+        "origin_time": UTCDateTime(2012, 4, 12, 7, 15, 48, 500000),
+        "m_rr": 1.0e16,
+        "m_tt": 1.0e16,
+        "m_pp": 1.0e16,
+        "m_rt": 0.0,
+        "m_rp": 0.0,
+        "m_tp": 0.0}
+
+    gen = InputFileGenerator()
+    gen.add_stations(stations)
+    gen.add_events(event)
+
+    # Configure it.
+    gen.config.NPROC_XI = 5
+    gen.config.NPROC_ETA = 5
+    gen.config.RECORD_LENGTH_IN_MINUTES = 15
+    gen.config.SIMULATION_TYPE = 1
+    gen.config.NCHUNKS = 1
+    gen.config.NEX_XI = 240
+    gen.config.NEX_ETA = 240
+    gen.config.NPROC_XI = 5
+    gen.config.NPROC_ETA = 5
+    gen.config.MODEL = "CEM_REQUEST"
+
+    # Write the input files to a dictionary.
+    input_files = gen.write(format="SPECFEM3D_GLOBE_CEM")
+
+    # If no source time is specified the external source time function flag
+    # must be false.
+    assert sorted(input_files.keys()) == \
+        ["CMTSOLUTION", "Par_file", "STATIONS"]
+    assert "EXTERNAL_SOURCE_TIME_FUNCTION   =  .false." in \
+        input_files["Par_file"]
+
+    # Now if one is specified it should also be written.
+    gen.config.SOURCE_TIME_FUNCTION = np.arange(10)
+
+    input_files = gen.write(format="SPECFEM3D_GLOBE_CEM")
+
+    assert sorted(input_files.keys()) == \
+        ["CMTSOLUTION", "Par_file", "STATIONS", "STF"]
+    assert "EXTERNAL_SOURCE_TIME_FUNCTION   =  .true." in \
+        input_files["Par_file"]
+
+    data = []
+    for line in input_files["STF"].splitlines():
+        if line.startswith("#"):
+            continue
+        data.append(float(line.strip()))
+    assert data == map(float, range(10))
