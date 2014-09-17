@@ -303,18 +303,19 @@ def write(config, events, stations):
         "PDE {time_year} {time_month} {time_day} {time_hh} {time_mm} "
         "{time_ss:.2f} {event_latitude:.5f} {event_longitude:.5f} "
         "{event_depth:.5f} {event_mag:.1f} {event_mag:.1f} {event_name}\n"
-        "event name:      0000000\n"
-        "time shift:       0.0000\n"
-        "half duration:    {half_duration:.4f}\n"
-        "latitude:       {event_latitude:.5f}\n"
-        "longitude:      {event_longitude:.5f}\n"
-        "depth:{event_depth: 17.5f}\n"
-        "Mrr:         {mrr:.6g}\n"
-        "Mtt:         {mtt:.6g}\n"
-        "Mpp:         {mpp:.6g}\n"
-        "Mrt:         {mrt:.6g}\n"
-        "Mrp:         {mrp:.6g}\n"
-        "Mtp:         {mtp:.6g}")
+        "event name:          00000\n"
+        "time shift:" + "0.0".rjust(15) + "\n"
+        "half duration:  {half_duration:10.5f}\n"
+        "latitude:       {event_latitude:10.5f}\n"
+        "longitude:      {event_longitude:10.5f}\n"
+        "depth:          {event_depth: 10.5f}\n"
+        "Mrr:            {mrr:10.6g}\n"
+        "Mtt:            {mtt:10.6g}\n"
+        "Mpp:            {mpp:10.6g}\n"
+        "Mrt:            {mrt:10.6g}\n"
+        "Mrp:            {mrp:10.6g}\n"
+        "Mtp:            {mtp:10.6g}\n"
+        )
 
     # Create the event file.
     if len(events) != 1:
@@ -355,7 +356,8 @@ def write(config, events, stations):
         mrr=m_rr * 1E7,
         mtp=m_tp * 1E7,
         mrt=m_rt * 1E7,
-        mrp=m_rp * 1E7)
+        mrp=m_rp * 1E7,
+        )
 
     station_parts = []
     for station in stations:
@@ -372,6 +374,6 @@ def write(config, events, stations):
     # Put the files int he output directory.
     output_files["Par_file"] = par_file
     output_files["CMTSOLUTION"] = CMT_SOLUTION_file
-    output_files["STATIONS"] = "\n".join(station_parts)
+    output_files["STATIONS"] = "\n".join(station_parts) + "\n"
 
     return output_files
