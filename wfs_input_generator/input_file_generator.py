@@ -23,11 +23,15 @@ import obspy
 from obspy import readEvents
 from obspy.core import AttribDict, read
 from obspy.core.event import Event
-from obspy.sac.core import isSAC
 from obspy.xseed import Parser
 import os
+import pkg_resources
 import urllib2
 import warnings
+
+# Proper way to get the is_sac function.
+is_sac = pkg_resources.load_entry_point(
+    "obspy", "obspy.plugin.waveform.SAC", "isFormat")
 
 
 def unique_list(items):
@@ -243,7 +247,7 @@ class InputFileGenerator(object):
                 continue
 
             # Also accepts SAC files.
-            if isSAC(station_item):
+            if is_sac(station_item):
                 st = read(station_item)
                 for tr in st:
                     stat = {}
