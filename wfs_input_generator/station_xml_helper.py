@@ -17,7 +17,8 @@ def extract_coordinates_from_StationXML(file_or_file_object):
     root = etree.parse(file_or_file_object).getroot()
     namespace = root.nsmap[None]
 
-    _ns = lambda tagname: "{%s}%s" % (namespace, tagname)
+    def _ns(tagname):
+        return "{%s}%s" % (namespace, tagname)
 
     all_stations = []
 

@@ -554,7 +554,7 @@ def test_adding_invalid_file_to_station_raises():
     Adding some invalid things should of course raise.
     """
     gen = InputFileGenerator()
-    with pytest.raises(ValueError):
+    with pytest.raises(IOError):
         gen.add_stations("some_nonesense")
 
 

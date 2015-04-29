@@ -9,12 +9,12 @@ Input file writer for SES3D 4.1.
     GNU General Public License, Version 3
     (http://www.gnu.org/copyleft/gpl.html)
 """
-EARTH_RADIUS = 6371 * 1000
-
 import numpy as np
 import obspy
 import os
 from wfs_input_generator import rotations
+
+EARTH_RADIUS = 6371 * 1000
 
 
 # Define the required configuration items. The key is always the name of the
