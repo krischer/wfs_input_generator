@@ -639,7 +639,7 @@ def test_adding_a_event_object():
     """
     event_file = os.path.join(DATA, "event1.xml")
 
-    event = obspy.readEvents(event_file)[0]
+    event = obspy.read_events(event_file)[0]
 
     gen = InputFileGenerator()
     gen.add_events([event])
@@ -666,8 +666,8 @@ def test_adding_a_list_of_event_object():
     event_file_1 = os.path.join(DATA, "event1.xml")
     event_file_2 = os.path.join(DATA, "event2.xml")
 
-    event_1 = obspy.readEvents(event_file_1)[0]
-    event_2 = obspy.readEvents(event_file_2)[0]
+    event_1 = obspy.read_events(event_file_1)[0]
+    event_2 = obspy.read_events(event_file_2)[0]
 
     gen = InputFileGenerator()
     gen.add_events([event_1, event_2])
@@ -706,8 +706,8 @@ def test_adding_a_catalog_object():
     event_file_1 = os.path.join(DATA, "event1.xml")
     event_file_2 = os.path.join(DATA, "event2.xml")
 
-    cat = obspy.readEvents(event_file_1)
-    cat += obspy.readEvents(event_file_2)
+    cat = obspy.read_events(event_file_1)
+    cat += obspy.read_events(event_file_2)
 
     gen = InputFileGenerator()
     gen.add_events(cat)

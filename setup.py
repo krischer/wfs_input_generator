@@ -39,7 +39,7 @@ def get_package_data():
 
 setup_config = dict(
     name="wfs_input_generator",
-    version="0.0.1a",
+    version="0.0.2a",
     description="Generic input file generator for waveform solvers",
     author="Lion Krischer",
     author_email="krischer@geophysik.uni-muenchen.de",
@@ -47,7 +47,7 @@ setup_config = dict(
     packages=find_packages(),
     license="GNU General Public License, version 3 (GPLv3)",
     platforms="OS Independent",
-    install_requires=["obspy >=0.8.0"],
+    install_requires=["obspy>=1.0.1"],
     extras_require={
         "tests": ["pytest", "flake8", "mock"]},
     package_data={

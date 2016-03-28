@@ -20,10 +20,10 @@ import inspect
 import io
 import json
 import obspy
-from obspy import readEvents
+from obspy import read_events
 from obspy.core import AttribDict, read
 from obspy.core.event import Event
-from obspy.xseed import Parser
+from obspy.io.xseed import Parser
 import os
 import pkg_resources
 import urllib2
@@ -153,7 +153,7 @@ class InputFileGenerator(object):
                 continue
 
             try:
-                cat = readEvents(event)
+                cat = read_events(event)
             except:
                 pass
             else:
@@ -253,20 +253,22 @@ class InputFileGenerator(object):
                     stat = {}
                     stat["id"] = "%s.%s" % (tr.stats.network,
                                             tr.stats.station)
-                    stat["latitude"] = float(tr.stats.sac.stla)
-                    stat["longitude"] = float(tr.stats.sac.stlo)
-                    stat["elevation_in_m"] = float(tr.stats.sac.stel)
-                    stat["local_depth_in_m"] = float(tr.stats.sac.stdp)
+
                     # lat/lng/ele must be given.
-                    if stat["latitude"] == -12345.0 or \
-                            stat["longitude"] == -12345.0 or \
-                            stat["elevation_in_m"] == -12345.0:
+                    sac_stat = tr.stats.sac
+                    if "stla" not in sac_stat or \
+                            "stlo" not in sac_stat or \
+                            "stel" not in sac_stat:
                         warnings.warn("No coordinates for channel '%s'."
                                       % str(tr))
                         continue
-                    # Local may be neclected.
-                    if stat["local_depth_in_m"] == -12345.0:
-                        del stat["local_depth_in_m"]
+
+                    stat["latitude"] = float(sac_stat.stla)
+                    stat["longitude"] = float(sac_stat.stlo)
+                    stat["elevation_in_m"] = float(sac_stat.stel)
+                    # Local depth may be neclected.
+                    if "stdp" in sac_stat:
+                        stat["local_depth_in_m"] = float(sac_stat.stdp)
                     all_stations[stat["id"]] = stat
                     continue
                 continue
