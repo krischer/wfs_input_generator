@@ -20,8 +20,6 @@ import os
 # the function or type that it will be converted to and the second is the
 # documentation.
 REQUIRED_CONFIGURATION = {
-    "NPROC_XI": (int, "Number of processors in xi direction for one chunk"),
-    "NPROC_ETA": (int, "Number of processors in eta direction for one chunk"),
     "RECORD_LENGTH_IN_MINUTES": (float, "record length in minutes"),
     "SIMULATION_TYPE": (
         int, "forward or adjoint simulation, 1 = forward, "

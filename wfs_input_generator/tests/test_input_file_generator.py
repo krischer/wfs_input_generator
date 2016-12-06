@@ -11,9 +11,6 @@ Test suite for the waveform solver input file generator.
 """
 from wfs_input_generator import InputFileGenerator
 
-import flake8
-import flake8.engine
-import flake8.main
 import io
 import inspect
 import json
@@ -21,41 +18,10 @@ import mock
 import obspy
 import os
 import pytest
-import warnings
 
 # Most generic way to get the actual data directory.
 DATA = os.path.join(os.path.dirname(os.path.abspath(inspect.getfile(
     inspect.currentframe()))), "data")
-
-
-def test_code_formatting():
-    """
-    Tests the formatting and other things with flake8.
-    """
-    if flake8.__version__ <= "2":
-        msg = ("Module was designed to be tested with flake8 >= 2.0. "
-               "Please update.")
-        warnings.warn(msg)
-    test_dir = os.path.dirname(os.path.abspath(inspect.getfile(
-        inspect.currentframe())))
-    root_dir = os.path.dirname(os.path.dirname(test_dir))
-    # Short sanity check.
-    if not os.path.exists(os.path.join(root_dir, "setup.py")):
-        msg = "Could not find project root."
-        raise Exception(msg)
-    files = []
-    for dirpath, _, filenames in os.walk(root_dir):
-        filenames = [_i for _i in filenames if
-                     os.path.splitext(_i)[-1] == os.path.extsep + "py"]
-        if not filenames:
-            continue
-        for py_file in filenames:
-            full_path = os.path.join(dirpath, py_file)
-            files.append(full_path)
-    flake8_style = flake8.engine.get_style_guide(
-        parse_argv=False, config_file=flake8.main.DEFAULT_CONFIG)
-    report = flake8_style.check_files(files)
-    assert report.get_count() == 0
 
 
 def test_adding_stations_as_SEED_files():
