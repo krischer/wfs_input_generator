@@ -113,3 +113,58 @@ def test_against_example_file():
     with open(original_par_file, "rt") as fh:
         original_par_file = fh.read().strip()
     assert original_par_file == par_file
+
+
+def test_cmt_file():
+    """
+    Test the cmt file.
+    """
+    stations = [
+        {
+            "id": "KO.ADVT",
+            "latitude": 41.0,
+            "longitude": 33.1234,
+            "elevation_in_m": 10
+        }
+    ]
+
+    gen = InputFileGenerator()
+    gen.add_stations(stations)
+
+    event_file = os.path.join(DATA, "quakeml_multiple_origins.xml")
+    gen.add_events(event_file)
+
+    # Configure it. Emulate an example in the SPECFEM directory.
+    gen.config.NPROC_XI = 2
+    gen.config.NPROC_ETA = 2
+    gen.config.RECORD_LENGTH_IN_MINUTES = 10.0
+    gen.config.SIMULATION_TYPE = 1
+    gen.config.NCHUNKS = 6
+    gen.config.NEX_XI = 64
+    gen.config.NEX_ETA = 64
+    gen.config.MODEL = "1D_isotropic_prem"
+
+    # Write the input files to a dictionary.
+    input_files = gen.write(format="SPECFEM3D_GLOBE")
+
+    assert bool(input_files)
+
+    assert sorted(input_files.keys()) == \
+        sorted(["Par_file", "CMTSOLUTION", "STATIONS"])
+
+    # Assert the CMTSOLUTION file.
+    assert input_files["CMTSOLUTION"].splitlines() == [
+        "PDE 2013 6 9 14 22 15.60 -26.00000 132.09000 12.00000 5.3 5.3 "
+        "2013-06-09T14:22:15.600000Z_5.3",
+        "event name:      0000000",
+        "time shift:       0.0000",
+        "half duration:    0.0000",
+        "latitude:       -26.00000",
+        "longitude:      132.09000",
+        "depth:         12.00000",
+        "Mrr:         1.05e+24",
+        "Mtt:         -8.23e+23",
+        "Mpp:         -2.29e+23",
+        "Mrt:         2e+22",
+        "Mrp:         2.8e+23",
+        "Mtp:         1.65e+24"]
