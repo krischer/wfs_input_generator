@@ -591,15 +591,28 @@ class InputFileGenerator(object):
         # Same with the focal mechanism.
         foc_mec = event.preferred_focal_mechanism() or \
             event.focal_mechanisms[0]
+        # The focal mechanism of course needs to have a moment tensor.
+        if not foc_mec.moment_tensor or not foc_mec.moment_tensor.tensor:
+            msg = "Every event needs to have a moment tensor."
+            raise ValueError(msg)
+
+        # Now check if the moment tensor has a derived origin - if yes: use
+        # that.
+        if foc_mec.moment_tensor.derived_origin_id:
+            new_origin = \
+                foc_mec.moment_tensor.derived_origin_id.get_referred_object()
+            if new_origin is None:
+                warnings.warn("Could not find the derived origin of the "
+                              "moment tensor - will use the preferred or "
+                              "first instead.")
+            else:
+                origin = new_origin
+
         # Origin needs to have latitude, longitude, depth and time
         if None in (origin.latitude, origin.longitude, origin.depth,
                     origin.time):
             msg = ("Every event origin needs to have latitude, longitude, "
                    "depth and time")
-            raise ValueError(msg)
-        # The focal mechanism of course needs to have a moment tensor.
-        if not foc_mec.moment_tensor or not foc_mec.moment_tensor.tensor:
-            msg = "Every event needs to have a moment tensor."
             raise ValueError(msg)
         # Also all six components need to be specified.
         mt = foc_mec.moment_tensor.tensor
