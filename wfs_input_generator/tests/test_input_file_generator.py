@@ -1199,3 +1199,27 @@ def test_event_filter_removed_everything_without_an_id():
     assert sorted(gen._filtered_events) == sorted(gen._events)
     gen.station_filter = []
     assert sorted(gen._filtered_events) == sorted(gen._events)
+
+
+def test_parsing_correct_origin_for_focal_mechanisms():
+    """
+    Event has multiple origins.
+    """
+    event_file_1 = os.path.join(DATA, "quakeml_multiple_origins.xml")
+
+    gen = InputFileGenerator()
+    gen.add_events([event_file_1])
+
+    assert gen._events == [{
+        '_event_id': 'smi:local/ndk/C201306091422A/event',
+        'depth_in_km': 12.0,
+        'description': 'SOUTH AUSTRALIA, C201306091422A',
+        'latitude': -26.0,
+        'longitude': 132.09,
+        'm_pp': -2.29e+16,
+        'm_rp': 2.8e+16,
+        'm_rr': 1.05e+17,
+        'm_rt': 2000000000000000.0,
+        'm_tp': 1.65e+17,
+        'm_tt': -8.23e+16,
+        'origin_time': obspy.UTCDateTime(2013, 6, 9, 14, 22, 15, 600000)}]
